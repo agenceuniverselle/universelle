@@ -1,0 +1,83 @@
+
+import { Toaster } from "@/components/ui/toaster";
+import { Toaster as Sonner } from "@/components/ui/sonner";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import Index from "./pages/Index";
+import Investir from "./pages/Investir";
+import NosServices from "./pages/NosServices";
+import NosBiens from "./pages/NosBiens";
+import PropertyDetails from "./pages/PropertyDetails";
+import Blog from "./pages/Blog";
+import NotFound from "./pages/NotFound";
+
+// Legal Pages
+import MentionsLegales from "./pages/legal/MentionsLegales";
+import CGV from "./pages/legal/CGV";
+import Confidentialite from "./pages/legal/Confidentialite";
+import Cookies from "./pages/legal/Cookies";
+
+// Admin Dashboard
+import AdminLogin from "./pages/admin/Login";
+import AdminDashboard from "./pages/admin/Dashboard";
+import AdminBiens from "./pages/admin/Biens";
+import AdminUsers from "./pages/admin/Users";
+import AdminTransactions from "./pages/admin/Transactions";
+import AdminContent from "./pages/admin/Content";
+import AdminStats from "./pages/admin/Stats";
+import AdminCRM from "./pages/admin/CRM";
+import AdminInvestissements from "./pages/admin/Investissements";
+import AdminPropertyDetails from "./pages/admin/PropertyDetails";
+import PropertyEdit from "./pages/admin/PropertyEdit";
+import LeadDetails from './pages/admin/crm/LeadDetails';
+import LeadEdit from './pages/admin/crm/LeadEdit';
+import Settings from './pages/admin/Settings';
+
+const queryClient = new QueryClient();
+
+const App = () => (
+  <QueryClientProvider client={queryClient}>
+    <TooltipProvider>
+      <Toaster />
+      <Sonner />
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<Index />} />
+          <Route path="/investir" element={<Investir />} />
+          <Route path="/nos-services" element={<NosServices />} />
+          <Route path="/nos-biens" element={<NosBiens />} />
+          <Route path="/bien/:propertyId" element={<PropertyDetails />} />
+          <Route path="/blog" element={<Blog />} />
+          
+          {/* Legal Pages */}
+          <Route path="/mentions-legales" element={<MentionsLegales />} />
+          <Route path="/conditions-generales-de-vente" element={<CGV />} />
+          <Route path="/politique-de-confidentialite" element={<Confidentialite />} />
+          <Route path="/politique-des-cookies" element={<Cookies />} />
+          
+          {/* Admin Dashboard */}
+          <Route path="/admin" element={<AdminLogin />} />
+          <Route path="/admin/dashboard" element={<AdminDashboard />} />
+          <Route path="/admin/biens" element={<AdminBiens />} />
+          <Route path="/admin/investissements" element={<AdminInvestissements />} />
+          <Route path="/admin/biens/:propertyId" element={<AdminPropertyDetails />} />
+          <Route path="/admin/biens/edit/:propertyId" element={<PropertyEdit />} />
+          <Route path="/admin/users" element={<AdminUsers />} />
+          <Route path="/admin/transactions" element={<AdminTransactions />} />
+          <Route path="/admin/content" element={<AdminContent />} />
+          <Route path="/admin/stats" element={<AdminStats />} />
+          <Route path="/admin/crm" element={<AdminCRM />} />
+          <Route path="/admin/crm/lead/:id" element={<LeadDetails />} />
+          <Route path="/admin/crm/lead/:id/edit" element={<LeadEdit />} />
+          <Route path="/admin/settings" element={<Settings />} />
+          
+          {/* Catch-all route for 404 */}
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </BrowserRouter>
+    </TooltipProvider>
+  </QueryClientProvider>
+);
+
+export default App;
