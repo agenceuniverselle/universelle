@@ -1,6 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import axios from 'axios';
 import AdminLayout from '@/components/layouts/AdminLayout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -12,74 +13,179 @@ import { toast } from "@/hooks/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ChevronLeft, Save, X, AlertTriangle, Upload, Trash } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Calendar } from '@/components/ui/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { format } from 'date-fns';
+import { useForm, FormProvider } from "react-hook-form";
+import {
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage
+} from "@/components/ui/form";
+import { useRef } from 'react';
+import { Calendar as CalendarIcon } from 'lucide-react';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import { Loader2 } from 'lucide-react';
+import { Bien } from '@/types/bien.types';
 
 const PropertyEdit = () => {
-  const { propertyId } = useParams();
+  const { bienId } = useParams();
   const navigate = useNavigate();
   const [isSaving, setIsSaving] = useState(false);
   const [activeTab, setActiveTab] = useState('main');
   const [hasChanges, setHasChanges] = useState(false);
   const [formErrors, setFormErrors] = useState<string[]>([]);
-  
-  // Mock property data - in a real app this would come from an API
-  const [property, setProperty] = useState({
-    id: propertyId || '',
-    title: 'Villa de luxe avec piscine',
-    description: 'Magnifique villa de luxe située dans le quartier prisé d\'Anfa à Casablanca. Ce bien d\'exception dispose de 5 chambres spacieuses, 4 salles de bain, un salon double, une cuisine entièrement équipée, une piscine privée et un jardin paysager. Parfait pour une famille exigeante à la recherche de confort et d\'élégance.',
-    location: 'Casablanca, Anfa',
-    price: '5200000',
-    type: 'Villa',
-    status: 'Disponible',
-    bedrooms: '5',
-    bathrooms: '4',
-    area: '450',
-    isFeatured: true,
-    images: [
-      '/placeholder.svg',
-      '/placeholder.svg',
-      '/placeholder.svg',
-      '/placeholder.svg',
-    ]
-  });
+const [bien, setBien] = useState<Bien>({
+  id: 0,
+  title: '',
+  type: '',
+  status: '',
+  price: '',
+  location: '',
+  area: '',
+  description: '',
+  bedrooms: 0, // optionnel mais on peut initialiser
+  bathrooms: 0,
+  images: [],
+  newImages: [],
+  replacedImages: [],
+  documents: [],
+  newDocuments: [],
+  isFeatured: false,
+  is_draft: false,
+  points_forts: [],
+  proximite: [],
+  owner_documents: [],
+  newOwnerDocuments: [],
+});
 
-  useEffect(() => {
-    // This would be an API call in a real application
-    console.log(`Loading property data for ID: ${propertyId}`);
-    
-    // Simulate loading period
-    const timer = setTimeout(() => {
-      console.log('Property data loaded');
-    }, 500);
-    
-    return () => clearTimeout(timer);
-  }, [propertyId]);
+  const [available_date, setAvailableDate] = useState<Date | undefined>(undefined);
+  const [selectedImageIndex, setSelectedImageIndex] = useState<number | null>(null);
+  const ownerDocInputRefs = useRef<(HTMLInputElement | null)[]>([]);
+  const [replacedOwnerDocuments, setReplacedOwnerDocuments] = useState<{ index: number; file: File }[]>([]);
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<{ type: 'image' | 'document' | 'ownerDoc';index?: number;}>({ type: 'image' });
+  const [isDeleting, setIsDeleting] = useState(false);
+  const newOwnerDocInputRef = useRef<HTMLInputElement | null>(null);
+
+  const handleConfirmedDelete = async () => {
+  if (!bienId) return;
+
+  try {
+    setIsDeleting(true);
+
+    if (deleteTarget.type === 'image' && typeof deleteTarget.index === 'number') {
+      await axios.delete(`http://localhost:8000/api/biens/${bienId}/images/${deleteTarget.index}`);
+      const updatedImages = [...bien.images];
+      updatedImages.splice(deleteTarget.index, 1);
+      setBien((prev) => ({ ...prev, images: updatedImages }));
+    }
+
+    if (deleteTarget.type === 'document') {
+      await axios.delete(`http://localhost:8000/api/biens/${bienId}/document`);
+      setBien((prev) => ({ ...prev, documents: [] }));
+    }
+
+    if (deleteTarget.type === 'ownerDoc' && typeof deleteTarget.index === 'number') {
+      await axios.delete(`http://localhost:8000/api/biens/${bienId}/owner-documents/${deleteTarget.index}`);
+      const updatedDocs = [...bien.owner_documents];
+      updatedDocs.splice(deleteTarget.index, 1);
+      setBien((prev) => ({ ...prev, owner_documents: updatedDocs }));
+    }
+
+    setHasChanges(true);
+    toast({ title: 'Supprimé avec succès.' });
+  } catch (err) {
+    toast({
+      title: 'Erreur',
+      description: 'Échec de la suppression',
+      variant: 'destructive',
+    });
+  } finally {
+    setIsDeleting(false);
+    setDeleteConfirmOpen(false);
+  }
+};
+
+
+  const form = useForm({
+    defaultValues: {
+      points_forts: [],
+      proximite: [],
+    },
+  });
+  
+  const { reset } = form;
+  
+  
+useEffect(() => {
+  console.log('bienId:', bienId); // ← Ajoute ceci
+
+  const fetchBien = async () => {
+    try {
+      const response = await axios.get(`http://localhost:8000/api/biens/${bienId}`);
+      const data = response.data;
+
+      setBien(data);
+      console.log('Bien récupéré :', data);
+      reset({
+        points_forts: data.points_forts || [],
+        proximite: data.proximite || [],
+      });
+      if (data.available_date) {
+        setAvailableDate(new Date(data.available_date));
+      }
+    } catch (error) {
+      console.error("Erreur lors du chargement du bien :", error);
+      toast({
+        title: "Erreur",
+        description: "Impossible de charger les données du bien",
+        variant: "destructive",
+      });
+    }
+  };
+
+  if (bienId) {
+    fetchBien();
+  }
+}, [bienId]);
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement> | 
     { target: { name: string; value: string } }
   ) => {
     const { name, value } = e.target;
-    setProperty(prev => ({ ...prev, [name]: value }));
+    setBien(prev => ({ ...prev, [name]: value }));
     setHasChanges(true);
   };
 
   const handleSelectChange = (name: string, value: string) => {
-    setProperty(prev => ({ ...prev, [name]: value }));
+    setBien(prev => ({ ...prev, [name]: value }));
     setHasChanges(true);
   };
 
   const handleCheckboxChange = (name: string, checked: boolean) => {
-    setProperty(prev => ({ ...prev, [name]: checked }));
+    setBien(prev => ({ ...prev, [name]: checked }));
     setHasChanges(true);
   };
 
   const validateForm = (): boolean => {
     const errors: string[] = [];
     
-    if (!property.title.trim()) errors.push('Le titre est requis');
-    if (!property.location.trim()) errors.push('L\'emplacement est requis');
-    if (!property.price || isNaN(Number(property.price))) errors.push('Le prix doit être un nombre valide');
-    if (!property.type.trim()) errors.push('Le type de bien est requis');
+    if (!bien.title.trim()) errors.push('Le titre est requis');
+    if (!bien.location.trim()) errors.push('L\'emplacement est requis');
+    if (!bien.price || isNaN(Number(bien.price))) errors.push('Le prix doit être un nombre valide');
+    if (!bien.type.trim()) errors.push('Le type de bien est requis');
     
     setFormErrors(errors);
     return errors.length === 0;
@@ -95,44 +201,176 @@ const PropertyEdit = () => {
       });
       return;
     }
-    
+  
     setIsSaving(true);
-    
+  
+    // ✅ Gestion du token
+    const token = localStorage.getItem("access_token");
+  
+    if (!token) {
+      toast({
+        title: "Erreur d'authentification",
+        description: "Votre session a expiré. Veuillez vous reconnecter.",
+        variant: "destructive",
+      });
+      navigate("/login");
+      return;
+    }
+  
     try {
-      // This would be an API call in a real application
-      await new Promise(resolve => setTimeout(resolve, 800));
-      
+      const formData = new FormData();
+  
+      // Champs texte
+      for (const key in bien) {
+        if (
+          key !== 'newImages' &&
+          key !== 'newDocuments' &&
+          key !== 'images' &&         // ⬅️ ne pas envoyer les chemins d'images
+          key !== 'documents' &&      // ⬅️ ne pas envoyer les chemins de documents
+          bien[key] !== null &&
+          bien[key] !== undefined
+        ) {
+          let value = bien[key];
+  
+          if (typeof value === 'boolean') {
+            value = value ? '1' : '0';
+          }
+  
+          if (Array.isArray(value)) {
+            value.forEach((item, i) => {
+              formData.append(`${key}[${i}]`, item);
+            });
+          } else {
+            formData.append(key, value);
+          }
+        }
+      }
+  
+      if (bien.newDocuments?.length > 0) {
+        bien.newDocuments.forEach((file: File) => {
+          formData.append("documents[]", file);
+        });
+      }
+  
+      if (bien.newOwnerDocuments?.length > 0) {
+        bien.newOwnerDocuments.forEach((file: File) => {
+          formData.append("owner_documents[]", file);
+        });
+      }
+  
+      if (bien.newImages?.length > 0) {
+        bien.newImages.forEach((file: File) => {
+          formData.append("images[]", file); // 👈 correspond à ton backend
+        });
+      }
+  
+      form.getValues("proximite")?.forEach((item, i) => {
+        formData.append(`proximite[${i}]`, item);
+      });
+  
+      if (available_date) {
+        formData.append("available_date", available_date.toISOString().split("T")[0]);
+      }
+  
+      // Images remplacées
+if (bien.replacedImages) {
+  bien.replacedImages.forEach(({ index, file }) => {
+    formData.append(`replace_images[${index}]`, file);
+  });
+}
+
+
+
+
+  
+      if (replacedOwnerDocuments.length > 0) {
+        replacedOwnerDocuments.forEach(({ index, file }) => {
+          formData.append(`replace_owner_documents[${index}]`, file);
+        });
+      }
+  
+      console.log([...formData.entries()]); // Debug
+  
+      // ✅ Requête avec Token
+      const response = await axios.post(
+        `http://localhost:8000/api/biens/${bienId}?_method=PUT`, // simulate PUT via POST
+        formData,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+            'Authorization': `Bearer ${token}`, // ✅ Utilisation du token
+          },
+        }
+      );
+  
+      setBien(response.data.data);
+      setHasChanges(false);
+      setReplacedOwnerDocuments([]); 
+  
       toast({
         title: "Modifications enregistrées",
         description: "Les informations du bien ont été mises à jour avec succès",
         variant: "default",
       });
-      
-      setHasChanges(false);
-      
-      // Redirect to the property details page after a short delay
-      setTimeout(() => {
-        navigate(`/admin/biens/${propertyId}`);
-      }, 300);
+  
     } catch (error) {
-      console.error('Error saving property:', error);
-      toast({
-        title: "Erreur lors de la sauvegarde",
-        description: "Une erreur s'est produite. Veuillez réessayer.",
-        variant: "destructive",
-      });
+      console.error('Erreur lors de la sauvegarde du bien :', error);
+  
+      if (error.response?.status === 401) {
+        toast({
+          title: "Erreur d'authentification",
+          description: "Votre session a expiré. Veuillez vous reconnecter.",
+          variant: "destructive",
+        });
+        navigate("/login");
+      } else {
+        toast({
+          title: "Erreur lors de la sauvegarde",
+          description: error.response?.data?.message || "Une erreur s'est produite. Veuillez réessayer.",
+          variant: "destructive",
+        });
+      }
     } finally {
       setIsSaving(false);
     }
   };
-
+  
+  
+  
+  
+  
+  
+  const handleDeleteDocument = async () => {
+    try {
+      await axios.delete(`http://localhost:8000/api/biens/${bienId}/document`);
+      setBien(prev => ({
+        ...prev,
+        documents: [],
+      }));
+      setHasChanges(true);
+      toast({
+        title: "Document supprimé",
+        description: "Le document a été supprimé avec succès.",
+        variant: "default",
+      });
+    } catch (error) {
+      console.error("Erreur suppression document :", error);
+      toast({
+        title: "Erreur",
+        description: "Impossible de supprimer le document.",
+        variant: "destructive",
+      });
+    }
+  };
+  
+  
   const handleCancel = () => {
     if (hasChanges) {
       if (window.confirm('Vous avez des modifications non enregistrées. Êtes-vous sûr de vouloir quitter ?')) {
-        navigate(`/admin/biens/${propertyId}`);
+        navigate(`/admin/biens/${bienId}`);
       }
     } else {
-      navigate(`/admin/biens/${propertyId}`);
+      navigate(`/admin/biens/${bienId}`);
     }
   };
 
@@ -140,22 +378,77 @@ const PropertyEdit = () => {
     setActiveTab(value);
   };
 
-  const handleDeleteImage = (index: number) => {
-    setProperty(prev => ({
-      ...prev,
-      images: prev.images.filter((_, i) => i !== index)
-    }));
-    setHasChanges(true);
+  const handleDeleteImage = async (index: number) => {
+    try {
+      await axios.delete(`http://localhost:8000/api/biens/${bienId}/images/${index}`);
+  
+      setBien(prev => {
+        const updatedImages = [...(prev.images || [])];
+        updatedImages.splice(index, 1);
+  
+        return {
+          ...prev,
+          images: updatedImages
+        };
+      });
+  
+      setHasChanges(true);
+  
+      toast({
+        title: "Image supprimée",
+        description: "L'image a bien été supprimée de la base de données.",
+        variant: "default",
+      });
+  
+    } catch (error) {
+      console.error(error);
+      toast({
+        title: "Erreur",
+        description: "Impossible de supprimer l’image.",
+        variant: "destructive",
+      });
+    }
   };
-
+  
+  
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+  
+    const formData = new FormData();
+    formData.append('image', file);
+    formData.append('bien_id', bienId!);
+  
+    try {
+      const response = await axios.post(`http://localhost:8000/api/biens/${bienId}/upload-image`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+  
+      setBien(prev => ({
+        ...prev,
+        images: [...(prev.images || []), response.data.path],
+      }));
+      setHasChanges(true);
+    } catch (error) {
+      console.error("Erreur upload :", error);
+      toast({
+        title: "Erreur",
+        description: "Échec de l'upload de l'image.",
+        variant: "destructive",
+      });
+    }
+  };
+  
   return (
-    <AdminLayout title={`Modifier le bien - ${property.title}`}>
+    <AdminLayout title={`Modifier le bien - ${bien.title}`}>
       <div className="mb-6">
         <div className="flex items-center justify-between mb-6">
           <Button 
             variant="outline" 
-            onClick={() => navigate(`/admin/biens/${propertyId}`)}
-            className="transition-all duration-200 hover:bg-gray-100 hover:scale-105 active:scale-95"
+            onClick={() => navigate(`/admin/biens/${bienId}`)}
+            className="transition-all duration-200 hover:bg-gray-100 hover:scale-105 active:scale-95 dark:text-black"
           >
             <ChevronLeft className="h-4 w-4 mr-2" />
             Retour aux détails
@@ -165,7 +458,7 @@ const PropertyEdit = () => {
             <Button 
               variant="outline" 
               onClick={handleCancel}
-              className="transition-all duration-200 hover:scale-105 active:scale-95"
+              className="transition-all duration-200 hover:scale-105 active:scale-95 dark:text-black"
             >
               <X className="h-4 w-4 mr-2" />
               Annuler
@@ -207,21 +500,24 @@ const PropertyEdit = () => {
           </Alert>
         )}
         
-        <Tabs value={activeTab} onValueChange={handleTabChange} className="space-y-4">
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="main" className="transition-all duration-200 data-[state=active]:scale-[1.03] data-[state=active]:shadow-sm">
+        <Tabs value={activeTab} onValueChange={handleTabChange} className="space-y-4 ">
+          <TabsList className="grid w-full grid-cols-4 dark:bg-gray-900">
+            <TabsTrigger value="main" className="transition-all duration-200 dark:data-[state=active]:bg-gray-700 dark:data-[state=active]:text-white data-[state=active]:scale-[1.03] data-[state=active]:shadow-sm">
               Informations principales
             </TabsTrigger>
-            <TabsTrigger value="details" className="transition-all duration-200 data-[state=active]:scale-[1.03] data-[state=active]:shadow-sm">
+            <TabsTrigger value="details" className="transition-all duration-200 dark:data-[state=active]:bg-gray-700 dark:data-[state=active]:text-white data-[state=active]:scale-[1.03] data-[state=active]:shadow-sm">
               Détails supplémentaires
             </TabsTrigger>
-            <TabsTrigger value="media" className="transition-all duration-200 data-[state=active]:scale-[1.03] data-[state=active]:shadow-sm">
+            <TabsTrigger value="media" className="transition-all duration-200 dark:data-[state=active]:bg-gray-700 dark:data-[state=active]:text-white data-[state=active]:scale-[1.03] data-[state=active]:shadow-sm">
               Médias
+            </TabsTrigger>
+            <TabsTrigger value="Propriétaire" className="transition-all duration-200 dark:data-[state=active]:bg-gray-700 dark:data-[state=active]:text-white data-[state=active]:scale-[1.03] data-[state=active]:shadow-sm">
+            Propriétaire
             </TabsTrigger>
           </TabsList>
           
           <TabsContent value="main" className="animate-in fade-in-50 duration-300">
-            <Card>
+            <Card className="bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-100">
               <CardHeader>
                 <CardTitle>Informations principales</CardTitle>
                 <CardDescription>Modifiez les informations essentielles du bien immobilier</CardDescription>
@@ -233,28 +529,49 @@ const PropertyEdit = () => {
                     <Input
                       id="title"
                       name="title"
-                      value={property.title}
+                      value={bien.title || ''}
                       onChange={handleInputChange}
-                      className="transition-all duration-200 hover:border-luxe-blue/30 focus:scale-[1.01]"
-                    />
+className="
+    transition-all duration-200
+    hover:border-luxe-blue/30
+    focus:scale-[1.01]
+    bg-white text-black border-gray-300
+    dark:bg-gray-900 dark:text-white dark:border-gray-700
+    dark:placeholder-gray-400
+    focus:outline-none focus:ring-2 focus:ring-luxe-blue/50
+    dark:focus:ring-luxe-blue/30
+  "                    />
                   </div>
                   
                   <div className="space-y-2">
                     <Label htmlFor="type">Type de bien<span className="text-red-500">*</span></Label>
                     <Select 
-                      value={property.type} 
+                      value={bien.type || ''} 
                       onValueChange={(value) => handleSelectChange('type', value)}
                     >
-                      <SelectTrigger id="type" className="transition-all duration-200 hover:border-luxe-blue/30">
+                      <SelectTrigger id="type" className="
+      transition-all duration-200
+      hover:border-luxe-blue/30
+      bg-white text-black border-gray-300
+      dark:bg-gray-900 dark:text-white dark:border-gray-700
+      focus:outline-none focus:ring-2 focus:ring-luxe-blue/50
+      dark:focus:ring-luxe-blue/30
+    ">
                         <SelectValue placeholder="Sélectionner un type" />
                       </SelectTrigger>
-                      <SelectContent>
+                      <SelectContent  className="
+      bg-white text-black
+      dark:bg-gray-900 dark:text-white
+      border border-gray-200 dark:border-gray-700
+    ">
                         <SelectItem value="Appartement">Appartement</SelectItem>
                         <SelectItem value="Villa">Villa</SelectItem>
                         <SelectItem value="Maison">Maison</SelectItem>
                         <SelectItem value="Bureau">Bureau</SelectItem>
                         <SelectItem value="Terrain">Terrain</SelectItem>
                         <SelectItem value="Riad">Riad</SelectItem>
+                        <SelectItem value="Commerce">Commerce</SelectItem>
+                        <SelectItem value="Autre">Autre</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -264,23 +581,42 @@ const PropertyEdit = () => {
                     <Input
                       id="price"
                       name="price"
-                      value={property.price}
+                      value={bien.price || ''}
                       onChange={handleInputChange}
                       type="number"
-                      className="transition-all duration-200 hover:border-luxe-blue/30 focus:scale-[1.01]"
-                    />
+className="
+    transition-all duration-200
+    hover:border-luxe-blue/30
+    focus:scale-[1.01]
+    bg-white text-black border-gray-300
+    dark:bg-gray-900 dark:text-white dark:border-gray-700
+    dark:placeholder-gray-400
+    focus:outline-none focus:ring-2 focus:ring-luxe-blue/50
+    dark:focus:ring-luxe-blue/30
+  "                    />
                   </div>
                   
                   <div className="space-y-2">
                     <Label htmlFor="status">Statut<span className="text-red-500">*</span></Label>
                     <Select 
-                      value={property.status} 
+                      value={bien.status || ''} 
                       onValueChange={(value) => handleSelectChange('status', value)}
                     >
-                      <SelectTrigger id="status" className="transition-all duration-200 hover:border-luxe-blue/30">
+                      <SelectTrigger id="status"className="
+      transition-all duration-200
+      hover:border-luxe-blue/30
+      bg-white text-black border-gray-300
+      dark:bg-gray-900 dark:text-white dark:border-gray-700
+      focus:outline-none focus:ring-2 focus:ring-luxe-blue/50
+      dark:focus:ring-luxe-blue/30
+    ">
                         <SelectValue placeholder="Sélectionner un statut" />
                       </SelectTrigger>
-                      <SelectContent>
+                      <SelectContent  className="
+      bg-white text-black
+      dark:bg-gray-900 dark:text-white
+      border border-gray-200 dark:border-gray-700
+    ">
                         <SelectItem value="Disponible">Disponible</SelectItem>
                         <SelectItem value="Réservé">Réservé</SelectItem>
                         <SelectItem value="Vendu">Vendu</SelectItem>
@@ -288,27 +624,145 @@ const PropertyEdit = () => {
                     </Select>
                   </div>
                   
-                  <div className="space-y-2 md:col-span-2">
-                    <Label htmlFor="location">Emplacement<span className="text-red-500">*</span></Label>
+                  <div className="space-y-2 ">
+                    <Label htmlFor="location">Ville<span className="text-red-500">*</span></Label>
                     <Input
                       id="location"
                       name="location"
-                      value={property.location}
+                      value={bien.location || ''}
                       onChange={handleInputChange}
-                      className="transition-all duration-200 hover:border-luxe-blue/30 focus:scale-[1.01]"
-                    />
+className="
+    transition-all duration-200
+    hover:border-luxe-blue/30
+    focus:scale-[1.01]
+    bg-white text-black border-gray-300
+    dark:bg-gray-900 dark:text-white dark:border-gray-700
+    dark:placeholder-gray-400
+    focus:outline-none focus:ring-2 focus:ring-luxe-blue/50
+    dark:focus:ring-luxe-blue/30
+  "                    />
                   </div>
-                  
+                  <div className="space-y-2">
+    <Label htmlFor="quartier">Quartier<span className="text-red-500">*</span></Label>
+    <Input
+      id="quartier"
+      name="quartier"
+      value={bien.quartier || ''}
+      onChange={handleInputChange}
+      className="
+    transition-all duration-200
+    hover:border-luxe-blue/30
+    focus:scale-[1.01]
+    bg-white text-black border-gray-300
+    dark:bg-gray-900 dark:text-white dark:border-gray-700
+    dark:placeholder-gray-400
+    focus:outline-none focus:ring-2 focus:ring-luxe-blue/50
+    dark:focus:ring-luxe-blue/30
+  "   
+    />
+  </div>
+  <FormProvider {...form}>
+  <FormField
+  control={form.control}
+  name="points_forts"
+  render={({ field }) => (
+    <FormItem>
+      <FormLabel>Points forts</FormLabel>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+        {[
+          "Emplacement privilégié",
+          "Matériaux haut de gamme",
+          "Excellent état",
+          "Sécurisé",
+          "Lumineux",
+          "Vue dégagée",
+          "Proche des commodités",
+          "Stationnement",
+          "Ascenseur",
+          "Piscine",
+          "Double vitrage"
+        ].map((item) => (
+          <label key={item} className="flex items-center space-x-2">
+            <input
+              type="checkbox"
+              checked={field.value?.includes(item)}
+              onChange={(e) => {
+                const checked = e.target.checked;
+                const updated = checked
+                  ? [...(field.value || []), item]
+                  : field.value?.filter((v) => v !== item);
+
+                field.onChange(updated);
+                setBien(prev => ({ ...prev, points_forts: updated }));
+                setHasChanges(true);
+              }}
+              className="accent-blue-600  dark:[accent-color:#22c55e]"
+            />
+            <span className="text-sm">{item}</span>
+          </label>
+        ))}
+      </div>
+      <FormMessage />
+    </FormItem>
+  )}
+/>
+
+</FormProvider>
+{/* Proximité */}
+<FormProvider {...form}>
+<FormField
+  control={form.control}
+  name="proximite"
+  render={({ field }) => (
+    <FormItem>
+      <FormLabel>Proximité</FormLabel>
+      <div className="grid grid-cols-1 gap-2">
+        {["Transports", "Commerces", "Restaurants", "Écoles"].map((item) => (
+          <label key={item} className="flex items-center space-x-2">
+            <input
+              type="checkbox"
+              checked={field.value?.includes(item)}
+              onChange={(e) => {
+                const checked = e.target.checked;
+                const updated = checked
+                  ? [...(field.value || []), item]
+                  : field.value?.filter((v) => v !== item);
+
+                field.onChange(updated);
+                setBien(prev => ({ ...prev, proximite: updated }));
+                setHasChanges(true);
+              }}
+              className="accent-blue-600  dark:[accent-color:#22c55e]"
+            />
+            <span className="text-sm">{item}</span>
+          </label>
+        ))}
+      </div>
+      <FormMessage />
+    </FormItem>
+  )}
+/>
+
+    </FormProvider>
+
                   <div className="space-y-2 md:col-span-2">
                     <Label htmlFor="description">Description</Label>
                     <Textarea
                       id="description"
                       name="description"
-                      value={property.description}
+                      value={bien.description || '' }
                       onChange={handleInputChange}
                       rows={6}
-                      className="resize-none transition-all duration-200 hover:border-luxe-blue/30 focus:scale-[1.01]"
-                    />
+className="
+    transition-all duration-200
+    hover:border-luxe-blue/30
+    focus:scale-[1.01]
+    bg-white text-black border-gray-300
+    dark:bg-gray-900 dark:text-white dark:border-gray-700
+    dark:placeholder-gray-400
+    focus:outline-none focus:ring-2 focus:ring-luxe-blue/50
+    dark:focus:ring-luxe-blue/30
+  "                    />
                   </div>
                 </div>
               </CardContent>
@@ -316,7 +770,7 @@ const PropertyEdit = () => {
           </TabsContent>
           
           <TabsContent value="details" className="animate-in fade-in-50 duration-300">
-            <Card>
+            <Card className="bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-100">
               <CardHeader>
                 <CardTitle>Détails supplémentaires</CardTitle>
                 <CardDescription>Ajoutez des informations détaillées sur les caractéristiques du bien</CardDescription>
@@ -328,10 +782,19 @@ const PropertyEdit = () => {
                     <Input
                       id="bedrooms"
                       name="bedrooms"
-                      value={property.bedrooms}
+                      value={bien.bedrooms || ''}
                       onChange={handleInputChange}
                       type="number"
-                      className="transition-all duration-200 hover:border-luxe-blue/30 focus:scale-[1.01]"
+                      className="
+    transition-all duration-200
+    hover:border-luxe-blue/30
+    focus:scale-[1.01]
+    bg-white text-black border-gray-300
+    dark:bg-gray-900 dark:text-white dark:border-gray-700
+    dark:placeholder-gray-400
+    focus:outline-none focus:ring-2 focus:ring-luxe-blue/50
+    dark:focus:ring-luxe-blue/30
+  " 
                     />
                   </div>
                   
@@ -340,11 +803,19 @@ const PropertyEdit = () => {
                     <Input
                       id="bathrooms"
                       name="bathrooms"
-                      value={property.bathrooms}
+                      value={bien.bathrooms || ''}
                       onChange={handleInputChange}
                       type="number"
-                      className="transition-all duration-200 hover:border-luxe-blue/30 focus:scale-[1.01]"
-                    />
+className="
+    transition-all duration-200
+    hover:border-luxe-blue/30
+    focus:scale-[1.01]
+    bg-white text-black border-gray-300
+    dark:bg-gray-900 dark:text-white dark:border-gray-700
+    dark:placeholder-gray-400
+    focus:outline-none focus:ring-2 focus:ring-luxe-blue/50
+    dark:focus:ring-luxe-blue/30
+  "                     />
                   </div>
                   
                   <div className="space-y-2">
@@ -352,66 +823,923 @@ const PropertyEdit = () => {
                     <Input
                       id="area"
                       name="area"
-                      value={property.area}
+                      value={bien.area || '' }
                       onChange={handleInputChange}
                       type="number"
-                      className="transition-all duration-200 hover:border-luxe-blue/30 focus:scale-[1.01]"
-                    />
+className="
+    transition-all duration-200
+    hover:border-luxe-blue/30
+    focus:scale-[1.01]
+    bg-white text-black border-gray-300
+    dark:bg-gray-900 dark:text-white dark:border-gray-700
+    dark:placeholder-gray-400
+    focus:outline-none focus:ring-2 focus:ring-luxe-blue/50
+    dark:focus:ring-luxe-blue/30
+  "                     />
                   </div>
+                  <div className="space-y-2">
+    <Label htmlFor="construction_year">Année de construction</Label>
+    <Input
+      id="construction_year"
+      name="construction_year"
+      value={bien.construction_year || ''}
+      onChange={handleInputChange}
+      className="
+    transition-all duration-200
+    hover:border-luxe-blue/30
+    focus:scale-[1.01]
+    bg-white text-black border-gray-300
+    dark:bg-gray-900 dark:text-white dark:border-gray-700
+    dark:placeholder-gray-400
+    focus:outline-none focus:ring-2 focus:ring-luxe-blue/50
+    dark:focus:ring-luxe-blue/30
+  " 
+    />
+  </div>
+
+  {/* Condition */}
+  <div className="space-y-2">
+    <Label htmlFor="condition">État général</Label>
+    <Select
+      value={bien.condition || ''}
+      onValueChange={(val) => handleSelectChange('condition', val)}
+    >
+      <SelectTrigger className="
+      transition-all duration-200
+      hover:border-luxe-blue/30
+      bg-white text-black border-gray-300
+      dark:bg-gray-900 dark:text-white dark:border-gray-700
+      focus:outline-none focus:ring-2 focus:ring-luxe-blue/50
+      dark:focus:ring-luxe-blue/30
+    ">
+        <SelectValue placeholder="Choisir l'état" />
+      </SelectTrigger>
+      <SelectContent  className="
+      bg-white text-black
+      dark:bg-gray-900 dark:text-white
+      border border-gray-200 dark:border-gray-700
+    ">
+
+        <SelectItem value="excellent">Excellent</SelectItem>
+        <SelectItem value="moyen">Moyen</SelectItem>
+        <SelectItem value="faible">Faible</SelectItem>
+      </SelectContent>
+    </Select>
+  </div>
+
+  {/* Exposition */}
+  <div className="space-y-2">
+    <Label htmlFor="exposition">Exposition</Label>
+    <Select
+      value={bien.exposition || ''}
+      onValueChange={(val) => handleSelectChange('exposition', val)}
+    >
+      <SelectTrigger className="
+      transition-all duration-200
+      hover:border-luxe-blue/30
+      bg-white text-black border-gray-300
+      dark:bg-gray-900 dark:text-white dark:border-gray-700
+      focus:outline-none focus:ring-2 focus:ring-luxe-blue/50
+      dark:focus:ring-luxe-blue/30
+    ">
+        <SelectValue placeholder="Choisir une exposition" />
+      </SelectTrigger>
+      <SelectContent  className="
+      bg-white text-black
+      dark:bg-gray-900 dark:text-white
+      border border-gray-200 dark:border-gray-700
+    ">
+
+        <SelectItem value="Sud">Sud</SelectItem>
+        <SelectItem value="Nord">Nord</SelectItem>
+        <SelectItem value="Est">Est</SelectItem>
+        <SelectItem value="Ouest">Ouest</SelectItem>
+        <SelectItem value="Sud-Est">Sud-Est</SelectItem>
+        <SelectItem value="Sud-Ouest">Sud-Ouest</SelectItem>
+      </SelectContent>
+    </Select>
+  </div>
+
+  {/* Cuisine */}
+  <div className="space-y-2">
+    <Label htmlFor="cuisine">Cuisine</Label>
+    <Select
+      value={bien.cuisine || ''}
+      onValueChange={(val) => handleSelectChange('cuisine', val)}
+    >
+      <SelectTrigger className="
+      transition-all duration-200
+      hover:border-luxe-blue/30
+      bg-white text-black border-gray-300
+      dark:bg-gray-900 dark:text-white dark:border-gray-700
+      focus:outline-none focus:ring-2 focus:ring-luxe-blue/50
+      dark:focus:ring-luxe-blue/30
+    " >
+        <SelectValue placeholder="Type de cuisine" />
+      </SelectTrigger>
+ <SelectContent  className="
+      bg-white text-black
+      dark:bg-gray-900 dark:text-white
+      border border-gray-200 dark:border-gray-700
+    ">
+        <SelectItem value="equipée">Équipée</SelectItem>
+        <SelectItem value="non-equipée">Non équipée</SelectItem>
+      </SelectContent>
+    </Select>
+  </div>
+
+  {/* Climatisation */}
+  <div className="space-y-2">
+    <Label htmlFor="climatisation">Climatisation</Label>
+    <Select
+      value={bien.climatisation || ''}
+      onValueChange={(val) => handleSelectChange('climatisation', val)}
+    >
+      <SelectTrigger className="
+      transition-all duration-200
+      hover:border-luxe-blue/30
+      bg-white text-black border-gray-300
+      dark:bg-gray-900 dark:text-white dark:border-gray-700
+      focus:outline-none focus:ring-2 focus:ring-luxe-blue/50
+      dark:focus:ring-luxe-blue/30
+    ">
+        <SelectValue placeholder="Climatisation ?" />
+      </SelectTrigger>
+ <SelectContent  className="
+      bg-white text-black
+      dark:bg-gray-900 dark:text-white
+      border border-gray-200 dark:border-gray-700
+    ">
+        <SelectItem value="oui">Oui</SelectItem>
+        <SelectItem value="non">Non</SelectItem>
+      </SelectContent>
+    </Select>
+  </div>
+
+  {/* Terrasse */}
+  <div className="space-y-2">
+    <Label htmlFor="terrasse">Terrasse / Balcon</Label>
+    <Select
+      value={bien.terrasse || ''}
+      onValueChange={(val) => handleSelectChange('terrasse', val)}
+    >
+      <SelectTrigger className="
+      transition-all duration-200
+      hover:border-luxe-blue/30
+      bg-white text-black border-gray-300
+      dark:bg-gray-900 dark:text-white dark:border-gray-700
+      focus:outline-none focus:ring-2 focus:ring-luxe-blue/50
+      dark:focus:ring-luxe-blue/30
+    ">
+        <SelectValue placeholder="Terrasse ou balcon ?" />
+      </SelectTrigger>
+       <SelectContent  className="
+      bg-white text-black
+      dark:bg-gray-900 dark:text-white
+      border border-gray-200 dark:border-gray-700
+    ">
+
+        <SelectItem value="oui">Oui</SelectItem>
+        <SelectItem value="non">Non</SelectItem>
+      </SelectContent>
+    </Select>
+  </div>
+
+  {/* Parking */}
+  <div className="space-y-2">
+    <Label htmlFor="has_parking">Parking</Label>
+    <Select
+      value={bien.has_parking || ''}
+      onValueChange={(val) => handleSelectChange('has_parking', val)}
+    >
+      <SelectTrigger className="
+      transition-all duration-200
+      hover:border-luxe-blue/30
+      bg-white text-black border-gray-300
+      dark:bg-gray-900 dark:text-white dark:border-gray-700
+      focus:outline-none focus:ring-2 focus:ring-luxe-blue/50
+      dark:focus:ring-luxe-blue/30
+    ">
+        <SelectValue placeholder="Y a-t-il un parking ?" />
+      </SelectTrigger>
+      <SelectContent  className="
+      bg-white text-black
+      dark:bg-gray-900 dark:text-white
+      border border-gray-200 dark:border-gray-700
+    ">
+
+        <SelectItem value="oui">Oui</SelectItem>
+        <SelectItem value="non">Non</SelectItem>
+      </SelectContent>
+    </Select>
+  </div>
+
+  {/* Places de parking (seulement si oui) */}
+  {bien.has_parking === 'oui' && (
+    <div className="space-y-2">
+      <Label htmlFor="parking_places">Nombre de places</Label>
+      <Input
+        id="parking_places"
+        name="parking_places"
+        value={bien.parking_places || ''}
+        onChange={handleInputChange}
+         className="
+    transition-all duration-200
+    hover:border-luxe-blue/30
+    focus:scale-[1.01]
+    bg-white text-black border-gray-300
+    dark:bg-gray-900 dark:text-white dark:border-gray-700
+    dark:placeholder-gray-400
+    focus:outline-none focus:ring-2 focus:ring-luxe-blue/50
+    dark:focus:ring-luxe-blue/30
+  " 
+
+      />
+    </div>
+  )}
+
+  {/* Taux d'occupation */}
+  <div className="space-y-2">
+    <Label htmlFor="occupation_rate">Taux d’occupation (%)</Label>
+    <Input
+      id="occupation_rate"
+      name="occupation_rate"
+      value={bien.occupation_rate || ''}
+      onChange={handleInputChange}
+       className="
+    transition-all duration-200
+    hover:border-luxe-blue/30
+    focus:scale-[1.01]
+    bg-white text-black border-gray-300
+    dark:bg-gray-900 dark:text-white dark:border-gray-700
+    dark:placeholder-gray-400
+    focus:outline-none focus:ring-2 focus:ring-luxe-blue/50
+    dark:focus:ring-luxe-blue/30
+  " 
+    />
+  </div>
+
+  {/* Valorisation estimée */}
+  <div className="space-y-2">
+    <Label htmlFor="estimated_valuation">Valorisation estimée (%)</Label>
+    <Input
+      id="estimated_valuation"
+      name="estimated_valuation"
+      value={bien.estimated_valuation || ''}
+      onChange={handleInputChange}
+       className="
+    transition-all duration-200
+    hover:border-luxe-blue/30
+    focus:scale-[1.01]
+    bg-white text-black border-gray-300
+    dark:bg-gray-900 dark:text-white dark:border-gray-700
+    dark:placeholder-gray-400
+    focus:outline-none focus:ring-2 focus:ring-luxe-blue/50
+    dark:focus:ring-luxe-blue/30
+  " 
+    />
+  </div>
+
+  {/* Charges estimées */}
+  <div className="space-y-2">
+    <Label htmlFor="estimated_charges">Charges mensuelles (MAD)</Label>
+    <Input
+      id="estimated_charges"
+      name="estimated_charges"
+      value={bien.estimated_charges|| ''}
+      onChange={handleInputChange}
+       className="
+    transition-all duration-200
+    hover:border-luxe-blue/30
+    focus:scale-[1.01]
+    bg-white text-black border-gray-300
+    dark:bg-gray-900 dark:text-white dark:border-gray-700
+    dark:placeholder-gray-400
+    focus:outline-none focus:ring-2 focus:ring-luxe-blue/50
+    dark:focus:ring-luxe-blue/30
+  " 
+    />
+  </div>
+
+  {/* Loyer mensuel */}
+  <div className="space-y-2">
+    <Label htmlFor="monthly_rent">Loyer mensuel (MAD)</Label>
+    <Input
+      id="monthly_rent"
+      name="monthly_rent"
+      value={bien.monthly_rent || ''}
+      onChange={handleInputChange}
+       className="
+    transition-all duration-200
+    hover:border-luxe-blue/30
+    focus:scale-[1.01]
+    bg-white text-black border-gray-300
+    dark:bg-gray-900 dark:text-white dark:border-gray-700
+    dark:placeholder-gray-400
+    focus:outline-none focus:ring-2 focus:ring-luxe-blue/50
+    dark:focus:ring-luxe-blue/30
+  " 
+    />
+  </div>
+{/* date de disponibilité mensuel */}
+<div className="space-y-2">
+  <Label htmlFor="available_date">Date de disponibilité</Label>
+  <Popover>
+    <PopoverTrigger asChild>
+      <Button
+        variant="outline"
+        className="w-full justify-start text-left font-normal dark:bg-gray-800 dark:text-white dark:border-gray-700"
+
+      >
+        <CalendarIcon className="mr-2 h-4 w-4 dark:text-white" />
+        {available_date ? format(available_date, 'dd/MM/yyyy') : 'Sélectionner une date'}
+      </Button>
+    </PopoverTrigger>
+        <PopoverContent className="w-auto p-0 dark:bg-gray-900 dark:border dark:border-gray-700">
+      <Calendar
+        mode="single"
+        selected={available_date}
+        onSelect={(date) => {
+          setAvailableDate(date);
+          handleInputChange({
+            target: {
+              name: 'available_date',
+              value: date?.toISOString().split('T')[0] || '',
+            }
+          });
+        }}
+        initialFocus
+        className="dark:bg-gray-900 dark:text-white"
+      />
+    </PopoverContent>
+  </Popover>
+</div>
+  {/* Lien Google Maps */}
+  <div className="space-y-2 md:col-span-2">
+    <Label htmlFor="map_link">Lien Google Maps</Label>
+    <Input
+      id="map_link"
+      name="map_link"
+      value={bien.map_link || ''}
+      onChange={handleInputChange}
+       className="
+    transition-all duration-200
+    hover:border-luxe-blue/30
+    focus:scale-[1.01]
+    bg-white text-black border-gray-300
+    dark:bg-gray-900 dark:text-white dark:border-gray-700
+    dark:placeholder-gray-400
+    focus:outline-none focus:ring-2 focus:ring-luxe-blue/50
+    dark:focus:ring-luxe-blue/30
+  " 
+    />
+  </div>
                 </div>
                 
                 <div className="flex items-center space-x-2 mt-4">
-                  <input
-                    type="checkbox"
-                    id="isFeatured"
-                    checked={property.isFeatured}
-                    onChange={(e) => handleCheckboxChange('isFeatured', e.target.checked)}
-                    className="h-4 w-4 rounded border-gray-300 text-luxe-blue focus:ring-luxe-blue"
-                  />
-                  <Label htmlFor="isFeatured" className="text-sm font-medium leading-none cursor-pointer">
-                    Mettre ce bien en vedette sur la page d'accueil
-                  </Label>
+                <input
+  type="checkbox"
+  id="is_featured"
+  checked={bien.isFeatured}
+  onChange={(e) => handleCheckboxChange('is_featured', e.target.checked)}
+    className="accent-blue-600 dark:[accent-color:#22c55e]"
+
+/>
+<Label htmlFor="is_featured">Mettre ce bien en vedette</Label>
+
                 </div>
               </CardContent>
             </Card>
           </TabsContent>
           
           <TabsContent value="media" className="animate-in fade-in-50 duration-300">
-            <Card>
+            <Card className="bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-100">
               <CardHeader>
                 <CardTitle>Photos et médias</CardTitle>
                 <CardDescription>Gérez les photos et autres médias associés à ce bien</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                  {property.images.map((image, index) => (
-                    <div key={index} className="relative group rounded-md overflow-hidden border">
-                      <img
-                        src={image}
-                        alt={`Image ${index + 1}`}
-                        className="w-full h-40 object-cover"
-                      />
-                      <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-40 transition-all duration-200 flex items-center justify-center">
-                        <Button 
-                          variant="destructive" 
-                          size="icon" 
-                          className="opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-                          onClick={() => handleDeleteImage(index)}
-                        >
-                          <Trash className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-                
-                <Button className="w-full py-8 border-dashed border-2 bg-gray-50 hover:bg-gray-100 text-gray-600 transition-all duration-200">
-                  <Upload className="h-5 w-5 mr-2" />
-                  Ajouter une nouvelle image
-                </Button>
-              </CardContent>
+  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+    <div className="col-span-full">
+      <h4 className="text-sm font-medium mb-2">Images existantes :</h4>
+    </div>
+
+    {(bien.images || []).map((img: string, index: number) => {
+      const replacement = bien.replacedImages?.find(r => r.index === index);
+      const src = replacement
+        ? URL.createObjectURL(replacement.file)
+        : `http://localhost:8000/${img}`;
+
+      return (
+        <div key={index} className="relative group rounded-md overflow-hidden border">
+          <img
+            src={src}
+            alt={`Image ${index + 1}`}
+            className="w-full h-40 object-cover"
+          />
+          <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-40 transition-all duration-200 flex items-center justify-center space-x-2">
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => {
+                setSelectedImageIndex(index);
+                document.getElementById("imageUpload")?.click();
+              }}
+            >
+              ✏️
+            </Button>
+            <Button
+  variant="destructive"
+  size="icon"
+  onClick={() => {
+    setDeleteTarget({ type: 'image', index });
+    setDeleteConfirmOpen(true);
+  }}
+>
+  <Trash className="h-4 w-4" />
+</Button>
+
+          </div>
+        </div>
+      );
+    })}
+
+    <div className="col-span-full">
+      <h4 className="text-sm font-medium mt-6 mb-2">Nouvelles images (non enregistrées) :</h4>
+    </div>
+
+    {(bien.newImages || []).map((file: File, i: number) => {
+      const src = URL.createObjectURL(file);
+      const index = (bien.images?.length || 0) + i;
+
+      return (
+        <div key={index} className="relative w-32 h-32 rounded-md overflow-hidden border border-gray-300 dark:border-gray-700"
+>
+          <img
+            src={src}
+            alt={`Nouvelle image ${i + 1}`}
+            className="w-full h-40 object-cover"
+          />
+          <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-40 transition-all duration-200 flex items-center justify-center space-x-2">
+            <Button
+              variant="outline"
+              size="icon"
+              disabled
+            >
+              ✏️
+            </Button>
+            <Button
+              variant="destructive"
+              size="icon"
+              onClick={() => {
+                const newImages = [...(bien.newImages || [])];
+                newImages.splice(i, 1);
+                setBien((prev) => ({ ...prev, newImages }));
+                setHasChanges(true);
+              }}
+            >
+              <Trash className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
+      );
+    })}
+  </div>
+
+  {/* Hidden input for replacing image */}
+  <input
+    type="file"
+    accept="image/*"
+    id="imageUpload"
+    onChange={(e) => {
+      const file = e.target.files?.[0];
+      if (!file || selectedImageIndex === null) return;
+
+      setBien(prev => ({
+        ...prev,
+        replacedImages: [...(prev.replacedImages || []), { index: selectedImageIndex, file }],
+      }));
+
+      setSelectedImageIndex(null);
+      setHasChanges(true);
+      e.target.value = '';
+    }}
+    hidden
+  />
+
+  {/* Hidden input for new image */}
+  <input
+    type="file"
+    accept="image/*"
+    id="newImageUpload"
+    onChange={(e) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+
+      setBien(prev => ({
+        ...prev,
+        newImages: [...(prev.newImages || []), file],
+      }));
+
+      setHasChanges(true);
+      e.target.value = '';
+    }}
+    hidden
+  />
+
+  {/* Add new image button */}
+  <label htmlFor="newImageUpload" className="w-full block mt-4">
+    <div className="w-full py-8 border-2 border-dashed rounded-md text-center transition-all duration-200
+    bg-gray-50 hover:bg-gray-100 text-gray-600
+    dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-300
+    dark:border-gray-600
+  ">
+      <Upload className="h-5 w-5 inline-block mr-2" />
+      Ajouter une image
+    </div>
+  </label>
+</CardContent>
+
+
+
             </Card>
+            <Card className="mt-6 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-100">
+  <CardHeader>
+    <CardTitle>Plan</CardTitle>
+    <CardDescription>Fichiers PDF ou autres documents associés</CardDescription>
+  </CardHeader>
+
+  <CardContent className="space-y-4">
+  {Array.isArray(bien.documents) && bien.documents.length > 0 ? (
+    bien.documents.map((doc: string, index: number) => (
+      <div
+        key={index}
+        className="flex items-center justify-between border rounded-md p-3 hover:bg-gray-50 transition"
+      >
+        <a
+          href={`http://localhost:8000/api/download/${bien.id}`}
+          className="flex items-center text-sm text-blue-600 hover:underline"
+          download
+        >
+          📄 {`Plan_${bien.title.replace(/\s/g, '_')}.pdf`}
+        </a>
+        <div className="flex space-x-2">
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => document.getElementById("replaceDocUpload")?.click()}
+          >
+            ✏️
+          </Button>
+          <Button
+  variant="destructive"
+  size="icon"
+  onClick={() => {
+    setDeleteTarget({ type: 'document' });
+    setDeleteConfirmOpen(true);
+  }}
+>
+  <Trash className="h-4 w-4" />
+</Button>
+
+        </div>
+      </div>
+    ))
+  ) : (
+    <>
+      <p className="text-sm text-gray-500">Aucun document disponible</p>
+
+      <label htmlFor="docUpload" className="w-full block">
+        <Button
+          variant="outline"
+          className="w-full py-8 border-2 border-dashed rounded-md text-center transition-all duration-200
+    bg-gray-50 hover:bg-gray-100 text-gray-600
+    dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-300
+    dark:border-gray-600
+  "
+          asChild
+        >
+          <div>
+            <Upload className="h-4 w-4 mr-2" />
+            Ajouter un document
+          </div>
+        </Button>
+      </label>
+    </>
+  )}
+
+  {/* Afficher temporairement le document ajouté */}
+  {bien.newDocuments && bien.newDocuments.length > 0 && (
+    <div className="space-y-2">
+      {bien.newDocuments.map((file: File, i: number) => (
+        <div key={i} className="text-sm text-gray-600">📎 {file.name}</div>
+      ))}
+    </div>
+  )}
+
+  {/* Input fichier pour remplacement ou ajout */}
+  <input
+    type="file"
+    id="replaceDocUpload"
+    accept=".pdf,.doc,.docx,.xls,.xlsx"
+    onChange={(e) => {
+      const files = Array.from(e.target.files || []);
+      setBien(prev => ({
+        ...prev,
+        newDocuments: files.slice(0, 1), // Toujours max 1
+      }));
+      setHasChanges(true);
+    }}
+    hidden
+  />
+
+  <input
+    type="file"
+    id="docUpload"
+    accept=".pdf,.doc,.docx,.xls,.xlsx"
+    onChange={(e) => {
+      const files = Array.from(e.target.files || []);
+      setBien(prev => ({
+        ...prev,
+        newDocuments: files.slice(0, 1),
+      }));
+      setHasChanges(true);
+    }}
+    hidden
+  />
+</CardContent>
+
+</Card>
+
+
           </TabsContent>
+          <TabsContent value="Propriétaire" className="animate-in fade-in-50 duration-300">
+  <Card className="mt-6 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-100">
+    <CardHeader>
+      <CardTitle>Informations du propriétaire</CardTitle>
+      <CardDescription>Ajoutez ou modifiez les coordonnées du propriétaire du bien</CardDescription>
+    </CardHeader>
+    <CardContent className="space-y-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <Label htmlFor="owner_name">Nom du propriétaire</Label>
+          <Input
+            id="owner_name"
+            name="owner_name"
+            value={bien.owner_name || ''}
+            onChange={handleInputChange}
+             className="
+    transition-all duration-200
+    hover:border-luxe-blue/30
+    focus:scale-[1.01]
+    bg-white text-black border-gray-300
+    dark:bg-gray-900 dark:text-white dark:border-gray-700
+    dark:placeholder-gray-400
+    focus:outline-none focus:ring-2 focus:ring-luxe-blue/50
+    dark:focus:ring-luxe-blue/30
+  " 
+          />
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="owner_email">Email du propriétaire</Label>
+          <Input
+            id="owner_email"
+            name="owner_email"
+            type="email"
+            value={bien.owner_email || ''}
+            onChange={handleInputChange}
+             className="
+    transition-all duration-200
+    hover:border-luxe-blue/30
+    focus:scale-[1.01]
+    bg-white text-black border-gray-300
+    dark:bg-gray-900 dark:text-white dark:border-gray-700
+    dark:placeholder-gray-400
+    focus:outline-none focus:ring-2 focus:ring-luxe-blue/50
+    dark:focus:ring-luxe-blue/30
+  " 
+          />
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="owner_phone">Téléphone</Label>
+          <Input
+            id="owner_phone"
+            name="owner_phone"
+            type="tel"
+            value={bien.owner_phone || ''}
+            onChange={handleInputChange}
+             className="
+    transition-all duration-200
+    hover:border-luxe-blue/30
+    focus:scale-[1.01]
+    bg-white text-black border-gray-300
+    dark:bg-gray-900 dark:text-white dark:border-gray-700
+    dark:placeholder-gray-400
+    focus:outline-none focus:ring-2 focus:ring-luxe-blue/50
+    dark:focus:ring-luxe-blue/30
+  " 
+          />
+        </div>
+
+       <div className="space-y-2">
+  <Label htmlFor="owner_nationality">Nationalité</Label>
+  <Select
+    value={bien.owner_nationality || ''}
+    onValueChange={(val) => handleSelectChange('owner_nationality', val)}
+  >
+    <SelectTrigger
+      id="owner_nationality"
+      className="
+        transition-all duration-200
+        hover:border-luxe-blue/30
+        bg-white text-black border-gray-300
+        dark:bg-gray-900 dark:text-white dark:border-gray-700
+        focus:outline-none focus:ring-2 focus:ring-luxe-blue/50
+        dark:focus:ring-luxe-blue/30
+      "
+    >
+      <SelectValue placeholder="Sélectionner une nationalité" />
+    </SelectTrigger>
+    <SelectContent
+      className="
+        bg-white text-black
+        dark:bg-gray-900 dark:text-white
+        border border-gray-200 dark:border-gray-700
+      "
+    >
+      {[
+        "Marocaine",
+        "Française",
+        "Espagnole",
+        "Américaine",
+        "Canadienne",
+        "Italienne",
+        "Allemande",
+        "Anglaise",
+        "Belge",
+        "Néerlandaise",
+        "Suisse",
+        "Chinoise",
+        "Japonaise",
+        "Indienne",
+        "Brésilienne",
+        "Australienne",
+        "Turque",
+        "Saoudienne",
+        "Égyptienne",
+        "Autre"
+      ].map((nationality) => (
+        <SelectItem key={nationality} value={nationality}>
+          {nationality}
+        </SelectItem>
+      ))}
+    </SelectContent>
+  </Select>
+</div>
+
+        <div className="space-y-2 mt-4">
+  <Label>Documents du propriétaire</Label>
+
+  {/* Liste des documents existants */}
+  {Array.isArray(bien.owner_documents) && bien.owner_documents.length > 0 ? (
+  bien.owner_documents.map((doc: string, index: number) => (
+    <div key={index} className="flex items-center justify-between p-2 bg-gray-50 border rounded-md">
+      <a
+        href={`http://localhost:8000/storage/${doc.replace('storage/', '')}`}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="text-sm text-blue-600 hover:underline"
+      >
+        📄 {doc.split('/').pop()}
+      </a>
+      <div className="flex gap-2">
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={() => ownerDocInputRefs.current[index]?.click()}
+        >
+          ✏️
+        </Button>
+        <Button
+  variant="destructive"
+  size="icon"
+  onClick={() => {
+    setDeleteTarget({ type: 'ownerDoc', index }); // ou 'image' / 'document'
+    setDeleteConfirmOpen(true);
+  }}
+>
+  <Trash className="h-4 w-4" />
+</Button>
+
+
+        {/* input de remplacement fichier */}
+        <input
+  type="file"
+  accept=".pdf,.doc,.docx,.xls,.xlsx"
+  ref={(el) => (ownerDocInputRefs.current[index] = el)}
+  hidden
+  onChange={(e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setReplacedOwnerDocuments((prev) => {
+      const updated = [...prev];
+      const existingIndex = updated.findIndex((r) => r.index === index);
+      if (existingIndex !== -1) {
+        updated[existingIndex] = { index, file };
+      } else {
+        updated.push({ index, file });
+      }
+      return updated;
+    });
+
+    setHasChanges(true);
+  }}
+/>
+
+{/* 🔽 AJOUTE CE BLOC ICI */}
+{replacedOwnerDocuments.find(r => r.index === index) && (
+  <div className="text-xs text-green-600 mt-1">
+    ✅ Nouveau document prêt à être enregistré
+  </div>
+)}
+
+
+      </div>
+    </div>
+  ))
+) : (
+  <div className="text-sm text-gray-500">Aucun document associé au propriétaire.</div>
+)}
+{/* Bouton d’ajout */}
+<Button
+  variant="outline"
+  className="w-full mt-2 py-8 border-2 border-dashed rounded-md text-center transition-all duration-200
+    bg-gray-50 hover:bg-gray-100 text-gray-600
+    dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-300
+    dark:border-gray-600
+  "
+  onClick={() => newOwnerDocInputRef.current?.click()}
+>
+  <Upload className="h-4 w-4 mr-2" />
+  Ajouter un document du propriétaire
+</Button>
+
+<input
+  type="file"
+  accept=".pdf,.doc,.docx,.xls,.xlsx"
+  ref={newOwnerDocInputRef}
+  hidden
+  onChange={(e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setBien((prev) => ({
+      ...prev,
+      newOwnerDocuments: [...(prev.newOwnerDocuments || []), file],
+    }));
+    setHasChanges(true);
+    e.target.value = '';
+  }}
+/>
+
+{/* Affichage des fichiers ajoutés */}
+{bien.newOwnerDocuments?.length > 0 && (
+  <div className="space-y-2 mt-2">
+    {bien.newOwnerDocuments.map((file: File, i: number) => (
+      <div
+        key={i}
+        className="flex justify-between items-center bg-gray-50 rounded p-2 border"
+      >
+        <span className="text-sm text-gray-700 truncate max-w-[75%]">
+          📎 {file.name}
+        </span>
+        <Button
+          variant="destructive"
+          size="icon"
+          onClick={() => {
+            const updated = [...bien.newOwnerDocuments];
+            updated.splice(i, 1);
+            setBien(prev => ({ ...prev, newOwnerDocuments: updated }));
+            setHasChanges(true);
+          }}
+        >
+          <Trash className="h-4 w-4" />
+        </Button>
+      </div>
+    ))}
+  </div>
+)}
+
+</div>
+
+      </div>
+    </CardContent>
+  </Card>
+</TabsContent>
+
         </Tabs>
         
         <div className="flex justify-end mt-6">
@@ -437,6 +1765,40 @@ const PropertyEdit = () => {
           </Button>
         </div>
       </div>
+       {/* AlertDialog  */}
+   <AlertDialog open={deleteConfirmOpen} onOpenChange={setDeleteConfirmOpen}>
+  <AlertDialogContent className="animate-in fade-in-0 zoom-in-95 duration-200 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-lg shadow-lg">
+    <AlertDialogHeader>
+      <AlertDialogTitle>Confirmer la suppression</AlertDialogTitle>
+      <AlertDialogDescription className="text-gray-600 dark:text-gray-300">
+        Cette action est irréversible. Le bien sera supprimé définitivement.
+      </AlertDialogDescription>
+    </AlertDialogHeader>
+    <AlertDialogFooter>
+      <AlertDialogCancel className="text-gray-700 dark:text-black hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md px-3 py-1">
+        Annuler
+      </AlertDialogCancel>
+      <AlertDialogAction
+        onClick={handleConfirmedDelete}
+        className="bg-red-600 hover:bg-red-700 text-white rounded-md px-3 py-1 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+        disabled={isDeleting}
+      >
+        {isDeleting ? (
+          <>
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            Suppression...
+          </>
+        ) : (
+          <>
+            <Trash className="mr-2 h-4 w-4" />
+            Oui, supprimer
+          </>
+        )}
+      </AlertDialogAction>
+    </AlertDialogFooter>
+  </AlertDialogContent>
+</AlertDialog>
+
     </AdminLayout>
   );
 };

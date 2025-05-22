@@ -1,0 +1,270 @@
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
+import { zodResolver } from '@hookform/resolvers/zod';
+
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form';
+import { Loader2, Save, TrendingUp } from 'lucide-react';
+import { Property } from '@/context/PropertiesContext';
+import { toast } from '@/hooks/use-toast';
+import { Separator } from '@/components/ui/separator';
+
+// Zod Schema
+const formSchema = z.object({
+  propertyId: z.string().min(1, "Veuillez sélectionner un bien."),
+  currentValue: z.string().min(1, "Valeur actuelle requise."),
+  monthlyRentalIncome: z.string().min(1, "Revenu locatif mensuel requis."),
+  annualGrowthRate: z.string().min(1, "Taux de croissance annuel requis."),
+  durationYears: z.string().min(1, "Durée requise."),
+  initialInvestment: z.string().min(1, "Investissement initial requis."), // <-- NOUVEAU
+
+});
+
+type ExclusiveOfferFormValues = z.infer<typeof formSchema>;
+
+interface ExclusiveOfferDialogProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onOfferAdded: () => void; // callback après succès
+}
+
+const ExclusiveOfferDialog: React.FC<ExclusiveOfferDialogProps> = ({ open, onOpenChange, onOfferAdded }) => {
+  const [properties, setProperties] = useState<Property[]>([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [exclusiveDialogOpen, setExclusiveDialogOpen] = useState(false);
+
+  const form = useForm<ExclusiveOfferFormValues>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      propertyId: '',
+      currentValue: '',
+      monthlyRentalIncome: '',
+      annualGrowthRate: '',
+      durationYears: '',
+    },
+  });
+
+  useEffect(() => {
+    const fetchProperties = async () => {
+      try {
+        const { data } = await axios.get('/api/properties');
+        setProperties(data.data || []);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    fetchProperties();
+  }, []);
+
+  const onSubmit = async (data: ExclusiveOfferFormValues) => {
+    try {
+      setIsSubmitting(true);
+  
+      // ✅ Récupération du token depuis le localStorage
+      const token = localStorage.getItem("access_token");
+      if (!token) {
+        toast({
+          title: "Erreur d'authentification",
+          description: "Votre session a expiré. Veuillez vous reconnecter.",
+          variant: "destructive",
+        });
+        onOpenChange(false);
+        return;
+      }
+  
+      // ✅ Requête de création avec authentification
+      await axios.post('/api/exclusive-offers', {
+        property_id: Number(data.propertyId),
+        current_value: Number(data.currentValue),
+        monthly_rental_income: Number(data.monthlyRentalIncome),
+        annual_growth_rate: Number(data.annualGrowthRate),
+        duration_years: Number(data.durationYears),
+        initial_investment: Number(data.initialInvestment),
+      }, {
+        headers: {
+          Authorization: `Bearer ${token}`, // ✅ Token ajouté dans les headers
+        },
+      });
+  
+      toast({
+        title: "Succès",
+        description: "Offre exclusive ajoutée avec succès !",
+      });
+  
+      form.reset();
+      onOpenChange(false);  // Fermer le dialog
+      onOfferAdded();       // Rafraîchir la liste si besoin
+    } catch (error) {
+      console.error(error);
+      toast({
+        title: "Erreur",
+        description: "Impossible d'ajouter l'offre exclusive.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+  
+  return (
+<Dialog open={open} onOpenChange={onOpenChange}>
+<DialogContent className="sm:max-w-[600px]">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <TrendingUp className="h-5 w-5" />
+            Ajouter une offre exclusive
+          </DialogTitle>
+        </DialogHeader>
+
+        <Separator />
+
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 mt-6">
+            <FormField
+              control={form.control}
+              name="propertyId"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Bien associé</FormLabel>
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl>
+                    <SelectTrigger className="w-full flex items-center justify-between bg-white dark:bg-gray-800 text-gray-800 dark:text-white border border-gray-300 dark:border-gray-600 rounded-md transition-colors px-3 py-2">
+                        <SelectValue placeholder="Sélectionner un bien" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent 
+      className="bg-white dark:bg-gray-800 text-gray-800 dark:text-white border border-gray-300 dark:border-gray-600 rounded-md shadow-lg transition-transform duration-200 transform origin-top scale-95 data-[state=open]:scale-100 max-h-60 overflow-y-auto">
+                      {properties.map((prop) => (
+                        <SelectItem key={prop.id} value={String(prop.id)}>
+                          {prop.title}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+<FormField
+  control={form.control}
+  name="initialInvestment"
+  render={({ field }) => (
+    <FormItem>
+      <FormLabel>Investissement initial (MAD)</FormLabel>
+      <FormControl>
+        <Input placeholder="ex: 2,000,000" {...field}   className="w-full pl-3 pr-3 py-2 border rounded-md bg-white dark:bg-gray-800 text-gray-800 dark:text-white border-gray-300 dark:border-gray-600 focus:ring-0 focus:outline-none transition-colors"
+        />
+      </FormControl>
+      <FormMessage />
+    </FormItem>
+  )}
+/>
+
+            <FormField
+              control={form.control}
+              name="currentValue"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Valeur actuelle (MAD)</FormLabel>
+                  <FormControl>
+                    <Input placeholder="ex: 2,500,000" {...field}  className="w-full pl-3 pr-3 py-2 border rounded-md bg-white dark:bg-gray-800 text-gray-800 dark:text-white border-gray-300 dark:border-gray-600 focus:ring-0 focus:outline-none transition-colors"
+        /> 
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="monthlyRentalIncome"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Revenu locatif mensuel (MAD)</FormLabel>
+                  <FormControl>
+                    <Input placeholder="ex: 15,000" {...field}   className="w-full pl-3 pr-3 py-2 border rounded-md bg-white dark:bg-gray-800 text-gray-800 dark:text-white border-gray-300 dark:border-gray-600 focus:ring-0 focus:outline-none transition-colors"
+        />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="annualGrowthRate"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Taux de croissance (%)</FormLabel>
+                  <FormControl>
+                    <Input placeholder="ex: 7" {...field}   className="w-full pl-3 pr-3 py-2 border rounded-md bg-white dark:bg-gray-800 text-gray-800 dark:text-white border-gray-300 dark:border-gray-600 focus:ring-0 focus:outline-none transition-colors"
+        />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="durationYears"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Durée d'investissement (années)</FormLabel>
+                  <FormControl>
+                    <Input placeholder="ex: 5" {...field}  className="w-full pl-3 pr-3 py-2 border rounded-md bg-white dark:bg-gray-800 text-gray-800 dark:text-white border-gray-300 dark:border-gray-600 focus:ring-0 focus:outline-none transition-colors"
+        />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+                
+<DialogFooter>
+      <Button
+        type="button"
+        variant="outline"
+        onClick={() => onOpenChange(false)}
+        className="text-gray-800 dark:text-Black border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+
+      >
+        Annuler
+      </Button>
+
+      <Button
+        type="button"
+        disabled={isSubmitting}
+        className="bg-green-600 hover:bg-green-700 text-white"
+        onClick={() => {
+          form.handleSubmit(onSubmit)();
+        }}
+      >
+        {isSubmitting ? (
+          <>
+            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+            Enregistrement...
+          </>
+        ) : (
+          <>
+            <Save className="h-4 w-4 mr-2" />
+            Enregistrer
+          </>
+        )}
+      </Button>
+    </DialogFooter>
+
+          </form>
+        </Form>
+      </DialogContent>
+    </Dialog>
+  );
+};
+
+export default ExclusiveOfferDialog;

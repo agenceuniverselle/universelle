@@ -7,6 +7,7 @@ import ContactFormSecurity from './ContactFormSecurity';
 import ContactFormSidebar from './ContactFormSidebar';
 
 const ContactFormContainer: React.FC = () => {
+  const [showVipForm, setShowVipForm] = useState(false);
   const { addLead } = useLeads();
   const [formData, setFormData] = useState({
     name: '',
@@ -87,12 +88,8 @@ const ContactFormContainer: React.FC = () => {
     <div className="bg-white shadow-2xl rounded-xl overflow-hidden">
       <div className="grid grid-cols-1 lg:grid-cols-2">
         <div className="p-8 lg:p-12">
-          <ContactFormFields 
-            formData={formData} 
-            loading={loading} 
-            handleChange={handleChange} 
-            handleSubmit={handleSubmit} 
-          />
+        <ContactFormFields onSuccess={() => setShowVipForm(false)} />
+
           <ContactFormSecurity />
         </div>
         <ContactFormSidebar />

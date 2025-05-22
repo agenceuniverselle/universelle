@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
@@ -9,9 +8,10 @@ import { Role } from '@/types/users';
 
 interface UserGeneralFormProps {
   formData: UserFormValues;
-  onChange: (field: keyof UserFormValues, value: any) => void;
+  onChange: <K extends keyof UserFormValues>(field: K, value: UserFormValues[K]) => void;
   availableRoles: Role[];
 }
+
 
 const UserGeneralForm: React.FC<UserGeneralFormProps> = ({ formData, onChange, availableRoles }) => {
   return (
@@ -23,8 +23,18 @@ const UserGeneralForm: React.FC<UserGeneralFormProps> = ({ formData, onChange, a
             id="name"
             value={formData.name}
             onChange={(e) => onChange('name', e.target.value)}
-            placeholder="Jean Dupont"
+            placeholder="fatima"
             required
+            className="
+    transition-all duration-200
+    hover:border-luxe-blue/30
+    focus:scale-[1.01]
+    bg-white text-black border-gray-300
+    dark:bg-gray-900 dark:text-white dark:border-gray-700
+    dark:placeholder-gray-400
+    focus:outline-none focus:ring-2 focus:ring-luxe-blue/50
+    dark:focus:ring-luxe-blue/30
+  "
           />
         </div>
         
@@ -35,8 +45,18 @@ const UserGeneralForm: React.FC<UserGeneralFormProps> = ({ formData, onChange, a
             type="email"
             value={formData.email}
             onChange={(e) => onChange('email', e.target.value)}
-            placeholder="jean.dupont@example.com"
+            placeholder="user@example.com"
             required
+            className="
+    transition-all duration-200
+    hover:border-luxe-blue/30
+    focus:scale-[1.01]
+    bg-white text-black border-gray-300
+    dark:bg-gray-900 dark:text-white dark:border-gray-700
+    dark:placeholder-gray-400
+    focus:outline-none focus:ring-2 focus:ring-luxe-blue/50
+    dark:focus:ring-luxe-blue/30
+  "
           />
         </div>
       </div>
@@ -48,27 +68,52 @@ const UserGeneralForm: React.FC<UserGeneralFormProps> = ({ formData, onChange, a
             id="phone"
             value={formData.phone}
             onChange={(e) => onChange('phone', e.target.value)}
-            placeholder="+33 6 12 34 56 78"
+            placeholder="+212 6 12 34 56 78"
+            className="
+    transition-all duration-200
+    hover:border-luxe-blue/30
+    focus:scale-[1.01]
+    bg-white text-black border-gray-300
+    dark:bg-gray-900 dark:text-white dark:border-gray-700
+    dark:placeholder-gray-400
+    focus:outline-none focus:ring-2 focus:ring-luxe-blue/50
+    dark:focus:ring-luxe-blue/30
+  "
           />
         </div>
         
         <div className="space-y-2">
           <Label htmlFor="role">Rôle *</Label>
-          <Select
-            value={formData.role}
-            onValueChange={(value) => onChange('role', value)}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Sélectionner un rôle" />
-            </SelectTrigger>
-            <SelectContent>
-              {availableRoles.map((role) => (
-                <SelectItem key={role} value={role}>
-                  {role}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+
+<Select
+  value={String(formData.role_id || "")}  // ✅ Utiliser role_id
+  onValueChange={(value) => onChange('role_id', Number(value))}  // ✅ Convertir en nombre
+>
+  <SelectTrigger className="
+      transition-all duration-200
+      hover:border-luxe-blue/30
+      bg-white text-black border-gray-300
+      dark:bg-gray-900 dark:text-white dark:border-gray-700
+      focus:outline-none focus:ring-2 focus:ring-luxe-blue/50
+      dark:focus:ring-luxe-blue/30
+    ">
+    <SelectValue placeholder="Sélectionner un rôle" />
+  </SelectTrigger>
+   <SelectContent  className="
+      bg-white text-black
+      dark:bg-gray-900 dark:text-white
+      border border-gray-200 dark:border-gray-700
+    ">
+
+    {availableRoles.map((role) => (
+      <SelectItem key={role.id} value={String(role.id)}>
+        {role.name}
+      </SelectItem>
+    ))}
+  </SelectContent>
+</Select>
+
+
         </div>
       </div>
       

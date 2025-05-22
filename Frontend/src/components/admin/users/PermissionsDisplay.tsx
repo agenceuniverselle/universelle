@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Permission, permissionDescriptions } from '@/types/users';
+import { Permission } from '@/types/users';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { CheckCircle2, UserCheck } from 'lucide-react';
 
@@ -38,16 +38,17 @@ const PermissionsDisplay: React.FC<PermissionsDisplayProps> = ({
     };
     
     // Fill groups with user permissions
-    permissions.forEach(perm => {
-      if (perm.startsWith('user.')) groups['Utilisateurs'].push(perm);
-      else if (perm.startsWith('property.')) groups['Biens immobiliers'].push(perm);
-      else if (perm.startsWith('lead.')) groups['Leads & CRM'].push(perm);
-      else if (perm.startsWith('investment.')) groups['Investissements'].push(perm);
-      else if (perm.startsWith('transaction.') || perm === 'finance.manage') groups['Transactions & Finance'].push(perm);
-      else if (perm.startsWith('team.') || perm.startsWith('client.')) groups['Équipes & Clients'].push(perm);
-      else if (perm.startsWith('ticket.')) groups['Support Client'].push(perm);
-      else groups['Système & Administration'].push(perm);
-    });
+   permissions.forEach(perm => {
+  if (perm.name.startsWith('user.')) groups['Utilisateurs'].push(perm);
+  else if (perm.name.startsWith('property.')) groups['Biens immobiliers'].push(perm);
+  else if (perm.name.startsWith('lead.')) groups['Leads & CRM'].push(perm);
+  else if (perm.name.startsWith('investment.')) groups['Investissements'].push(perm);
+  else if (perm.name.startsWith('transaction.') || perm.name === 'finance.manage') groups['Transactions & Finance'].push(perm);
+  else if (perm.name.startsWith('team.') || perm.name.startsWith('client.')) groups['Équipes & Clients'].push(perm);
+  else if (perm.name.startsWith('ticket.')) groups['Support Client'].push(perm);
+  else groups['Système & Administration'].push(perm);
+});
+
     
     // Return only non-empty groups
     return Object.entries(groups)
@@ -73,11 +74,12 @@ const PermissionsDisplay: React.FC<PermissionsDisplayProps> = ({
                 <h4 className="font-medium text-gray-700">{group.name}</h4>
                 <div className="grid grid-cols-1 gap-2">
                   {group.permissions.map(permission => (
-                    <div key={permission} className="flex items-center gap-2 text-sm">
-                      <CheckCircle2 className="h-3.5 w-3.5 text-green-600 flex-shrink-0" />
-                      <span>{permissionDescriptions[permission]}</span>
-                    </div>
-                  ))}
+  <div key={permission.id} className="flex items-center gap-2 text-sm">
+    <CheckCircle2 className="h-3.5 w-3.5 text-green-600 flex-shrink-0" />
+    <span>{permission.description ?? permission.name}</span>
+  </div>
+))}
+
                 </div>
               </div>
             ))}

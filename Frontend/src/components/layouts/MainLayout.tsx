@@ -24,18 +24,22 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
                 Agence Universelle d'Investissement Immobilier - Votre partenaire de confiance pour l'investissement immobilier au Maroc.
               </p>
               <div className="flex space-x-4 mt-4">
-                <a href="#" className="text-gray-500 hover:text-blue-600 transition-colors">
+                <a href="https://www.facebook.com/share/1QrqWhazuq/?mibextid=qi2Omg" className="text-gray-500 hover:text-blue-600 transition-colors">
                   <Facebook size={20} />
                 </a>
-                <a href="#" className="text-gray-500 hover:text-pink-600 transition-colors">
+                <a href="https://www.instagram.com/agenceuniverselle/" className="text-gray-500 hover:text-pink-600 transition-colors">
                   <Instagram size={20} />
                 </a>
-                <a href="#" className="text-gray-500 hover:text-blue-500 transition-colors">
+                <a href="https://www.linkedin.com/company/agence-universelle/" className="text-gray-500 hover:text-blue-500 transition-colors">
                   <Linkedin size={20} />
                 </a>
-                <a href="#" className="text-gray-500 hover:text-blue-400 transition-colors">
-                  <Twitter size={20} />
-                </a>
+                <a href="https://x.com/agenceuniver" className="w-6 h-6 hover:opacity-80 transition" aria-label="X (ancien Twitter)">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="20" height="20">
+      <polygon fill="#616161" points="41,6 9.929,42 6.215,42 37.287,6" />
+      <polygon fill="#fff" fillRule="evenodd" points="31.143,41 7.82,7 16.777,7 40.1,41" clipRule="evenodd" />
+      <path fill="#616161" d="M15.724,9l20.578,30h-4.106L11.618,9H15.724 M17.304,6H5.922l24.694,36h11.382L17.304,6L17.304,6z" />
+    </svg>
+  </a>
               </div>
             </div>
             <div>
@@ -60,10 +64,10 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
             <div>
               <h3 className="font-bold text-lg mb-4">Contact</h3>
               <address className="not-italic text-sm text-gray-600 space-y-2">
-                <p>123 Avenue Mohammed V</p>
-                <p>Casablanca, Maroc</p>
-                <p>Email: contact@agenceuniverselle.com</p>
-                <p>Tel: +212 522 123 456</p>
+                <p> IMM17 N°9 Touzine, Complexe Bayt Laatik, Tanger 90000</p>
+                <p>Tanger, Maroc</p>
+                <p>Email:contact@universelle.ma</p>
+                <p>Tel: +212 808604195</p>
               </address>
             </div>
           </div>

@@ -1,5 +1,7 @@
-
-import React from 'react';
+import React, { useState } from 'react';
+import axios from 'axios';
+import { toast } from "@/hooks/use-toast";
+import { CheckCircle, XCircle } from "lucide-react";
 
 interface FormData {
   name: string;
@@ -9,20 +11,73 @@ interface FormData {
   message: string;
   purpose: string;
 }
-
 interface ContactFormFieldsProps {
-  formData: FormData;
-  loading: boolean;
-  handleChange: (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => void;
-  handleSubmit: (e: React.FormEvent) => void;
+  onSuccess: () => void;
 }
 
-const ContactFormFields: React.FC<ContactFormFieldsProps> = ({
-  formData,
-  loading,
-  handleChange,
-  handleSubmit,
-}) => {
+const ContactFormFields: React.FC<ContactFormFieldsProps> = ({ onSuccess }) => {
+  
+  const [formData, setFormData] = useState<FormData>({
+    name: '',
+    email: '',
+    phone: '',
+    budget: '',
+    message: '',
+    purpose: '',
+  });
+
+  const [loading, setLoading] = useState(false);
+
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
+  ) => {
+    setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      const response = await axios.post('/api/vip-contact', formData);
+
+      toast({
+        title: "Succès",
+        description: (
+          <div className="flex items-center gap-2">
+            <CheckCircle className="text-green-500 w-5 h-5" />
+            <span>Votre message a bien été envoyé.</span>
+          </div>
+        ),
+        duration: 3000,
+      });
+      onSuccess(); 
+
+      // Reset form
+      setFormData({
+        name: '',
+        email: '',
+        phone: '',
+        budget: '',
+        message: '',
+        purpose: '',
+      });
+    } catch (err) {
+      toast({
+        title: "Erreur",
+        description: (
+          <div className="flex items-center gap-2">
+            <XCircle className="text-red-500 w-5 h-5" />
+            <span>Une erreur est survenue.</span>
+          </div>
+        ),
+        variant: "destructive",
+        duration: 3000,
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <form onSubmit={handleSubmit}>
       <div className="space-y-6">
@@ -41,7 +96,7 @@ const ContactFormFields: React.FC<ContactFormFieldsProps> = ({
             required
           />
         </div>
-        
+
         <div>
           <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
             Email *
@@ -57,7 +112,7 @@ const ContactFormFields: React.FC<ContactFormFieldsProps> = ({
             required
           />
         </div>
-        
+
         <div>
           <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">
             Téléphone *
@@ -73,7 +128,7 @@ const ContactFormFields: React.FC<ContactFormFieldsProps> = ({
             required
           />
         </div>
-        
+
         <div>
           <label htmlFor="purpose" className="block text-sm font-medium text-gray-700 mb-1">
             Objectif de votre recherche *
@@ -86,12 +141,13 @@ const ContactFormFields: React.FC<ContactFormFieldsProps> = ({
             onChange={handleChange}
             required
           >
+                        <option value="" disabled>Sélectionnez votre Objectif</option>
             <option value="information">Demande d'informations générales</option>
             <option value="purchase">Achat d'un bien immobilier</option>
             <option value="investment">Investissement immobilier</option>
           </select>
         </div>
-        
+
         <div>
           <label htmlFor="budget" className="block text-sm font-medium text-gray-700 mb-1">
             Budget d&apos;investissement *
@@ -105,13 +161,13 @@ const ContactFormFields: React.FC<ContactFormFieldsProps> = ({
             required
           >
             <option value="" disabled>Sélectionnez votre budget</option>
-            <option value="100-300k">100,000€ - 300,000€</option>
-            <option value="300-500k">300,000€ - 500,000€</option>
-            <option value="500-1M">500,000€ - 1,000,000€</option>
-            <option value="1M+">Plus de 1,000,000€</option>
+            <option value="100-300k">100,000€ - 300,000 MAD</option>
+            <option value="300-500k">300,000€ - 500,000 MAD</option>
+            <option value="500-1M">500,000€ - 1,000,000 MAD</option>
+            <option value="1M+">Plus de 1,000,000 MAD</option>
           </select>
         </div>
-        
+
         <div>
           <label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-1">
             Message (optionnel)
@@ -126,7 +182,7 @@ const ContactFormFields: React.FC<ContactFormFieldsProps> = ({
             onChange={handleChange}
           />
         </div>
-        
+
         <div className="pt-4">
           <button
             type="submit"
@@ -143,7 +199,7 @@ const ContactFormFields: React.FC<ContactFormFieldsProps> = ({
                 Envoi en cours...
               </>
             ) : (
-              "Recevoir mon plan"
+              "Envoyer"
             )}
           </button>
         </div>

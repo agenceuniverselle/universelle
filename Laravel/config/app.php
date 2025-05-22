@@ -185,5 +185,6 @@ return [
         // 'Example' => App\Facades\Example::class,
         'Image' => 'Intervention\Image\Facades\Image', // Ajouter ici
     ])->toArray(),
+    
 
 ];

@@ -54,39 +54,33 @@ const WhyChooseUs = () => {
             </div>
           ))}
         </div>
-
-        {/* Testimonial preview */}
-        <div className="mt-16 text-center">
-          <p className="italic text-xl font-playfair text-gray-700 max-w-3xl mx-auto">
-            "L'investissement au Maroc a été la meilleure décision financière de ma vie. Le retour sur investissement a dépassé toutes mes attentes."
-          </p>
-          <div className="mt-4">
-            <span className="font-medium text-luxe-blue">Jean Dupont</span>
-            <span className="text-gray-500"> — Investisseur depuis 2019</span>
-          </div>
-          <a 
-            href="#testimonials" 
-            className="mt-6 inline-block text-gold hover:text-gold-dark font-medium transition-colors"
-          >
-            Voir tous les témoignages →
-          </a>
-        </div>
-
         {/* Partners logos */}
         <div className="mt-20">
-          <h3 className="text-center text-gray-400 text-sm uppercase tracking-wider mb-8">Nos partenaires de confiance</h3>
+          <h3 className="text-center text-black-400 text-sm uppercase tracking-wider mb-8">Nos partenaires de confiance</h3>
           <div className="flex flex-wrap justify-center items-center gap-8">
-            <div className="w-32 h-16 flex items-center justify-center">
-              <img 
+            <div className="w-40 h-20 flex items-center justify-center">
+            <img 
                 src="/lovable-uploads/Logo_Small_SVG.svg" 
                 alt="Logo Agence Universelle" 
                 className="max-h-full max-w-full"
               />
             </div>
-            {/* <div className="w-32 h-16 bg-gray-300 rounded flex items-center justify-center">Logo 3</div>
-            <div className="w-32 h-16 bg-gray-300 rounded flex items-center justify-center">Logo 4</div>
-            <div className="w-32 h-16 bg-gray-300 rounded flex items-center justify-center">Logo 5</div>
-           */}
+            <div className="w-40 h-20 flex items-center justify-center"> <img 
+                src="/EXTRAV.png" 
+                alt="Logo EXTRAV" 
+                className="max-h-full max-w-full"
+              /></div>
+            <div className="w-60 h-45 flex items-center justify-center"><img 
+                src="/SINMAT.png" 
+                alt="SINMAT EXTRAV" 
+                className="max-h-full max-w-full"
+              /></div>
+             <div className="w-40 h-25 flex items-center justify-center"><img 
+                src="/sintraS.png" 
+                alt="sintraS EXTRAV" 
+                className="max-h-full max-w-full"
+              /></div>
+           
           </div>
         </div>
       </div>

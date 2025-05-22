@@ -120,9 +120,13 @@ export const UserProfileDialog: React.FC<UserProfileDialogProps> = ({
               <div className="text-center">
                 <h3 className="text-xl font-semibold">{user.name}</h3>
                 <div className="flex justify-center gap-2 mt-2">
-                  <Badge variant="outline" className={getRoleColor(user.role)}>
-                    {user.role}
-                  </Badge>
+               {user.role && (
+  <Badge variant="outline" className={getRoleColor(user.role.name)}>
+    {user.role.name}
+  </Badge>
+)}
+
+
                   <Badge variant="outline" className={getStatusColor(user.status)}>
                     {user.status}
                   </Badge>
@@ -147,7 +151,7 @@ export const UserProfileDialog: React.FC<UserProfileDialogProps> = ({
                 <CalendarDays className="h-4 w-4 text-gray-500" />
                 <div>
                   <p className="text-sm text-gray-500">Inscrit le</p>
-                  <p>{user.registeredDate}</p>
+                  <p>{user.createdAt}</p>
                 </div>
               </div>
 
@@ -172,7 +176,12 @@ export const UserProfileDialog: React.FC<UserProfileDialogProps> = ({
           </TabsContent>
           
           <TabsContent value="permissions">
-            <PermissionsDisplay permissions={user.permissions || []} />
+<PermissionsDisplay
+  permissions={(user.permissions || []).map((name, index) => ({
+    id: index,
+    name,
+  }))}
+/>
           </TabsContent>
           
           <TabsContent value="security">

@@ -5,6 +5,7 @@ import BlogTab from './tabs/BlogTab';
 import TestimonialsTab from './tabs/TestimonialsTab';
 import PagesTab from './tabs/PagesTab';
 import { BlogPost } from '@/types/blog.types';
+import { Testimonial } from '@/types/Testimonial';
 
 interface ContentTabsProps {
   blogArticles: BlogPost[];
@@ -15,7 +16,7 @@ interface ContentTabsProps {
   handlePublishToggle: (article: BlogPost) => void;
   handleManageComments: (article: BlogPost) => void;
   confirmDeleteArticle: (articleId: number) => void;
-  testimonials: any[];
+  testimonials: Testimonial[];
   getStatusColor: (status: string) => string;
   renderStars: (rating: number) => JSX.Element;
   getCategoryName: (categoryId: string) => string;
@@ -57,13 +58,7 @@ const ContentTabs: React.FC<ContentTabsProps> = ({
         />
       </TabsContent>
       
-      <TabsContent value="testimonials">
-        <TestimonialsTab 
-          testimonials={testimonials}
-          getStatusColor={getStatusColor}
-          renderStars={renderStars}
-        />
-      </TabsContent>
+    
       
       <TabsContent value="pages">
         <PagesTab />

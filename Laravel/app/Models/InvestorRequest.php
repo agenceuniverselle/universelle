@@ -8,7 +8,8 @@ use Illuminate\Database\Eloquent\Model;
 class InvestorRequest extends Model
 {
     use HasFactory;
-     protected $fillable = [
+
+    protected $fillable = [
         'property_id',
         'montant_investissement',
         'type_participation',
@@ -18,9 +19,11 @@ class InvestorRequest extends Model
         'telephone',
         'nationalite',
         'adresse',
-        'methode_paiement',
-        'piece_identite',
-        'justificatif_domicile',
-        'releve_bancaire',
+        'commentaire',
     ];
+
+    public function property()
+    {
+        return $this->belongsTo(Property::class);
+    }
 }

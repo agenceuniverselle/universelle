@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { User, Role } from '@/types/users';
 import { UserFormValues } from '@/hooks/useUserManagement';
@@ -7,6 +6,7 @@ interface UserStateManagerProps {
   users: User[];
   currentUserRole: Role;
   addUser: (userData: UserFormValues) => Promise<User | undefined>;
+  availableRoles: Role[]; // ✅ Liste des rôles passée dynamiquement
 }
 
 interface UserStateValues {
@@ -27,7 +27,7 @@ interface UserStateValues {
   clearFilters: () => void;
   handleViewActivityLog: (userId: string) => void;
   handleViewProfile: (userId: string) => void;
-  handleEditUser: (userId: string) => void;
+  handleEditUser: (user: User) => void;
   handleUpdateUser: (userId: string, userData: Partial<User>) => void;
   handleAddUser: (userData: UserFormValues) => Promise<void>;
   availableRoles: Role[];
@@ -36,19 +36,22 @@ interface UserStateValues {
 export const UserStateManager = ({ 
   users, 
   currentUserRole,
-  addUser 
+  addUser,
+  availableRoles // ✅ Utilisation directe
 }: UserStateManagerProps): UserStateValues => {
   // Filter state
   const [searchTerm, setSearchTerm] = useState('');
   const [roleFilter, setRoleFilter] = useState('Tous');
   const [statusFilter, setStatusFilter] = useState('Tous');
-  
+
   // Dialog state
   const [isAddUserDialogOpen, setIsAddUserDialogOpen] = useState(false);
   const [activityLogUser, setActivityLogUser] = useState<{ id: string; name: string } | null>(null);
   const [viewProfileUser, setViewProfileUser] = useState<User | null>(null);
   const [editProfileUser, setEditProfileUser] = useState<User | null>(null);
-
+ //EDIT
+ const [selectedUser, setSelectedUser] = useState<User | null>(null);
+ const [editDialogOpen, setEditDialogOpen] = useState(false);
   // Handler functions
   const clearFilters = () => {
     setSearchTerm('');
@@ -70,31 +73,21 @@ export const UserStateManager = ({
     }
   };
 
-  const handleEditUser = (userId: string) => {
-    const user = users.find(u => u.id === userId);
-    if (user) {
-      setEditProfileUser(user);
-    }
-  };
+  const handleEditUser = (user: User) => {
+  setSelectedUser(user);
+  setEditDialogOpen(true);
+};
 
   const handleUpdateUser = (userId: string, userData: Partial<User>) => {
-    // This is just a placeholder as the actual update is handled in the parent component
     const user = users.find(u => u.id === userId);
-    
     if (user && userData.role && userData.role !== user.role) {
-      // Logic is handled by the parent component
+      // La logique de mise à jour réelle est gérée par le composant parent
     }
   };
 
   const handleAddUser = async (userData: UserFormValues): Promise<void> => {
     await addUser(userData);
   };
-
-  // Available roles based on current user role
-  const availableRoles: Role[] = 
-    currentUserRole === 'Super Admin' 
-      ? ['Super Admin', 'Administrateur', 'Commercial', 'Gestionnaire CRM', 'Investisseur', 'Acheteur']
-      : ['Commercial', 'Gestionnaire CRM', 'Investisseur', 'Acheteur'];
 
   return {
     searchTerm,
@@ -117,6 +110,6 @@ export const UserStateManager = ({
     handleEditUser,
     handleUpdateUser,
     handleAddUser,
-    availableRoles
+    availableRoles // ✅ Liste dynamique
   };
 };

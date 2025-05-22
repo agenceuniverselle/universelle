@@ -2,42 +2,53 @@
 
 namespace App\Http\Controllers;
 
+
+use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\InvestorRequest;
 
 class InvestorRequestController extends Controller
 {
-    public function store($id, Request $request) // <-- $id doit venir en premier ici
+    //Afficher 
+       public function index()
     {
-        \Log::info('Received property ID: ' . $id);
+        $investorRequests = InvestorRequest::all();
 
-    // Check if the request contains all necessary data
-    \Log::info('Request data: ', $request->all());
+        return response()->json([
+            'data' => $investorRequests,
+        ], 200);
+    }
+     //Afficher un investisseur par ID
+    public function show($id)
+    {
+        $investorRequest = InvestorRequest::find($id);
+
+        if (!$investorRequest) {
+            return response()->json([
+                'message' => 'Investisseur non trouvé.'
+            ], 404);
+        }
+
+        return response()->json($investorRequest, 200);
+    }
+    //stocker avec id property not obligatoire
+     public function storeprospect(Request $request)
+    {
         $validated = $request->validate([
             'montant_investissement' => 'required|string',
             'type_participation' => 'required|string',
             'prenom' => 'required|string|max:255',
             'nom' => 'required|string|max:255',
-            'email' => 'required|email|max:255',
-            'telephone' => 'required|string|max:20',
+            'email' => 'required|email|unique:investor_requests,email',
+            'telephone' => 'required|string',
             'nationalite' => 'required|string',
-            'adresse' => 'required|string',
-            'methode_paiement' => 'required|string',
-            'piece_identite' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:2048',
-            'justificatif_domicile' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:2048',
-            'releve_bancaire' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:2048',
+            'adresse' => 'nullable|string',
+            'commentaire' => 'nullable|string',
+            'property_id' => 'nullable|exists:properties,id', // Optionnel pour les prospects
         ]);
 
-        $paths = [];
-
-        foreach (['piece_identite', 'justificatif_domicile', 'releve_bancaire'] as $field) {
-            if ($request->hasFile($field)) {
-                $paths[$field] = $request->file($field)->store('investor_docs', 'public');
-            }
-        }
-
-        $investorRequest = InvestorRequest::create([
-            'property_id' => $id, // <-- ici on utilise l'id reçu depuis la route
+        $prospect = InvestorRequest::create([
+            'property_id' => $validated['property_id'] ?? null, // Peut être null
             'montant_investissement' => $validated['montant_investissement'],
             'type_participation' => $validated['type_participation'],
             'prenom' => $validated['prenom'],
@@ -45,16 +56,87 @@ class InvestorRequestController extends Controller
             'email' => $validated['email'],
             'telephone' => $validated['telephone'],
             'nationalite' => $validated['nationalite'],
-            'adresse' => $validated['adresse'],
-            'methode_paiement' => $validated['methode_paiement'],
-            'piece_identite' => $paths['piece_identite'] ?? null,
-            'justificatif_domicile' => $paths['justificatif_domicile'] ?? null,
-            'releve_bancaire' => $paths['releve_bancaire'] ?? null,
+            'adresse' => $validated['adresse'] ?? null,
+            'commentaire' => $validated['commentaire'] ?? null,
         ]);
 
         return response()->json([
-            'message' => 'Demande enregistrée avec succès',
-            'data' => $investorRequest,
+            'message' => 'Prospect ajouté avec succès.',
+            'data' => $prospect,
+        ], 201);
+    }
+
+    //Stocker
+    public function store(Request $request, $propertyId)
+    {
+        $validated = $request->validate([
+            'montant_investissement' => 'required|string',
+            'type_participation' => 'required|string',
+            'prenom' => 'required|string|max:255',
+            'nom' => 'required|string|max:255',
+            'email' => 'required|email',
+            'telephone' => 'required|string',
+            'nationalite' => 'required|string',
+            'adresse' => 'required|string',
+            'commentaire' => 'nullable|string',
         ]);
+
+        $investorRequest = InvestorRequest::create([
+            'property_id' => $propertyId,
+            ...$validated
+        ]);
+
+        return response()->json([
+            'message' => 'Demande enregistrée avec succès.',
+            'data' => $investorRequest,
+        ], 201);
+    }
+    //update 
+    public function update(Request $request, $id)
+{
+    $investorRequest = InvestorRequest::find($id);
+
+    if (!$investorRequest) {
+        return response()->json([
+            'message' => 'Demande non trouvée.'
+        ], 404);
+    }
+
+    $validated = $request->validate([
+        'montant_investissement' => 'required|string',
+        'type_participation' => 'required|string',
+        'prenom' => 'required|string|max:255',
+        'nom' => 'required|string|max:255',
+        'email' => 'required|email',
+        'telephone' => 'required|string',
+        'nationalite' => 'nullable|string',
+        'adresse' => 'nullable|string',
+        'commentaire' => 'nullable|string',
+    ]);
+
+    $investorRequest->update($validated);
+
+    return response()->json([
+        'message' => 'Demande mise à jour avec succès.',
+        'data' => $investorRequest,
+    ], 200);
+}
+
+    //Supprimer
+     public function destroy($id)
+    {
+        $investorRequest = InvestorRequest::find($id);
+
+        if (!$investorRequest) {
+            return response()->json([
+                'message' => 'Demande non trouvée.'
+            ], 404);
+        }
+
+        $investorRequest->delete();
+
+        return response()->json([
+            'message' => 'Demande supprimée avec succès.'
+        ], 200);
     }
 }

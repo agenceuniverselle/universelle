@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('properties', function (Blueprint $table) {
             $table->id(); // ID du bien
             $table->string('title');  // Titre du bien
-            $table->enum('type', ['Appartement', 'Villa','Maison','Riad','Bureau','Commerce','Terrain','Immeuble','Complexe','Autre']);  // Type de bien (résidentiel, commercial, etc.)
+            $table->string('type');
             $table->decimal('price', 15, 2);  // Prix du bien en MAD
             $table->enum('status', ['Disponible', 'Réservé','Vendu']);  // Statut du bien
             $table->string('location');  // Localisation du bien

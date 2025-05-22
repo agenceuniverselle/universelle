@@ -12,7 +12,11 @@ import * as z from 'zod';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Check, Download, XCircle } from 'lucide-react';
 import { Property } from '@/context/PropertiesContext';
+import { Bien } from '@/context/BiensContext';
+import axios from 'axios';
+
 import { useLeads, LeadProvider } from '@/context/LeadContext';
+import { generateOfferRecap } from '@/lib/generateOfferRecap';
 
 // Form schema for validation
 const formSchema = z.object({
@@ -33,7 +37,7 @@ type FormValues = z.infer<typeof formSchema>;
 interface MakeOfferDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  property: Property;
+  bien: Bien;
 }
 
 // Wrap the content in this component to provide the LeadContext
@@ -46,7 +50,7 @@ const MakeOfferDialogWithLeadContext = (props: MakeOfferDialogProps) => {
 };
 
 // Main component content
-const MakeOfferDialogContent = ({ open, onOpenChange, property }: MakeOfferDialogProps) => {
+const MakeOfferDialogContent = ({ open, onOpenChange,bien }: MakeOfferDialogProps) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const { addLead } = useLeads();
@@ -66,39 +70,43 @@ const MakeOfferDialogContent = ({ open, onOpenChange, property }: MakeOfferDialo
     },
   });
   
-  function onSubmit(data: FormValues) {
-    setIsSubmitting(true);
-    
-    // Create lead in CRM as an "Acheteur"
+  const onSubmit = async (data: FormValues) => {
+    setIsSubmitting(true);    
     try {
-      addLead({
-        name: `${data.firstName} ${data.lastName}`,
+      await axios.post('/api/offers', {
+        bien_id: bien.id,
+        first_name: data.firstName,
+        last_name: data.lastName,
         email: data.email,
         phone: data.phone,
-        budget: `${data.offer} MAD`,
-        status: 'Qualifié', // They are qualified since they made an offer
-        source: 'Formulaire d\'offre',
-        notes: `Mode de financement: ${data.financing === 'cash' ? 'Comptant' : data.financing === 'mortgage' ? 'Crédit bancaire' : 'Autre'}. Message: ${data.message || 'Aucun'}`
-      }, 'Acheteur', `Offre sur: ${property.title} (${property.price}). Offre proposée: ${data.offer} MAD`);
-      
+        offer: data.offer,
+        financing: data.financing,
+        message: data.message
+      });
+      await generateOfferRecap({
+        firstName: data.firstName,
+        lastName: data.lastName,
+        email: data.email,
+        phone: data.phone,
+        offer: data.offer,
+        financing: data.financing,
+        message: data.message,
+        bienTitle: bien.title,
+        bienPrice: bien.price
+      });
       console.log('Offre soumise - Lead ajouté au CRM comme Acheteur');
     } catch (error) {
       console.error('Erreur lors de l\'ajout du lead:', error);
     }
     
     // Simulate submission with timeout
-    setTimeout(() => {
-      setIsSubmitting(false);
-      setIsSuccess(true);
-      
-      // Reset form after 3 seconds and close modal
-      setTimeout(() => {
-        form.reset();
-        setIsSuccess(false);
-        onOpenChange(false);
-      }, 3000);
-    }, 1500);
+setTimeout(() => {
+  setIsSubmitting(false);
+  setIsSuccess(true);
+}, 1500);
+
   }
+ 
   
   const handleClose = () => {
     if (!isSubmitting) {
@@ -116,7 +124,7 @@ const MakeOfferDialogContent = ({ open, onOpenChange, property }: MakeOfferDialo
             <DialogHeader>
               <DialogTitle>Faire une offre</DialogTitle>
               <DialogDescription>
-                Soumettez votre offre pour {property.title}
+                Soumettez votre offre pour {bien.title}
               </DialogDescription>
             </DialogHeader>
             
@@ -126,9 +134,9 @@ const MakeOfferDialogContent = ({ open, onOpenChange, property }: MakeOfferDialo
                   <div className="md:col-span-2">
                     <div className="p-4 bg-gray-50 rounded-lg mb-4">
                       <h3 className="font-medium text-gray-900">Détails du bien</h3>
-                      <p className="text-sm text-gray-600">{property.title}</p>
-                      <p className="text-sm text-gray-600">{property.location}</p>
-                      <p className="text-sm font-semibold text-gray-900">Prix affiché: {property.price}</p>
+                      <p className="text-sm text-gray-600">{bien.title}</p>
+                      <p className="text-sm text-gray-600">{bien.location}</p>
+                      <p className="text-sm font-semibold text-gray-900">Prix affiché: {bien.price}</p>
                     </div>
                   </div>
                   
@@ -316,10 +324,26 @@ const MakeOfferDialogContent = ({ open, onOpenChange, property }: MakeOfferDialo
               <Button variant="outline" className="mr-2" onClick={handleClose}>
                 Fermer
               </Button>
-              <Button className="bg-luxe-blue hover:bg-luxe-blue/90">
-                <Download className="h-4 w-4 mr-2" />
-                Télécharger récapitulatif
-              </Button>
+              <Button
+  className="bg-luxe-blue hover:bg-luxe-blue/90"
+  onClick={() => {
+    generateOfferRecap({
+      firstName: form.getValues('firstName'),
+      lastName: form.getValues('lastName'),
+      email: form.getValues('email'),
+      phone: form.getValues('phone'),
+      offer: form.getValues('offer'),
+      financing: form.getValues('financing'),
+      message: form.getValues('message'),
+      bienTitle: bien.title,
+      bienPrice: bien.price,
+    });
+  }}
+>
+  <Download className="h-4 w-4 mr-2" />
+  Télécharger récapitulatif
+</Button>
+
             </div>
           </div>
         )}

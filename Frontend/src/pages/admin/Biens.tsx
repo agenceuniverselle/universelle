@@ -9,36 +9,40 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Command, CommandInput, CommandEmpty, CommandGroup, CommandItem, CommandList } from '@/components/ui/command';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { MoreHorizontal, Plus, Search, Building, Filter, Loader2, X, MapPin, Euro, Home, Calendar, Check, Eye, Pencil, Trash, FileText, FileDown, Printer, Download, AlertCircle, Power } from 'lucide-react';
+import { MoreHorizontal, Plus, Search, Building, Filter, Loader2, X, MapPin, Coins , Home, Calendar, Check, Eye, Pencil, Trash, FileText, FileDown, Printer, Download, AlertCircle, Power } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import AddPropertyDialog from '@/components/properties/AddPropertyDialog';
 import { toast } from "@/hooks/use-toast";
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-import { exportToCsv, exportToPdf, printProperties } from '@/utils/exportUtils';
-import { useProperties } from '@/context/PropertiesContext';
+import { exportToXlsx , exportToPdf, printProperties } from '@/utils/exportUtils';
+import { Bien, useBiens } from '@/context/BiensContext';
+import { Property } from '@/context/PropertiesContext';
+import AddPropertyDialog from '@/components/properties/AddBienDialog';
+import axios from 'axios';
+import { useAuth } from '@/context/AuthContext'; // ✅ Importer AuthContext
 
 const AdminBiens = () => {
   const [isAddingProperty, setIsAddingProperty] = useState(false);
   const [addPropertyOpen, setAddPropertyOpen] = useState(false);
-  const [propertyToDelete, setPropertyToDelete] = useState<string | null>(null);
+  const [bienToDelete, setPropertyToDelete] = useState<string | null>(null);
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
-  const [isExporting, setIsExporting] = useState<'csv' | 'pdf' | 'print' | null>(null);
+  const [isExporting, setIsExporting] = useState<'csv' | 'pdf' | 'print' | 'xlsx' | null>(null);
   const [isPublishing, setIsPublishing] = useState(false);
   const [publishPropertyId, setPublishPropertyId] = useState<string | null>(null);
   const [publishConfirmOpen, setPublishConfirmOpen] = useState(false);
   const navigate = useNavigate();
+  const { permissions } = useAuth(); // ✅ Récupérer les permissions de l'utilisateur connecté
 
-  const { properties, removeProperty, publishProperty } = useProperties();
+  const { biens: properties, loading, error, removeBien: removeProperty, publishBien: publishProperty } = useBiens();
 
   const [searchTerm, setSearchTerm] = useState('');
-  const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [searchResults, setSearchResults] = useState<Property[]>([]);
   const [showSearchResults, setShowSearchResults] = useState(false);
   const [activeTab, setActiveTab] = useState('all');
-  const [filteredProperties, setFilteredProperties] = useState<any[]>([]);
+  const [filteredProperties, setFilteredProperties] = useState<Bien[]>([]);
   const [recentSearches, setRecentSearches] = useState<string[]>([]);
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const [advancedFiltersOpen, setAdvancedFiltersOpen] = useState(false);
@@ -50,6 +54,12 @@ const AdminBiens = () => {
     city: '',
   });
 
+  // ✅ Permissions
+  const canViewProperties = permissions.includes("view_properties");
+  const canCreateProperties = permissions.includes("create_properties");
+  const canEditProperties = permissions.includes("edit_properties");
+  const canDeleteProperties = permissions.includes("delete_properties");
+  const canExportProperties = permissions.includes("export_properties");
   useEffect(() => {
     let filtered = [...properties];
     
@@ -62,45 +72,45 @@ const AdminBiens = () => {
       };
 
       if (activeTab === 'draft') {
-        filtered = filtered.filter(property => property.isDraft === statusMap[activeTab]);
+        filtered = filtered.filter(bien => bien.isDraft === statusMap[activeTab]);
       } else {
-        filtered = filtered.filter(property => 
-          property.status === statusMap[activeTab] && !property.isDraft
+        filtered = filtered.filter(bien => 
+          bien.status === statusMap[activeTab] && !bien.isDraft
         );
       }
     }
     
     if (searchTerm) {
       const lowercasedTerm = searchTerm.toLowerCase();
-      filtered = filtered.filter(property => 
-        property.id.toLowerCase().includes(lowercasedTerm) ||
-        property.title.toLowerCase().includes(lowercasedTerm) ||
-        property.location.toLowerCase().includes(lowercasedTerm) ||
-        property.type.toLowerCase().includes(lowercasedTerm)
+      filtered = filtered.filter(bien => 
+        String(bien.id).toLowerCase().includes(lowercasedTerm) ||
+        bien.title.toLowerCase().includes(lowercasedTerm) ||
+        bien.location.toLowerCase().includes(lowercasedTerm) ||
+        bien.type.toLowerCase().includes(lowercasedTerm)
       );
     }
     
     if (filters.type) {
-      filtered = filtered.filter(property => property.type === filters.type);
+      filtered = filtered.filter(bien => bien.type === filters.type);
     }
     
     if (filters.city) {
-      filtered = filtered.filter(property => property.location.includes(filters.city));
+      filtered = filtered.filter(bien => bien.location.includes(filters.city));
     }
     
     if (filters.minBedrooms) {
-      filtered = filtered.filter(property => {
-        const bedroomCount = typeof property.bedrooms === 'string' 
-          ? parseInt(property.bedrooms, 10) 
-          : property.bedrooms;
+      filtered = filtered.filter(bien => {
+        const bedroomCount = typeof bien.bedrooms === 'string' 
+          ? parseInt(bien.bedrooms, 10) 
+          : bien.bedrooms;
         
         return !isNaN(bedroomCount) && bedroomCount >= parseInt(filters.minBedrooms);
       });
     }
     
     if (filters.minPrice || filters.maxPrice) {
-      filtered = filtered.filter(property => {
-        const numPrice = parseInt(property.price.replace(/[^\d]/g, ''));
+      filtered = filtered.filter(bien => {
+        const numPrice = parseInt(bien.price.replace(/[^\d]/g, ''));
         if (filters.minPrice && filters.maxPrice) {
           return numPrice >= parseInt(filters.minPrice) && numPrice <= parseInt(filters.maxPrice);
         } else if (filters.minPrice) {
@@ -115,24 +125,44 @@ const AdminBiens = () => {
     setFilteredProperties(filtered);
   }, [properties, activeTab, searchTerm, filters]);
 
-  useEffect(() => {
-    if (searchTerm.length < 2) {
-      setSearchResults([]);
-      setShowSearchResults(false);
-      return;
+ useEffect(() => {
+  let filtered = properties.map((bien) => ({
+    ...bien,
+    bedrooms: typeof bien.bedrooms === 'string' ? parseInt(bien.bedrooms) : bien.bedrooms,
+    bathrooms: typeof bien.bathrooms === 'string' ? parseInt(bien.bathrooms) : bien.bathrooms,
+  }));
+
+  if (activeTab !== 'all') {
+    const statusMap: Record<string, string | boolean> = {
+      'available': 'Disponible',
+      'reserved': 'Réservé',
+      'sold': 'Vendu',
+      'draft': true,
+    };
+
+    if (activeTab === 'draft') {
+      filtered = filtered.filter((bien) => bien.isDraft === statusMap[activeTab]);
+    } else {
+      filtered = filtered.filter(
+        (bien) => bien.status === statusMap[activeTab] && !bien.isDraft
+      );
     }
-    
-    const term = searchTerm.toLowerCase();
-    const results = properties.filter(property => 
-      property.id.toLowerCase().includes(term) ||
-      property.title.toLowerCase().includes(term) ||
-      property.location.toLowerCase().includes(term) ||
-      property.type.toLowerCase().includes(term)
-    ).slice(0, 5);
-    
-    setSearchResults(results);
-    setShowSearchResults(true);
-  }, [searchTerm, properties]);
+  }
+
+  if (searchTerm) {
+    const lowercasedTerm = searchTerm.toLowerCase();
+    filtered = filtered.filter(
+      (bien) =>
+        String(bien.id).toLowerCase().includes(lowercasedTerm) ||
+        bien.title.toLowerCase().includes(lowercasedTerm) ||
+        bien.location.toLowerCase().includes(lowercasedTerm) ||
+        bien.type.toLowerCase().includes(lowercasedTerm)
+    );
+  }
+
+  setFilteredProperties(filtered);
+}, [properties, activeTab, searchTerm, filters]);
+
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value);
@@ -143,7 +173,7 @@ const AdminBiens = () => {
     setShowSearchResults(false);
   };
 
-  const selectSearchResult = (result: any) => {
+  const selectSearchResult = (result: Property) => {
     setSearchTerm(result.title);
     setShowSearchResults(false);
     
@@ -164,7 +194,7 @@ const AdminBiens = () => {
   const handleTabChange = (value: string) => {
     setActiveTab(value);
     
-    const contentElement = document.querySelector('.property-content');
+    const contentElement = document.querySelector('.bien-content');
     if (contentElement) {
       contentElement.classList.remove('animate-in');
       void (contentElement as HTMLElement).offsetWidth; // Fix: Cast to HTMLElement to access offsetWidth
@@ -209,11 +239,11 @@ const AdminBiens = () => {
     }
   };
 
-  const getStatusDisplay = (property: any) => {
-    if (property.isDraft) {
+  const getStatusDisplay = (bien: Property) => {
+    if (bien.isDraft) {
       return "Brouillon";
     }
-    return property.status;
+    return bien.status;
   };
 
   const handleAddProperty = () => {
@@ -224,7 +254,7 @@ const AdminBiens = () => {
     }, 300);
   };
 
-  const handlePropertyAdded = (propertyId: string) => {
+  const handlePropertyAdded = (bienId: string) => {
     setAddPropertyOpen(false);
     toast({
       title: "Bien ajouté avec succès",
@@ -233,18 +263,18 @@ const AdminBiens = () => {
     });
   };
 
-  const handleViewDetails = (propertyId: string) => {
-    const rowElement = document.getElementById(`property-row-${propertyId}`);
+  const handleViewDetails = (bienId: string) => {
+    const rowElement = document.getElementById(`bien-row-${bienId}`);
     if (rowElement) {
       rowElement.classList.add('bg-blue-50', 'transition-colors', 'duration-300');
     }
     
     setTimeout(() => {
-      navigate(`/admin/biens/${propertyId}`);
+      navigate(`/admin/biens/${bienId}`);
     }, 150);
   };
 
-  const handleEditProperty = (propertyId: string) => {
+  const handleEditProperty = (bienId: string) => {
     toast({
       title: "Mode édition",
       description: "Chargement du formulaire d'édition...",
@@ -252,42 +282,59 @@ const AdminBiens = () => {
     });
     
     setTimeout(() => {
-      navigate(`/admin/biens/edit/${propertyId}`);
+      navigate(`/admin/biens/edit/${bienId}`);
     }, 300);
   };
 
-  const confirmDelete = (propertyId: string) => {
-    setPropertyToDelete(propertyId);
+  const confirmDelete = (bienId: string) => {
+    setPropertyToDelete(bienId);
     setDeleteConfirmOpen(true);
   };
 
-  const handleDeleteProperty = () => {
-    if (!propertyToDelete) return;
-    
-    setIsDeleting(true);
-    
-    const rowElement = document.getElementById(`property-row-${propertyToDelete}`);
-    if (rowElement) {
-      rowElement.classList.add('opacity-50', 'scale-98', 'transition-all', 'duration-300');
-    }
-    
-    setTimeout(() => {
-      removeProperty(propertyToDelete);
-      
-      setIsDeleting(false);
-      setDeleteConfirmOpen(false);
-      setPropertyToDelete(null);
-      
+  const handleDeleteProperty = async (id: string | null) => {
+    if (!id) return;
+  
+    try {
+      setIsDeleting(true);
+  
+      const token = localStorage.getItem("access_token"); // ✅ Récupération du token
+      if (!token) {
+        toast({
+          title: "Erreur d'authentification",
+          description: "Votre session a expiré. Veuillez vous reconnecter.",
+          variant: "destructive",
+        });
+        navigate("/login");
+        return;
+      }
+  
+      await axios.delete(`http://localhost:8000/api/biens/${id}`, {
+        headers: {
+          Authorization: `Bearer ${token}`, // ✅ Ajout du token dans les headers
+        },
+      });
+  
       toast({
         title: "Bien supprimé",
-        description: "Le bien a été supprimé avec succès",
-        variant: "default",
+        description: "Le bien a été supprimé avec succès.",
       });
-    }, 500);
+      setDeleteConfirmOpen(false);
+      setPropertyToDelete(null);
+      removeProperty(id);
+    } catch (error) {
+      console.error("Erreur suppression bien :", error);
+      toast({
+        title: "Erreur",
+        description: error.response?.data?.message || "Impossible de supprimer le bien.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsDeleting(false);
+    }
   };
-
-  const confirmPublish = (propertyId: string) => {
-    setPublishPropertyId(propertyId);
+  
+  const confirmPublish = (bienId: string) => {
+    setPublishPropertyId(bienId);
     setPublishConfirmOpen(true);
   };
 
@@ -316,34 +363,9 @@ const AdminBiens = () => {
       setPublishPropertyId(null);
     }, 500);
   };
-
-  const handleExportCSV = () => {
-    setIsExporting('csv');
-    
-    setTimeout(() => {
-      try {
-        exportToCsv(filteredProperties);
-        toast({
-          title: "Export CSV",
-          description: "Fichier CSV généré avec succès",
-          variant: "default",
-        });
-      } catch (error) {
-        console.error("Error exporting to CSV:", error);
-        toast({
-          title: "Erreur",
-          description: "Une erreur est survenue lors de l'exportation",
-          variant: "destructive",
-        });
-      } finally {
-        setIsExporting(null);
-      }
-    }, 500);
-  };
-
   const handleExportPDF = () => {
     setIsExporting('pdf');
-    
+  
     setTimeout(() => {
       try {
         exportToPdf(filteredProperties);
@@ -353,18 +375,40 @@ const AdminBiens = () => {
           variant: "default",
         });
       } catch (error) {
-        console.error("Error exporting to PDF:", error);
+        console.error("Erreur export PDF :", error);
         toast({
           title: "Erreur",
-          description: "Une erreur est survenue lors de l'exportation",
+          description: "Impossible de générer le fichier PDF",
           variant: "destructive",
         });
       } finally {
         setIsExporting(null);
       }
-    }, 500);
+    }, 300);
   };
-
+  
+  const handleExportExcel = () => {
+    setIsExporting('xlsx');
+  
+    setTimeout(() => {
+      try {
+        exportToXlsx(filteredProperties);
+        toast({
+          title: "Export Excel",
+          description: "Fichier .xlsx généré avec succès",
+        });
+      } catch (error) {
+        console.error("Erreur export XLSX :", error);
+        toast({
+          title: "Erreur",
+          description: "Impossible de générer le fichier Excel",
+          variant: "destructive",
+        });
+      } finally {
+        setIsExporting(null);
+      }
+    }, 300);
+  };
   const handlePrint = () => {
     setIsExporting('print');
     
@@ -388,231 +432,146 @@ const AdminBiens = () => {
       }
     }, 500);
   };
+  if (!canViewProperties) {
+    return (
+      <AdminLayout title="Accès refusé">
+        <div className="flex items-center justify-center h-[60vh] text-center">
+          <div className="space-y-4">
+            <h2 className="text-2xl font-semibold">Accès refusé</h2>
+            <p className="text-gray-600">
+              Vous n'avez pas la permission de voir les biens immobiliers.
+            </p>
+            <Button onClick={() => navigate('/admin')}>Retour au tableau de bord</Button>
+          </div>
+        </div>
+      </AdminLayout>
+    );
+  }
 
   return (
     <AdminLayout title="Gestion des biens immobiliers">
       <div className="mb-6">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
           <div className="flex flex-col md:flex-row items-start md:items-center w-full space-y-2 md:space-y-0 md:space-x-2">
-            <div className="relative w-full md:w-96 group">
-              <Popover open={showSearchResults && isSearchFocused} onOpenChange={setShowSearchResults}>
-                <PopoverTrigger asChild>
-                  <div className="relative w-full">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400 group-focus-within:text-luxe-blue transition-colors duration-200" />
-                    <Input 
-                      placeholder="Rechercher par titre, ID, type ou lieu..." 
-                      className="pl-10 pr-10 w-full transition-all duration-200 bg-white focus:ring-2 focus:ring-luxe-blue/20 focus:border-luxe-blue focus:shadow-[0_0_0_2px_rgba(10,37,64,0.05)] focus:scale-[1.01] cursor-text"
-                      value={searchTerm}
-                      onChange={handleSearchChange}
-                      onFocus={() => setIsSearchFocused(true)}
-                      onBlur={() => setTimeout(() => setIsSearchFocused(false), 200)}
-                    />
-                    {searchTerm && (
-                      <button 
-                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors duration-200"
-                        onClick={clearSearch}
-                      >
-                        <X className="h-4 w-4" />
-                      </button>
-                    )}
-                  </div>
-                </PopoverTrigger>
-                <PopoverContent className="p-0 w-[calc(100vw-24px)] md:w-[26rem] shadow-lg animate-in fade-in-0 zoom-in-95">
-                  <Command>
-                    <CommandList>
-                      {searchResults.length > 0 ? (
-                        <CommandGroup heading="Résultats">
-                          {searchResults.map((result) => (
-                            <CommandItem 
-                              key={result.id} 
-                              onSelect={() => selectSearchResult(result)}
-                              className="flex items-center gap-2 py-3 cursor-pointer hover:bg-gray-100"
-                            >
-                              <div className="flex-shrink-0 h-8 w-8 bg-gray-100 rounded-md flex items-center justify-center">
-                                <Building className="h-4 w-4 text-gray-500" />
-                              </div>
-                              <div className="flex flex-col">
-                                <span className="font-medium text-sm">{result.title}</span>
-                                <span className="text-xs text-gray-500 flex items-center">
-                                  <MapPin className="h-3 w-3 mr-1" /> {result.location}
-                                </span>
-                              </div>
-                              <Badge variant="outline" className={getStatusColor(result.status, result.isDraft)}>
-                                {getStatusDisplay(result)}
-                              </Badge>
-                            </CommandItem>
-                          ))}
-                        </CommandGroup>
-                      ) : searchTerm.length >= 2 ? (
-                        <CommandEmpty>Aucun résultat trouvé</CommandEmpty>
-                      ) : recentSearches.length > 0 ? (
-                        <CommandGroup heading="Recherches récentes">
-                          {recentSearches.map((term, index) => (
-                            <CommandItem 
-                              key={index} 
-                              onSelect={() => setSearchTerm(term)}
-                              className="flex items-center py-2 cursor-pointer"
-                            >
-                              <Calendar className="h-3 w-3 mr-2 text-gray-400" />
-                              <span>{term}</span>
-                            </CommandItem>
-                          ))}
-                        </CommandGroup>
-                      ) : null}
-                    </CommandList>
-                  </Command>
-                </PopoverContent>
-              </Popover>
-            </div>
-
-            <Popover open={advancedFiltersOpen} onOpenChange={setAdvancedFiltersOpen}>
-              <PopoverTrigger asChild>
-                <Button 
-                  variant="outline" 
-                  size="icon" 
-                  className={`${Object.values(filters).some(v => v !== '') ? 'bg-luxe-blue text-white hover:bg-luxe-blue/90' : ''} transition-colors duration-200 hover:scale-105 active:scale-95`}
-                >
-                  <Filter className="h-4 w-4" />
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-80 p-4">
-                <div className="space-y-4">
-                  <h3 className="font-medium">Filtres avancés</h3>
-                  
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">Type de bien</label>
-                    <Select value={filters.type} onValueChange={(value) => updateFilter('type', value)}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Tous types" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="">Tous types</SelectItem>
-                        <SelectItem value="Appartement">Appartement</SelectItem>
-                        <SelectItem value="Villa">Villa</SelectItem>
-                        <SelectItem value="Bureau">Bureau</SelectItem>
-                        <SelectItem value="Terrain">Terrain</SelectItem>
-                        <SelectItem value="Riad">Riad</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">Ville</label>
-                    <Select value={filters.city} onValueChange={(value) => updateFilter('city', value)}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Toutes villes" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="">Toutes villes</SelectItem>
-                        <SelectItem value="Casablanca">Casablanca</SelectItem>
-                        <SelectItem value="Rabat">Rabat</SelectItem>
-                        <SelectItem value="Marrakech">Marrakech</SelectItem>
-                        <SelectItem value="Tanger">Tanger</SelectItem>
-                        <SelectItem value="Agadir">Agadir</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">Prix (MAD)</label>
-                    <div className="grid grid-cols-2 gap-2">
-                      <Input 
-                        type="number" 
-                        placeholder="Min" 
-                        value={filters.minPrice}
-                        onChange={(e) => updateFilter('minPrice', e.target.value)}
-                      />
-                      <Input 
-                        type="number" 
-                        placeholder="Max" 
-                        value={filters.maxPrice}
-                        onChange={(e) => updateFilter('maxPrice', e.target.value)}
-                      />
-                    </div>
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">Chambres (min)</label>
-                    <Input 
-                      type="number" 
-                      placeholder="Nombre minimum" 
-                      value={filters.minBedrooms}
-                      onChange={(e) => updateFilter('minBedrooms', e.target.value)}
-                    />
-                  </div>
-                  
-                  <div className="flex justify-between pt-2">
-                    <Button variant="outline" size="sm" onClick={resetFilters}>
-                      Réinitialiser
-                    </Button>
-                    <Button size="sm" onClick={() => setAdvancedFiltersOpen(false)} className="bg-luxe-blue hover:bg-luxe-blue/90">
-                      Appliquer
-                    </Button>
-                  </div>
-                </div>
-              </PopoverContent>
-            </Popover>
-            
-            <div className="hidden md:flex md:ml-2">
-              <ToggleGroup type="single" value={activeTab} onValueChange={value => value && handleTabChange(value)}>
-                <ToggleGroupItem 
-                  value="all" 
-                  aria-label="Tous les biens" 
-                  className="flex items-center gap-1 transition-all duration-200 hover:bg-gray-100 data-[state=active]:scale-[1.02] data-[state=active]:shadow-sm"
-                >
-                  <Home className="h-4 w-4" />
-                  <span className="hidden sm:inline">Tous</span>
-                </ToggleGroupItem>
-                <ToggleGroupItem 
-                  value="draft" 
-                  aria-label="Brouillons" 
-                  className="flex items-center gap-1 transition-all duration-200 hover:bg-amber-50/80 data-[state=active]:bg-amber-50 data-[state=active]:text-amber-700 data-[state=active]:scale-[1.02] data-[state=active]:shadow-sm"
-                >
-                  <AlertCircle className="h-4 w-4" />
-                  <span className="hidden sm:inline">Brouillons</span>
-                </ToggleGroupItem>
-                <ToggleGroupItem 
-                  value="available" 
-                  aria-label="Biens disponibles" 
-                  className="flex items-center gap-1 transition-all duration-200 hover:bg-green-50/80 data-[state=active]:bg-green-50 data-[state=active]:text-green-700 data-[state=active]:scale-[1.02] data-[state=active]:shadow-sm"
-                >
-                  <Check className="h-4 w-4" />
-                  <span className="hidden sm:inline">Disponibles</span>
-                </ToggleGroupItem>
-                <ToggleGroupItem 
-                  value="reserved" 
-                  aria-label="Biens réservés" 
-                  className="flex items-center gap-1 transition-all duration-200 hover:bg-blue-50/80 data-[state=active]:bg-blue-50 data-[state=active]:text-blue-700 data-[state=active]:scale-[1.02] data-[state=active]:shadow-sm"
-                >
-                  <Calendar className="h-4 w-4" />
-                  <span className="hidden sm:inline">Réservés</span>
-                </ToggleGroupItem>
-                <ToggleGroupItem 
-                  value="sold" 
-                  aria-label="Biens vendus" 
-                  className="flex items-center gap-1 transition-all duration-200 hover:bg-gray-50/80 data-[state=active]:bg-gray-50 data-[state=active]:text-gray-700 data-[state=active]:scale-[1.02] data-[state=active]:shadow-sm"
-                >
-                  <Euro className="h-4 w-4" />
-                  <span className="hidden sm:inline">Vendus</span>
-                </ToggleGroupItem>
-              </ToggleGroup>
-            </div>
-          </div>
-          
-          <Button 
-            className={`bg-luxe-blue hover:bg-luxe-blue/90 transition-all duration-300 ${isAddingProperty ? 'opacity-80 scale-95' : ''}`}
-            onClick={handleAddProperty}
-            disabled={isAddingProperty}
+          <div className="relative w-full md:w-96 group">
+  <Popover open={showSearchResults && isSearchFocused} onOpenChange={setShowSearchResults}>
+    <PopoverTrigger asChild>
+      <div className="relative w-full">
+        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400 group-focus-within:text-luxe-blue transition-colors duration-200" />
+        <Input 
+          placeholder="Rechercher par titre, ID, type ou lieu..." 
+          className="bg-white dark:bg-gray-800 text-gray-700 dark:text-white pl-10 pr-10 w-full transition-all duration-200 bg-white focus:ring-2 focus:ring-luxe-blue/20 focus:border-luxe-blue focus:shadow-[0_0_0_2px_rgba(10,37,64,0.05)] focus:scale-[1.01] cursor-text"
+          value={searchTerm}
+          onChange={handleSearchChange}
+          onFocus={() => setIsSearchFocused(true)}
+         // onBlur={() => setTimeout(() => setIsSearchFocused(false), 200)}
+        />
+        {searchTerm && (
+          <button 
+            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors duration-200"
+            onClick={clearSearch}
           >
-            {isAddingProperty ? (
-              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-            ) : (
-              <Plus className="h-4 w-4 mr-2" />
-            )}
-            Ajouter un bien
-          </Button>
+            <X className="h-4 w-4" />
+          </button>
+        )}
+      </div>
+    </PopoverTrigger>
+    <PopoverContent className="p-0 w-[calc(100vw-24px)] md:w-[26rem] shadow-lg animate-in fade-in-0 zoom-in-95">
+      <Command>
+        <CommandList>
+          {searchResults.length > 0 ? (
+            <CommandGroup heading="Résultats">
+              {searchResults.map((result) => (
+                <CommandItem 
+                  key={result.id} 
+                  onSelect={() => selectSearchResult(result)}
+                  className="flex items-center gap-2 py-3 cursor-pointer hover:bg-gray-100"
+                >
+                  <div className="flex-shrink-0 h-8 w-8 bg-gray-100 rounded-md flex items-center justify-center">
+                    <Building className="h-4 w-4 text-gray-500" />
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="font-medium text-sm">{result.title}</span>
+                    <span className="text-xs text-gray-500 flex items-center">
+                      <MapPin className="h-3 w-3 mr-1" /> {result.location}
+                    </span>
+                  </div>
+                  <Badge variant="outline" className={getStatusColor(result.status, result.isDraft)}>
+                    {getStatusDisplay(result)}
+                  </Badge>
+                </CommandItem>
+              ))}
+            </CommandGroup>
+          ) : searchTerm.length >= 2 ? (
+            <CommandEmpty>Aucun résultat trouvé</CommandEmpty>
+          ) : recentSearches.length > 0 ? (
+            <CommandGroup heading="Recherches récentes">
+              {recentSearches.map((term, index) => (
+                <CommandItem 
+                  key={index} 
+                  onSelect={() => setSearchTerm(term)}
+                  className="flex items-center py-2 cursor-pointer"
+                >
+                  <Calendar className="h-3 w-3 mr-2 text-gray-400" />
+                  <span>{term}</span>
+                </CommandItem>
+              ))}
+            </CommandGroup>
+          ) : null}
+        </CommandList>
+      </Command>
+    </PopoverContent>
+  </Popover>
+
+  {/* ✅ ToggleGroup déplacé juste en dessous du champ de recherche */}
+  <div className="mt-3 flex justify-start">
+  <ToggleGroup
+    type="single"
+    value={activeTab}
+    onValueChange={(value) => value && handleTabChange(value)}
+    className="flex gap-3"
+  >
+    <ToggleGroupItem value="all" aria-label="Tous les biens" className="flex items-center gap-1">
+      <Home className="h-4 w-4" />
+      <span className="hidden sm:inline">Tous</span>
+    </ToggleGroupItem>
+    <ToggleGroupItem value="draft" aria-label="Brouillons" className="flex items-center gap-1 text-amber-700">
+      <AlertCircle className="h-4 w-4" />
+      <span className="hidden sm:inline">Brouillons</span>
+    </ToggleGroupItem>
+    <ToggleGroupItem value="available" aria-label="Disponibles" className="flex items-center gap-1 text-green-700">
+      <Check className="h-4 w-4" />
+      <span className="hidden sm:inline">Disponibles</span>
+    </ToggleGroupItem>
+    <ToggleGroupItem value="reserved" aria-label="Réservés" className="flex items-center gap-1 text-blue-700">
+      <Calendar className="h-4 w-4" />
+      <span className="hidden sm:inline">Réservés</span>
+    </ToggleGroupItem>
+    <ToggleGroupItem value="sold" aria-label="Vendus" className="flex items-center gap-1 text-gray-400">
+      <Coins className="h-4 w-4" />
+      <span className="hidden sm:inline ">Vendus</span>
+    </ToggleGroupItem>
+  </ToggleGroup>
+</div>
+</div> 
+</div>
+{permissions.includes("create_properties") && (
+  <Button            
+
+    className={`bg-luxe-blue hover:bg-luxe-blue/90 dark:bg-blue-500 dark:hover:bg-blue-600 ${isAddingProperty ? 'opacity-80 scale-95' : ''}`}
+    onClick={handleAddProperty}
+    disabled={isAddingProperty}
+  >
+    {isAddingProperty ? (
+      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+    ) : (
+      <Plus className="h-4 w-4 mr-2" />
+    )}
+    Ajouter un bien
+  </Button>
+)}
+
         </div>
-        
         <Tabs defaultValue={activeTab} value={activeTab} onValueChange={handleTabChange} className="mb-6 md:hidden">
           <TabsList className="w-full grid grid-cols-5">
             <TabsTrigger value="all" className="transition-all duration-200 hover:bg-gray-100 data-[state=active]:scale-[1.02] data-[state=active]:shadow-sm">Tous</TabsTrigger>
@@ -622,7 +581,6 @@ const AdminBiens = () => {
             <TabsTrigger value="sold" className="text-gray-700 transition-all duration-200 hover:bg-gray-50 data-[state=active]:scale-[1.02] data-[state=active]:shadow-sm">Vendus</TabsTrigger>
           </TabsList>
         </Tabs>
-        
         {(searchTerm || Object.values(filters).some(v => v !== '') || activeTab !== 'all') && (
           <div className="flex justify-between items-center mb-4 text-sm text-gray-600">
             <div>
@@ -635,194 +593,196 @@ const AdminBiens = () => {
             </div>
           </div>
         )}
-        
-        <Card>
+        <Card className="bg-white dark:bg-gray-800 dark:text-gray-100 transition-colors duration-300">
           <CardHeader className="pb-3">
             <div className="flex justify-between items-center">
               <div>
-                <CardTitle>Liste des biens immobiliers</CardTitle>
-                <CardDescription>Gérez votre portfolio de biens immobiliers</CardDescription>
+                <CardTitle className="dark:text-white">Liste des biens immobiliers</CardTitle>
+                <CardDescription className="dark:text-gray-300" >Gérez votre portfolio de biens immobiliers</CardDescription>
               </div>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button 
-                    variant="outline" 
-                    size="sm"
-                    className="flex items-center gap-2 group transition-all duration-200 hover:scale-105 active:scale-95"
-                  >
-                    {isExporting ? (
-                      <>
-                        <Loader2 className="h-4 w-4 animate-spin text-luxe-blue" />
-                        <span>Exportation...</span>
-                      </>
-                    ) : (
-                      <>
-                        <Download className="h-4 w-4 group-hover:text-luxe-blue transition-colors" />
-                        <span>Exporter</span>
-                      </>
-                    )}
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-48 animate-in fade-in-0 zoom-in-95">
-                  <DropdownMenuLabel>Options d'export</DropdownMenuLabel>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem 
-                    onClick={handleExportCSV}
-                    disabled={isExporting !== null}
-                    className="flex items-center gap-2 cursor-pointer transition-colors hover:bg-gray-100"
-                  >
-                    {isExporting === 'csv' ? (
-                      <Loader2 className="h-4 w-4 animate-spin text-luxe-blue" />
-                    ) : (
-                      <FileText className="h-4 w-4 text-green-600" />
-                    )}
-                    <span>Exporter en CSV</span>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem 
-                    onClick={handleExportPDF}
-                    disabled={isExporting !== null}
-                    className="flex items-center gap-2 cursor-pointer transition-colors hover:bg-gray-100"
-                  >
-                    {isExporting === 'pdf' ? (
-                      <Loader2 className="h-4 w-4 animate-spin text-luxe-blue" />
-                    ) : (
-                      <FileDown className="h-4 w-4 text-red-600" />
-                    )}
-                    <span>Exporter en PDF</span>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem 
-                    onClick={handlePrint}
-                    disabled={isExporting !== null}
-                    className="flex items-center gap-2 cursor-pointer transition-colors hover:bg-gray-100"
-                  >
-                    {isExporting === 'print' ? (
-                      <Loader2 className="h-4 w-4 animate-spin text-luxe-blue" />
-                    ) : (
-                      <Printer className="h-4 w-4 text-blue-600" />
-                    )}
-                    <span>Imprimer</span>
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+              {canEditProperties && (
+ <DropdownMenu>
+  <DropdownMenuTrigger asChild>
+    <Button 
+      variant="outline" 
+      size="sm"
+      className="flex items-center gap-2 group transition-all duration-200 hover:scale-105 active:scale-95 dark:text-gray-100 dark:bg-gray-800 dark:border-gray-700"
+    >
+      {isExporting ? (
+        <>
+          <Loader2 className="h-4 w-4 animate-spin text-luxe-blue dark:text-white" />
+          <span>Exportation...</span>
+        </>
+      ) : (
+        <>
+          <Download className="h-4 w-4 group-hover:text-luxe-blue transition-colors dark:text-white" />
+          <span>Exporter</span>
+        </>
+      )}
+    </Button>
+  </DropdownMenuTrigger>
+
+  <DropdownMenuContent className="w-48 animate-in fade-in-0 zoom-in-95">
+    <DropdownMenuLabel className="text-gray-700 dark:text-gray-200">Options d'export</DropdownMenuLabel>
+    <DropdownMenuSeparator className="border-gray-200 dark:border-gray-600" />
+
+    <DropdownMenuItem
+      onClick={handleExportExcel}
+      disabled={isExporting !== null}
+      className="flex items-center gap-2 cursor-pointer transition-colors hover:bg-gray-100 dark:hover:bg-gray-700"
+    >
+      {isExporting === 'xlsx' ? (
+        <Loader2 className="h-4 w-4 animate-spin text-luxe-blue dark:text-white" />
+      ) : (
+        <FileText className="h-4 w-4 text-green-600 dark:text-green-400" />
+      )}
+      <span>Exporter en Excel</span>
+    </DropdownMenuItem>
+
+    <DropdownMenuItem 
+      onClick={handleExportPDF}
+      disabled={isExporting !== null}
+      className="flex items-center gap-2 cursor-pointer transition-colors hover:bg-gray-100 dark:hover:bg-gray-700"
+    >
+      {isExporting === 'pdf' ? (
+        <Loader2 className="h-4 w-4 animate-spin text-luxe-blue dark:text-white" />
+      ) : (
+        <FileDown className="h-4 w-4 text-red-600 dark:text-red-400" />
+      )}
+      <span>Exporter en PDF</span>
+    </DropdownMenuItem>
+
+    <DropdownMenuItem 
+      onClick={handlePrint}
+      disabled={isExporting !== null}
+      className="flex items-center gap-2 cursor-pointer transition-colors hover:bg-gray-100 dark:hover:bg-gray-700"
+    >
+      {isExporting === 'print' ? (
+        <Loader2 className="h-4 w-4 animate-spin text-luxe-blue dark:text-white" />
+      ) : (
+        <Printer className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+      )}
+      <span>Imprimer</span>
+    </DropdownMenuItem>
+  </DropdownMenuContent>
+</DropdownMenu>
+
+
+)}
+
             </div>
           </CardHeader>
-          <CardContent className="property-content animate-in fade-in-50 duration-300">
-            <div className="rounded-md border">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="w-[100px]">ID</TableHead>
-                    <TableHead>Bien</TableHead>
-                    <TableHead>Type</TableHead>
-                    <TableHead>Localisation</TableHead>
-                    <TableHead>Prix</TableHead>
-                    <TableHead>Statut</TableHead>
-                    <TableHead>Date</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredProperties.length > 0 ? (
-                    filteredProperties.map((property) => (
-                      <TableRow 
-                        key={property.id} 
-                        id={`property-row-${property.id}`}
-                        className={`animate-in fade-in-50 duration-300 group ${property.isDraft ? 'bg-amber-50/30' : ''}`}
-                      >
-                        <TableCell className="font-medium">{property.id}</TableCell>
-                        <TableCell>
-                          <div className="flex items-center space-x-3">
-                            <div className="flex-shrink-0 h-10 w-10 bg-gray-100 rounded-md flex items-center justify-center">
-                              {property.image ? (
-                                <img 
-                                  src={property.image} 
-                                  alt={property.title} 
-                                  className="h-10 w-10 object-cover rounded-md"
-                                />
-                              ) : (
-                                <Building className="h-5 w-5 text-gray-500" />
-                              )}
-                            </div>
-                            <div>
-                              <div className="font-medium">
-                                {property.title}
-                                {property.isDraft && (
-                                  <span className="ml-2 text-xs text-amber-600 font-normal">
-                                    (Brouillon)
-                                  </span>
-                                )}
-                              </div>
-                              <div className="text-xs text-gray-500">
-                                {property.bedrooms > 0 ? `${property.bedrooms} ch, ` : ''}
-                                {property.area}
-                              </div>
-                            </div>
-                          </div>
-                        </TableCell>
-                        <TableCell>{property.type}</TableCell>
-                        <TableCell>{property.location}</TableCell>
-                        <TableCell>{property.price}</TableCell>
-                        <TableCell>
-                          <Badge variant="outline" className={getStatusColor(property.status, property.isDraft)}>
-                            {getStatusDisplay(property)}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>{property.date}</TableCell>
-                        <TableCell className="text-right">
-                          <div className="flex justify-end items-center space-x-1 opacity-80 group-hover:opacity-100 transition-opacity">
-                            {property.isDraft && (
-                              <Button 
-                                variant="ghost" 
-                                size="icon"
-                                onClick={() => confirmPublish(property.id)}
-                                className="text-green-600 hover:text-green-800 hover:bg-green-50 transition-all duration-200 hover:scale-110"
-                                title="Publier"
-                              >
-                                <Power className="h-4 w-4" />
-                              </Button>
-                            )}
-                            <Button 
-                              variant="ghost" 
-                              size="icon"
-                              onClick={() => handleViewDetails(property.id)}
-                              className="text-blue-600 hover:text-blue-800 hover:bg-blue-50 transition-all duration-200 hover:scale-110"
-                              title="Voir les détails"
-                            >
-                              <Eye className="h-4 w-4" />
-                            </Button>
-                            <Button 
-                              variant="ghost" 
-                              size="icon"
-                              onClick={() => handleEditProperty(property.id)}
-                              className="text-amber-600 hover:text-amber-800 hover:bg-amber-50 transition-all duration-200 hover:scale-110"
-                              title="Modifier"
-                            >
-                              <Pencil className="h-4 w-4" />
-                            </Button>
-                            <Button 
-                              variant="ghost" 
-                              size="icon"
-                              onClick={() => confirmDelete(property.id)}
-                              className="text-red-600 hover:text-red-800 hover:bg-red-50 transition-all duration-200 hover:scale-110"
-                              title="Supprimer"
-                            >
-                              <Trash className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))
-                  ) : (
-                    <TableRow>
-                      <TableCell colSpan={8} className="h-24 text-center">
-                        Aucun bien trouvé avec ces critères
-                      </TableCell>
-                    </TableRow>
-                  )}
-                </TableBody>
-              </Table>
-            </div>
-          </CardContent>
+          <CardContent className="bien-content animate-in fade-in-50 duration-300">
+    <div className="rounded-md border dark:border-gray-700">
+      <Table className="dark:text-gray-100">
+      <TableHeader className="dark:bg-gray-700 dark:text-gray-200">
+        <TableRow>
+          <TableHead className="w-[100px] text-left text-gray-700 dark:text-gray-300">ID</TableHead>
+          <TableHead className="text-left text-gray-700 dark:text-gray-300">Bien</TableHead>
+          <TableHead className="text-left text-gray-700 dark:text-gray-300">Type</TableHead>
+          <TableHead className="text-left text-gray-700 dark:text-gray-300">Ville</TableHead>
+          <TableHead className="text-left text-gray-700 dark:text-gray-300">Quartier</TableHead>
+          <TableHead className="text-left text-gray-700 dark:text-gray-300">Prix</TableHead>
+          <TableHead className="text-left text-gray-700 dark:text-gray-300">Surface</TableHead>
+          <TableHead className="text-left text-gray-700 dark:text-gray-300">Statut</TableHead>
+          <TableHead className="text-center text-gray-700 dark:text-gray-300 pr-28">Actions</TableHead>
+        </TableRow>
+      </TableHeader>
+
+      <TableBody>
+        {filteredProperties.length > 0 ? (
+          filteredProperties.map((bien) => (
+            <TableRow key={bien.id} id={`bien-row-${bien.id}`}className="dark:hover:bg-gray-700">
+              <TableCell className="font-medium">{bien.id}</TableCell>
+              <TableCell className="flex items-center gap-4">
+  <div className="flex items-center space-x-3 w-[100px]"> {/* ✅ Largeur fixe pour "Bien" */}
+    {bien.images?.[0] ? (
+      <img
+        src={`http://localhost:8000/${bien.images[0]}`}
+        alt={bien.title}
+        className="h-10 w-10 object-cover rounded-md"
+      />
+    ) : (
+      <Building className="h-5 w-5 text-gray-500 dark:text-gray-300" />
+    )}
+  <div className="whitespace-nowrap overflow-hidden text-ellipsis">
+  {bien.title.length > 5 ? bien.title.slice(0, 5) + "..." : bien.title}
+</div>
+
+  </div>
+</TableCell>
+
+<TableCell className="pl-0">{bien.type}</TableCell> {/* ✅ Espace entre "Bien" et "Type" */}
+
+              <TableCell>{bien.location}</TableCell>
+              <TableCell>{bien.quartier || '—'}</TableCell>
+              <TableCell>{Number(bien.price).toLocaleString()} MAD</TableCell>
+              <TableCell>{bien.area} m²</TableCell>
+              <TableCell>
+                <Badge variant="outline" className={getStatusColor(bien.status, bien.isDraft)}>
+                  {getStatusDisplay(bien)}
+                </Badge>
+              </TableCell>
+              <TableCell className="text-left">
+  <div className="flex justify-start items-center space-x-3"> {/* ✅ Aligner les icônes à gauche */}
+    {/* ✅ Voir les détails - Accessible à tous */}
+    {permissions.includes("view_properties") && (
+      <Button 
+        variant="ghost" 
+        size="icon"
+        onClick={() => handleViewDetails(bien.id)}
+        title="Voir"
+        className="text-blue-600 hover:text-blue-800 flex items-center gap-1"
+      >
+        <Eye className="h-4 w-4" />
+      </Button>
+    )}
+
+    {/* ✅ Modifier - Visible avec permission */}
+    {permissions.includes("edit_properties") && (
+    <Button 
+    variant="ghost" 
+    size="icon"
+    onClick={() => handleEditProperty(bien.id)}
+    className="flex items-center gap-1 text-amber-600 hover:text-amber-800 
+               dark:text-amber-500 dark:hover:text-amber-400 
+               transition-colors"
+    title="Modifier"
+  >
+    <Pencil className="h-4 w-4 text-amber-600 dark:text-amber-500" />
+  </Button>
+  
+    )}
+
+    {/* ✅ Supprimer - Visible avec permission */}
+    {permissions.includes("delete_properties") && (
+      <Button 
+        variant="ghost" 
+        size="icon"
+        onClick={() => confirmDelete(bien.id)}
+        className="text-red-600 hover:text-red-800 flex items-center gap-1"
+        title="Supprimer"
+      >
+        <Trash className="h-4 w-4" />
+      </Button>
+    )}
+  </div>
+</TableCell>
+
+            </TableRow>
+          ))
+        ) : (
+          <TableRow>
+            <TableCell colSpan={8} className="h-24 text-center">
+              Aucun bien trouvé avec ces critères
+            </TableCell>
+          </TableRow>
+        )}
+      </TableBody>
+    </Table>
+  </div>
+</CardContent>
+
         </Card>
       </div>
 
@@ -832,37 +792,39 @@ const AdminBiens = () => {
         onPropertyAdded={handlePropertyAdded}
       />
 
-      <AlertDialog open={deleteConfirmOpen} onOpenChange={setDeleteConfirmOpen}>
-        <AlertDialogContent className="animate-in fade-in-0 zoom-in-95 duration-200">
-          <AlertDialogHeader>
-            <AlertDialogTitle>Confirmer la suppression</AlertDialogTitle>
-            <AlertDialogDescription>
-              Êtes-vous sûr de vouloir supprimer ce bien immobilier ?
-              Cette action est irréversible et toutes les données associées seront perdues.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel className="transition-all duration-200 hover:scale-105">Annuler</AlertDialogCancel>
-            <AlertDialogAction 
-              onClick={handleDeleteProperty}
-              className="bg-red-600 hover:bg-red-700 text-white transition-all duration-200 hover:scale-105"
-              disabled={isDeleting}
-            >
-              {isDeleting ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Suppression...
-                </>
-              ) : (
-                <>
-                  <Trash className="mr-2 h-4 w-4" />
-                  Oui, supprimer
-                </>
-              )}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+     <AlertDialog open={deleteConfirmOpen} onOpenChange={setDeleteConfirmOpen}>
+  <AlertDialogContent className="animate-in fade-in-0 zoom-in-95 duration-200 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-lg shadow-lg">
+    <AlertDialogHeader>
+      <AlertDialogTitle>Confirmer la suppression</AlertDialogTitle>
+      <AlertDialogDescription>
+        Êtes-vous sûr de vouloir supprimer ce bien immobilier ? Cette action est irréversible et toutes les données associées seront perdues.
+      </AlertDialogDescription>
+    </AlertDialogHeader>
+    <AlertDialogFooter>
+      <AlertDialogCancel className="transition-all duration-200 hover:scale-105 text-gray-700 dark:text-balck hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md px-3 py-1">
+        Annuler
+      </AlertDialogCancel>
+      <AlertDialogAction
+        onClick={() => handleDeleteProperty(bienToDelete)}
+        className="bg-red-600 hover:bg-red-700 text-white transition-all duration-200 hover:scale-105 rounded-md px-3 py-1 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+        disabled={isDeleting}
+      >
+        {isDeleting ? (
+          <>
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            Suppression...
+          </>
+        ) : (
+          <>
+            <Trash className="mr-2 h-4 w-4" />
+            Oui, supprimer
+          </>
+        )}
+      </AlertDialogAction>
+    </AlertDialogFooter>
+  </AlertDialogContent>
+</AlertDialog>
+
 
       <AlertDialog open={publishConfirmOpen} onOpenChange={setPublishConfirmOpen}>
         <AlertDialogContent className="animate-in fade-in-0 zoom-in-95 duration-200">

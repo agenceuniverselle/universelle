@@ -34,6 +34,7 @@ import { Separator } from '@/components/ui/separator';
 import { cn } from '@/lib/utils';
 import { AnimatePresence, motion } from 'framer-motion';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import axios from 'axios';
 
 interface InvestmentFormProps {
   property: Property;
@@ -186,9 +187,7 @@ const InvestmentForm: React.FC<InvestmentFormProps> = ({
       case 3:
         break;
       case 4:
-        if (!formData.paymentMethod) {
-          errors.paymentMethod = "Veuillez sélectionner une méthode de paiement";
-        }
+        
         break;
     }
     
@@ -245,93 +244,92 @@ const InvestmentForm: React.FC<InvestmentFormProps> = ({
 
       fetchCsrfToken();
   }, []);
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-  
-    if (!validateStep()) {
-      return;
-    }
-  
-    setIsLoading(true);
-  
-    // Créer une nouvelle instance de FormData
-    const formDataToSend = new FormData();
-  
-    // Ajout des données simples (textuelles) au FormData
-    formDataToSend.append('montant_investissement', formData.amount);
-    formDataToSend.append('type_participation', formData.participationType);
-    formDataToSend.append('prenom', formData.firstName);
-    formDataToSend.append('nom', formData.lastName);
-    formDataToSend.append('email', formData.email);
-    formDataToSend.append('telephone', formData.phone);
-    formDataToSend.append('nationalite', formData.nationality);
-    formDataToSend.append('adresse', formData.address);
-    formDataToSend.append('methode_paiement', formData.paymentMethod);
-  
-    // Vérifier si les fichiers sont téléchargés avant de les ajouter au FormData
-    if (formData.documentsUploaded['pieceIdentite']) {
-      formDataToSend.append('piece_identite', formData.documentsUploaded['pieceIdentite']);
-    }
-    if (formData.documentsUploaded['justificatifDomicile']) {
-      formDataToSend.append('justificatif_domicile', formData.documentsUploaded['justificatifDomicile']);
-    }
-    if (formData.documentsUploaded['releveBancaire']) {
-      formDataToSend.append('releve_bancaire', formData.documentsUploaded['releveBancaire']);
-    }
-  
-    try {
-      console.log('Property ID:', property.id);  // Vérifie la valeur de property.id
 
-      const response = await fetch(`http://127.0.0.1:8000/api/investors/${encodeURIComponent(property.id)}/store`, {
-        method: 'POST',
-        headers: {
-          'X-CSRF-TOKEN': csrfToken,
-        },
-        body: formDataToSend,
-        credentials: 'include', // Ajouter cette ligne pour s'assurer que les cookies sont envoyés
-      });
-      console.log(csrfToken)
-  
-      toast({
-        title: "Demande d'investissement envoyée",
-        description: "Votre demande d'investissement a été transmise avec succès. Un conseiller vous contactera prochainement.",
-        variant: "default",
-      });
-  
-      onOpenChange(false);
-      setStep(1);
-      setFormData({
-        amount: '',
-        participationType: 'passive',
-        firstName: '',
-        lastName: '',
-        email: '',
-        phone: '',
-        nationality: '',
-        address: '',
-        comments: '',
-        documentsUploaded: false,
-        paymentMethod: 'bank',
-      });
-    } catch (error) {
-      toast({
-        title: "Erreur",
-        description: "Une erreur est survenue lors de l'envoi de votre demande. Veuillez réessayer.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+
+  if (!validateStep()) {
+    return;
+  }
+
+  setIsLoading(true);
+
+  const formDataToSend = new FormData();
+  formDataToSend.append('montant_investissement', formData.amount);
+  formDataToSend.append('type_participation', formData.participationType);
+  formDataToSend.append('prenom', formData.firstName);
+  formDataToSend.append('nom', formData.lastName);
+  formDataToSend.append('email', formData.email);
+  formDataToSend.append('telephone', formData.phone);
+  formDataToSend.append('nationalite', formData.nationality);
+  formDataToSend.append('adresse', formData.address);
+  formDataToSend.append('comments', formData.comments);
+  //formDataToSend.append('methode_paiement', formData.paymentMethod);
+
+// Ajout fichiers s’ils existent
+
+{/* if (formData.documentsUploaded['pieceIdentite']) {
+    formDataToSend.append('piece_identite', formData.documentsUploaded['pieceIdentite']);
+  }
+  if (formData.documentsUploaded['justificatifDomicile']) {
+    formDataToSend.append('justificatif_domicile', formData.documentsUploaded['justificatifDomicile']);
+  }
+  if (formData.documentsUploaded['releveBancaire']) {
+    formDataToSend.append('releve_bancaire', formData.documentsUploaded['releveBancaire']);
+  }
+*/}
+  try {
+    await axios.post(`/api/investors/${property.id}/store`, formDataToSend, {
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'multipart/form-data',
+        // 'Authorization': `Bearer ${token}`, // Si nécessaire, ajouter un token
+    },
+      withCredentials: true, // pour que les cookies soient transmis si nécessaire
+    });
+
+    toast({
+      title: "Demande envoyée",
+      description: "Votre demande a été soumise avec succès.",
+    });
+
+    // Reset form
+    onOpenChange(false);
+    setStep(1);
+    setFormData({
+      amount: '',
+      participationType: 'passive',
+      firstName: '',
+      lastName: '',
+      email: '',
+      phone: '',
+      nationality: '',
+      address: '',
+      comments: '',
+      documentsUploaded: false,
+      paymentMethod: 'bank',
+    });
+
+  } catch (error) {
+    toast({
+      title: "Erreur",
+      description: "Une erreur est survenue lors de l'envoi.",
+      variant: "destructive",
+    });
+    console.error(error);
+  } finally {
+    setIsLoading(false);
+  }
+};
+
   
 
   const MinEntryPrice = property.investmentDetails?.minEntryPrice || '500,000 MAD';
   const numericPrice = parseInt(MinEntryPrice.replace(/[^0-9]/g, ''));
   const suggestedAmounts = [
     numericPrice,
-    numericPrice * 1.5,
+    numericPrice * 1.*5,
     numericPrice * 2,
-    numericPrice * 3
   ];
 
   const renderStepContent = () => {
@@ -393,6 +391,20 @@ const InvestmentForm: React.FC<InvestmentFormProps> = ({
                     {formatAmount(amount.toString())} MAD
                   </Button>
                 ))}
+                <Button
+  type="button"
+  variant={formData.amount === "Autre" ? "default" : "outline"}
+  className={cn(
+    "h-12 text-base transition-all hover:scale-102",
+    formData.amount === "Autre" ? "bg-luxe-blue shadow-md" : ""
+  )}
+  onClick={() => {
+    setFormData({ ...formData, amount: "Autre" });
+  }}
+>
+  Autre
+</Button>
+
               </div>
             </div>
 
@@ -575,162 +587,6 @@ const InvestmentForm: React.FC<InvestmentFormProps> = ({
                 onChange={handleInputChange}
               />
             </div>
-          </motion.div>
-        );
-      
-      case 3:
-        return (
-          <motion.div 
-            key="step3"
-            custom={slideDirection.current}
-            initial="enter"
-            animate="center"
-            exit="exit"
-            variants={variants}
-            transition={{ type: "tween", ease: "easeInOut", duration: 0.3 }}
-            className="space-y-4 py-2"
-          >
-            <div className="bg-amber-50 p-4 rounded-md border border-amber-200 mb-6">
-              <div className="flex items-start">
-                <AlertCircle className="h-5 w-5 text-amber-600 mr-2 mt-0.5" />
-                <div>
-                  <h4 className="font-medium text-amber-800">Documents requis</h4>
-                  <p className="text-sm text-amber-700 mt-1">
-                    Pour finaliser votre demande d'investissement, nous avons besoin des documents suivants. Veuillez les préparer au format PDF ou JPG.
-                  </p>
-                </div>
-              </div>
-            </div>
-            
-            <div className="space-y-4">
-            <div className="border border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-luxe-blue hover:bg-blue-50 transition-colors group cursor-pointer relative">
-        <FileText className="h-10 w-10 text-gray-400 mx-auto mb-3 group-hover:text-luxe-blue transition-colors" />
-        <h4 className="font-medium">Pièce d'identité</h4>
-        <p className="text-sm text-gray-500 mt-1">
-          CIN, passeport ou carte de séjour
-        </p>
-        <input
-          type="file"
-          accept=".pdf, .jpg, .jpeg"
-          className="mt-4 opacity-0 absolute inset-0 cursor-pointer"
-          onChange={(e) => handleFileChange(e, 'identite')}
-        />
-        <Button variant="outline" className="mt-4 group-hover:border-luxe-blue group-hover:text-luxe-blue transition-all">
-          Choisir un fichier
-        </Button>
-        {fileNameIdentite && <p className="text-sm text-gray-500 mt-1">Fichier sélectionné : {fileNameIdentite}</p>}
-      </div>
-
-      {/* Justificatif de domicile */}
-      <div className="border border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-luxe-blue hover:bg-blue-50 transition-colors group cursor-pointer relative">
-        <FileText className="h-10 w-10 text-gray-400 mx-auto mb-3 group-hover:text-luxe-blue transition-colors" />
-        <h4 className="font-medium">Justificatif de domicile</h4>
-        <p className="text-sm text-gray-500 mt-1">
-          Facture d'électricité, eau ou téléphone (moins de 3 mois)
-        </p>
-        <input
-          type="file"
-          accept=".pdf, .jpg, .jpeg"
-          className="mt-4 opacity-0 absolute inset-0 cursor-pointer"
-          onChange={(e) => handleFileChange(e, 'domicile')}
-        />
-        <Button variant="outline" className="mt-4 group-hover:border-luxe-blue group-hover:text-luxe-blue transition-all">
-          Choisir un fichier
-        </Button>
-        {fileNameDomicile && <p className="text-sm text-gray-500 mt-1">Fichier sélectionné : {fileNameDomicile}</p>}
-      </div>
-
-      {/* Relevé bancaire */}
-      <div className="border border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-luxe-blue hover:bg-blue-50 transition-colors group cursor-pointer relative">
-        <FileText className="h-10 w-10 text-gray-400 mx-auto mb-3 group-hover:text-luxe-blue transition-colors" />
-        <h4 className="font-medium">Relevé bancaire</h4>
-        <p className="text-sm text-gray-500 mt-1">
-          Relevé bancaire des 3 derniers mois
-        </p>
-        <input
-          type="file"
-          accept=".pdf, .jpg, .jpeg"
-          className="mt-4 opacity-0 absolute inset-0 cursor-pointer"
-          onChange={(e) => handleFileChange(e, 'releve')}
-        />
-        <Button variant="outline" className="mt-4 group-hover:border-luxe-blue group-hover:text-luxe-blue transition-all">
-          Choisir un fichier
-        </Button>
-        {fileNameReleve && <p className="text-sm text-gray-500 mt-1">Fichier sélectionné : {fileNameReleve}</p>}
-      </div>
-            </div>
-            
-            <div className="mt-4">
-              <Button 
-                type="button" 
-                className="w-full bg-luxe-blue hover:bg-luxe-blue/90" 
-                onClick={() => setFormData({...formData, documentsUploaded: true})}
-              >
-                <Check className="h-4 w-4 mr-2" />
-                Simuler le téléversement
-              </Button>
-            </div>
-          </motion.div>
-        );
-      
-      case 4:
-        return (
-          <motion.div 
-            key="step4"
-            custom={slideDirection.current}
-            initial="enter"
-            animate="center"
-            exit="exit"
-            variants={variants}
-            transition={{ type: "tween", ease: "easeInOut", duration: 0.3 }}
-            className="space-y-4 py-2"
-          >
-            <div className="bg-green-50 p-4 rounded-md border border-green-200 mb-6">
-              <div className="flex items-start">
-                <Check className="h-5 w-5 text-green-600 mr-2 mt-0.5" />
-                <div>
-                  <h4 className="font-medium text-green-800">Presque terminé!</h4>
-                  <p className="text-sm text-green-700 mt-1">
-                    Veuillez sélectionner votre méthode de paiement préférée pour finaliser votre demande d'investissement.
-                  </p>
-                </div>
-              </div>
-            </div>
-            
-            <div className="space-y-3">
-              <Label className="text-base font-medium">Méthode de paiement</Label>
-              {formErrors.paymentMethod && (
-                <p className="text-sm text-red-500">{formErrors.paymentMethod}</p>
-              )}
-              <RadioGroup
-                value={formData.paymentMethod}
-                onValueChange={(value) => handleSelectChange(value, 'paymentMethod')}
-                className="space-y-3"
-              >
-                <div className="flex items-center space-x-2 p-3 border rounded-md bg-white hover:bg-gray-50 transition-colors">
-                  <RadioGroupItem value="bank" id="bank" />
-                  <Label htmlFor="bank" className="flex-1 cursor-pointer">
-                    <div className="font-medium">Virement bancaire</div>
-                    <div className="text-sm text-gray-500">Virement direct sur le compte bancaire du projet</div>
-                  </Label>
-                </div>
-                <div className="flex items-center space-x-2 p-3 border rounded-md bg-white hover:bg-gray-50 transition-colors">
-                  <RadioGroupItem value="card" id="card" />
-                  <Label htmlFor="card" className="flex-1 cursor-pointer">
-                    <div className="font-medium">Carte bancaire</div>
-                    <div className="text-sm text-gray-500">Paiement sécurisé par carte bancaire</div>
-                  </Label>
-                </div>
-                <div className="flex items-center space-x-2 p-3 border rounded-md bg-white hover:bg-gray-50 transition-colors">
-                  <RadioGroupItem value="check" id="check" />
-                  <Label htmlFor="check" className="flex-1 cursor-pointer">
-                    <div className="font-medium">Chèque certifié</div>
-                    <div className="text-sm text-gray-500">Paiement par chèque bancaire certifié</div>
-                  </Label>
-                </div>
-              </RadioGroup>
-            </div>
-            
             <div className="mt-6">
               <Label htmlFor="comments" className="text-base font-medium">
                 Commentaires (optionnel)
@@ -744,20 +600,33 @@ const InvestmentForm: React.FC<InvestmentFormProps> = ({
                 onChange={handleInputChange}
               />
             </div>
-
-            <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-md">
-              <div className="flex items-start">
-                <Calendar className="h-5 w-5 text-blue-600 mr-2 mt-1" />
-                <div>
-                  <h4 className="font-medium text-blue-800">Votre rendez-vous</h4>
-                  <p className="text-sm text-blue-700 mt-1">
-                    Après validation de votre demande, un conseiller vous contactera sous 24-48h pour fixer un rendez-vous.
-                  </p>
-                </div>
-              </div>
-            </div>
           </motion.div>
         );
+        case 3:
+          return (
+            <motion.div
+              key="step3"
+              custom={slideDirection.current}
+              initial="enter"
+              animate="center"
+              exit="exit"
+              variants={variants}
+              transition={{ type: "tween", ease: "easeInOut", duration: 0.3 }}
+              className="space-y-6 py-2"
+            >
+              <div className="bg-blue-50 border border-blue-200 p-6 rounded-lg text-center">
+                <Check className="w-12 h-12 text-blue-600 mx-auto mb-4" />
+                <h3 className="text-xl font-semibold text-blue-800 mb-2">Merci pour votre intérêt !</h3>
+                <p className="text-gray-700 text-base">
+                Au nom de toute l’équipe Universelle, nous vous remercions sincèrement pour le temps que vous avez consacré à compléter vos informations.
+                Un conseiller vous contactera sous 24 à 48 heures afin de discuter de votre investissement et convenir d’un rendez-vous pour organiser la suite du processus.
+                </p>
+                
+              </div>
+            </motion.div>
+          );
+        
+  
       
       default:
         return null;
@@ -766,7 +635,7 @@ const InvestmentForm: React.FC<InvestmentFormProps> = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-auto">
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-auto bg-white dark:bg-white text-gray-800 dark:text-gray-800">
         <DialogHeader>
           <DialogTitle className="text-2xl font-bold">Investir dans {property.title}</DialogTitle>
           <DialogDescription className="text-base">
@@ -776,7 +645,7 @@ const InvestmentForm: React.FC<InvestmentFormProps> = ({
         
         <div className="my-4">
           <div className="flex justify-between items-center mb-2">
-            {[1, 2, 3, 4].map((stepNumber) => (
+            {[1, 2, 3, ].map((stepNumber) => (
               <div key={stepNumber} className="flex flex-col items-center">
                 <div 
                   className={cn(
@@ -793,8 +662,8 @@ const InvestmentForm: React.FC<InvestmentFormProps> = ({
                 <span className="text-xs mt-1 text-gray-500 hidden sm:block">
                   {stepNumber === 1 && "Montant"}
                   {stepNumber === 2 && "Informations"}
-                  {stepNumber === 3 && "Documents"}
-                  {stepNumber === 4 && "Paiement"}
+                  {stepNumber === 3 && "Finalisation"}
+                  {/* {stepNumber === 4 && "Paiement"} */}
                 </span>
               </div>
             ))}
@@ -802,7 +671,7 @@ const InvestmentForm: React.FC<InvestmentFormProps> = ({
           <div className="w-full bg-gray-200 h-1 rounded-full overflow-hidden">
             <div 
               className="bg-luxe-blue h-full transition-all duration-500 ease-in-out"
-              style={{ width: `${(step / 4) * 100}%` }}
+              style={{ width: `${(step / 3) * 100}%` }}
             />
           </div>
         </div>
@@ -830,7 +699,7 @@ const InvestmentForm: React.FC<InvestmentFormProps> = ({
             </Button>
           )}
           <div className="flex-1" />
-          {step < 4 ? (
+          {step < 3 ? (
             <Button
               type="button"
               className="bg-luxe-blue hover:bg-luxe-blue/90 w-full sm:w-auto group"

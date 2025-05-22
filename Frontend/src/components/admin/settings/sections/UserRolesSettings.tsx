@@ -5,22 +5,12 @@ import { Button } from '@/components/ui/button';
 import { useToast } from '@/components/ui/use-toast';
 import { Save } from 'lucide-react';
 import { RolePermissionManager } from '@/components/admin/users/RolePermissionManager';
-import { RoleDefinition, defaultRoles } from '@/types/users';
 
 export const UserRolesSettings = () => {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
-  const [roles, setRoles] = useState<RoleDefinition[]>(defaultRoles);
 
-  const handleSaveRoles = (updatedRoles: RoleDefinition[]) => {
-    setRoles(updatedRoles);
-    console.log('Roles updated:', updatedRoles);
-    
-    toast({
-      title: "Rôles mis à jour",
-      description: "Les rôles et permissions ont été mis à jour avec succès.",
-    });
-  };
+  
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -28,7 +18,6 @@ export const UserRolesSettings = () => {
 
     // Simuler un appel API
     setTimeout(() => {
-      console.log('User roles settings saved:', roles);
       
       setIsLoading(false);
       toast({
@@ -47,11 +36,7 @@ export const UserRolesSettings = () => {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <form onSubmit={handleSubmit}>
-          <RolePermissionManager
-            onSave={handleSaveRoles}
-            initialRoles={roles}
-          />
+       
           
           <div className="flex justify-end mt-6">
             <Button 
@@ -75,7 +60,7 @@ export const UserRolesSettings = () => {
               )}
             </Button>
           </div>
-        </form>
+      
       </CardContent>
     </>
   );

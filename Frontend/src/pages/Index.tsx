@@ -8,6 +8,7 @@ import InvestmentOpportunities from '@/components/InvestmentOpportunities';
 import Testimonials from '@/components/Testimonials';
 import ExclusiveOffers from '@/components/ExclusiveOffers';
 import ContactForm from '@/components/ContactForm';
+import LocationMap from '@/components/LocationMap'; // Ajoute cette ligne
 
 const Index = () => {
   const location = useLocation();
@@ -34,6 +35,7 @@ const Index = () => {
         <Testimonials />
         <ExclusiveOffers />
         <ContactForm />
+        <LocationMap /> 
       </div>
     </MainLayout>
   );

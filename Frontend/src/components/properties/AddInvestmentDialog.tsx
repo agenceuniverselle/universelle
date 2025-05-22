@@ -56,10 +56,12 @@ import { useProperties } from '@/context/PropertiesContext';
 import { toast } from "@/hooks/use-toast";
 import { useNavigate } from 'react-router-dom';
 import { Separator } from '@/components/ui/separator';
+import { useAuth } from '@/context/AuthContext';
+import { Bien } from '@/types/bien.types';
 
 const formSchema = z.object({
   title: z.string().min(3, { message: "Le titre doit contenir au moins 3 caractères." }),
-  type: z.string().min(1, { message: "Veuillez sélectionner un type de bien." }),
+  type: z.string().min(1, { message: "Veuillez entrer un type de bien." }),
   status: z.string().min(1, { message: "Veuillez sélectionner un statut." }),
   price: z.string().min(1, { message: "Veuillez entrer un prix." }),
   location: z.string().min(3, { message: "Veuillez entrer une localisation." }),
@@ -156,132 +158,108 @@ const AddInvestmentDialog: React.FC<AddInvestmentDialogProps> = ({
   const removeDocument = (index: number) => {
     setDocuments(prev => prev.filter((_, i) => i !== index));
   };
+  const { user } = useAuth(); // Utiliser le contexte Auth
 
-  const onSubmit = async (data, publish = false) => {
-    if (publish) {
-        setIsPublishing(true);
-    } else {
-        setIsSubmitting(true);
+  const onSubmit = async (data: PropertyFormValues, publish = false) => {
+    const token = localStorage.getItem("access_token");
+    if (!token) {
+      console.error("Aucun token d'accès trouvé.");
+      return;
     }
-
-    const bedroomsValue = data.bedrooms ? parseInt(data.bedrooms) : 0;
-    const bathroomsValue = data.bathrooms ? parseInt(data.bathrooms) : 0;
-
-    const formData = new FormData();
-
-    formData.append('title', data.title);
-    formData.append('type', data.type);
-    formData.append('price', data.price);
-    formData.append('status', data.status);
-    formData.append('location', data.location);
-    formData.append('area', data.area);
-    formData.append('bedrooms', bedroomsValue.toString());
-    formData.append('bathrooms', bathroomsValue.toString());
-    formData.append('description', data.description);
-    formData.append("isFeatured", data.isFeatured ? "1" : "0");
-    // Remplacer isFeatured par featured
-    formData.append('investmentType', data.investmentType);
-    formData.append('projectStatus', data.projectStatus);
-    formData.append('returnRate', data.returnRate);
-    formData.append('minEntryPrice', data.minEntryPrice);
-    formData.append('recommendedDuration', data.recommendedDuration);
-// Ensure partners are passed correctly as a comma-separated string
-if (Array.isArray(data.partners)) {
-  const partnersString = data.partners.join(','); // Create a comma-separated string
-  formData.append('partners', partnersString); // Add to FormData
+  
+    if (publish) {
+  setIsPublishing(true);
 } else {
-  formData.append('partners', data.partners); // If it's already a string, just append it
+  setIsSubmitting(true);
 }
-   formData.append('financingEligibility', data.financingEligibility? "1" : "0");  // Ajout du champ pour l'éligibilité au financement
 
-    images.forEach((image) => {
-      formData.append("images[]", image);
-  });
-  
-  documents.forEach((doc) => {
-      formData.append("documents[]", doc);
-  });
-  
-// DEBUG : affichage des données envoyées
-const entries = [...formData.entries()];
-console.log("=== Données à envoyer via axios.post ===");
-entries.forEach(([key, value]) => {
-  if (value instanceof File) {
-    console.log(`${key}:`, {
-      name: value.name,
-      type: value.type,
-      size: value.size + ' bytes'
-    });
-  } else {
-    console.log(`${key}:`, value);
-  }
-});
     try {
-        const response = await axios.post('http://localhost:8000/api/admin/properties', // Utiliser le chemin relatif
-            formData, // Form data à envoyer
-            {
-                headers: {
-                    'Accept': 'application/json',
-                    'Content-Type': 'multipart/form-data',
-                    // 'Authorization': `Bearer ${token}`, // Si nécessaire, ajouter un token
-                },
-            }
-        );
-    
-        const result = response.data;
-        console.log(result); 
-        console.log("Réponse complète du serveur : ", response);
-
-        if (response.status === 200 || response.status === 201) {
-            // Si la réponse contient des données, affichez-les
-            console.log("Bien ajouté avec succès:", response.data);
-            if (response.data && response.data.propertyId) {
-                console.log("ID de la propriété ajoutée :", response.data.propertyId);
-            }
-        } else {
-            console.error("Erreur côté serveur:", response.data);
-            toast({
-                title: "Erreur",
-                description: response.data.message || "Une erreur est survenue.",
-                variant: "destructive",
-            });
-        }
-        if (publish) {
-            setIsPublishing(false);
-            onOpenChange(false);
-
-            toast({
-                title: "Bien d'investissement publié avec succès",
-                description: "Redirection vers la page d'édition...",
-                variant: "default",
-            });
-
-            setTimeout(() => {
-                navigate(`/admin/investissements`);
-            }, 300);
-        } else {
-            setIsSubmitting(false);
-
-            toast({
-                title: "Brouillon enregistré",
-                description: "Le bien d'investissement a été ajouté en mode brouillon.",
-                variant: "default",
-            });
-
-            onPropertyAdded(result.propertyId);
-        }
-
-    } catch (error) {
-        console.error('Erreur lors de l\'envoi des données:', error);
+      const formData = new FormData();
+      const {
+        title, type, price, status, location, area, bedrooms, bathrooms,
+        description, isFeatured, investmentType, projectStatus,
+        returnRate, minEntryPrice, recommendedDuration,
+        partners, financingEligibility
+      } = data;
+  
+      // ✅ Ajout des champs principaux
+      formData.append('title', title);
+      formData.append('type', type);
+      formData.append('price', price);
+      formData.append('status', status);
+      formData.append('location', location);
+      formData.append('area', area);
+      formData.append('bedrooms', bedrooms ? bedrooms.toString() : "0");
+      formData.append('bathrooms', bathrooms ? bathrooms.toString() : "0");
+      formData.append('description', description);
+      formData.append('isFeatured', isFeatured ? "1" : "0");
+      formData.append('investmentType', investmentType);
+      formData.append('projectStatus', projectStatus);
+      formData.append('returnRate', (returnRate !== undefined && returnRate !== null) ? returnRate.toString() : "0");
+      formData.append('minEntryPrice', minEntryPrice);
+      formData.append('recommendedDuration', recommendedDuration);
+      formData.append('financingEligibility', financingEligibility ? "1" : "0");
+  
+      // ✅ Partenaires (convertir en chaîne si tableau)
+      const partnersValue = Array.isArray(partners) ? partners.join(",") : partners;
+      formData.append('partners', partnersValue || "");
+  
+      // ✅ Ajout des images
+      images.forEach(image => formData.append("images[]", image));
+  
+      // ✅ Ajout des documents
+      documents.forEach(doc => formData.append("documents[]", doc));
+  
+      // ✅ Debug des données envoyées
+      console.log("=== Données à envoyer via axios.post ===");
+      [...formData.entries()].forEach(([key, value]) => {
+        console.log(`${key}:`, value instanceof File ? value.name : value);
+      });
+  
+      // ✅ Envoi de la requête
+      const response = await axios.post('http://localhost:8000/api/admin/properties', formData, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'multipart/form-data',
+          'Accept': 'application/json',
+        },
+      });
+  
+      const result = response.data;
+      console.log("✅ Bien ajouté avec succès:", result);
+  
+      if (publish) {
         setIsPublishing(false);
+        onOpenChange(false);
+        toast({
+          title: "Bien publié avec succès",
+          description: "Redirection vers la page d'édition...",
+          variant: "default",
+        });
+        navigate(`/admin/investissements`);
+      } else {
         setIsSubmitting(false);
         toast({
-            title: "Erreur",
-            description: "Une erreur est survenue lors de l'ajout du bien.",
-            variant: "destructive",
+          title: "Brouillon enregistré",
+          description: "Le bien d'investissement a été ajouté en mode brouillon.",
+          variant: "default",
         });
+        onPropertyAdded(result.propertyId);
+      }
+  
+    } catch (error) {
+      console.error("❌ Erreur lors de l'ajout du bien:", error);
+      toast({
+        title: "Erreur",
+        description: "Une erreur est survenue lors de l'ajout du bien.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+      setIsPublishing(false);
     }
-};
+  };
+  
 
   
 
@@ -312,67 +290,87 @@ entries.forEach(([key, value]) => {
                 name="title"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Titre du bien</FormLabel>
+                    <FormLabel className="text-gray-800 dark:text-white">Titre du bien</FormLabel>
                     <FormControl>
                       <Input 
                         placeholder="ex: Complexe résidentiel Horizon" 
                         autoFocus
                         {...field} 
+                        className="w-full pl-10 pr-3 py-2 border rounded-md bg-white dark:bg-gray-800 text-gray-800 dark:text-white border-gray-300 dark:border-gray-600 focus:ring-0 focus:outline-none transition-colors"
                       />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-              
               <FormField
                 control={form.control}
-                name="type"
+                name="investmentType"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Type de bien</FormLabel>
+                    <FormLabel className="text-gray-800 dark:text-white">Type d'investissement</FormLabel>
                     <Select 
                       onValueChange={field.onChange} 
                       defaultValue={field.value}
                     >
                       <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Sélectionner un type" />
+                      <SelectTrigger className="w-full flex items-center justify-between bg-white dark:bg-gray-800 text-gray-800 dark:text-white border border-gray-300 dark:border-gray-600 rounded-md transition-colors px-3 py-2">
+
+                          <SelectValue placeholder="Sélectionner un type d'investissement" />
                         </SelectTrigger>
                       </FormControl>
-                      <SelectContent>
-                        <SelectItem value="Appartement">Appartement</SelectItem>
-                        <SelectItem value="Villa">Villa</SelectItem>
-                        <SelectItem value="Maison">Maison</SelectItem>
-                        <SelectItem value="Riad">Riad</SelectItem>
-                        <SelectItem value="Bureau">Bureau</SelectItem>
-                        <SelectItem value="Commerce">Commerce</SelectItem>
-                        <SelectItem value="Terrain">Terrain</SelectItem>
-                        <SelectItem value="Immeuble">Immeuble</SelectItem>
-                        <SelectItem value="Complexe">Complexe</SelectItem>
-                        <SelectItem value="Autre">Autre</SelectItem>
+                      <SelectContent 
+          className="bg-white dark:bg-gray-800 text-gray-800 dark:text-white border border-gray-300 dark:border-gray-600 rounded-md shadow-lg transition-transform duration-200 transform origin-top scale-95 data-[state=open]:scale-100"
+        >                        <SelectItem value="Résidentiel">
+                          <div className="flex items-center">
+                            <Home className="h-4 w-4 mr-2 text-blue-600 dark:text-blue-400" />
+                            Résidentiel
+                          </div>
+                        </SelectItem>
+                        <SelectItem value="Commercial">
+                          <div className="flex items-center">
+                            <Briefcase className="h-4 w-4 mr-2 text-blue-600 dark:text-blue-400" />
+                            Commercial
+                          </div>
+                        </SelectItem>
+                        <SelectItem value="Touristique">
+                          <div className="flex items-center">
+                            <Luggage className="h-4 w-4 mr-2 text-blue-600 dark:text-blue-400" />
+                            Touristique
+                          </div>
+                        </SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-            </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              
               <FormField
+  control={form.control}
+  name="type"
+  render={({ field }) => (
+    <FormItem>
+      <FormLabel className="text-gray-800 dark:text-white">Type de bien</FormLabel>
+      <FormControl>
+        <Input placeholder="ex: Maison, Villa..." {...field}className="w-full pl-10 pr-3 py-2 border rounded-md bg-white dark:bg-gray-800 text-gray-800 dark:text-white border-gray-300 dark:border-gray-600 focus:ring-0 focus:outline-none transition-colors" />
+      </FormControl>
+      <FormMessage />
+    </FormItem>
+  )}
+/>
+<FormField
                 control={form.control}
                 name="price"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Prix (MAD)</FormLabel>
+                    <FormLabel className="text-gray-800 dark:text-white">Prix (MAD)</FormLabel>
                     <FormControl>
                       <div className="relative">
-                        <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500" />
                         <Input 
                           placeholder="ex: 2,500,000" 
-                          className="pl-10" 
                           {...field} 
+                          className="w-full pl-10 pr-3 py-2 border rounded-md bg-white dark:bg-gray-800 text-gray-800 dark:text-white border-gray-300 dark:border-gray-600 focus:ring-0 focus:outline-none transition-colors"
                         />
                       </div>
                     </FormControl>
@@ -380,23 +378,28 @@ entries.forEach(([key, value]) => {
                   </FormItem>
                 )}
               />
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              
               
               <FormField
                 control={form.control}
                 name="status"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Statut</FormLabel>
+                    <FormLabel className="text-gray-800 dark:text-white">Statut</FormLabel>
                     <Select 
                       onValueChange={field.onChange} 
                       defaultValue={field.value}
                     >
                       <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Sélectionner un statut" />
+                      <SelectTrigger className="w-full flex items-center justify-between bg-white dark:bg-gray-800 text-gray-800 dark:text-white border border-gray-300 dark:border-gray-600 rounded-md transition-colors px-3 py-2">                          <SelectValue placeholder="Sélectionner un statut" />
                         </SelectTrigger>
                       </FormControl>
-                      <SelectContent>
+                      <SelectContent 
+          className="bg-white dark:bg-gray-800 text-gray-800 dark:text-white border border-gray-300 dark:border-gray-600 rounded-md shadow-lg transition-transform duration-200 transform origin-top scale-95 data-[state=open]:scale-100"
+        >
                         <SelectItem value="Disponible">Disponible</SelectItem>
                         <SelectItem value="Réservé">Réservé</SelectItem>
                         <SelectItem value="Vendu">Vendu</SelectItem>
@@ -406,21 +409,20 @@ entries.forEach(([key, value]) => {
                   </FormItem>
                 )}
               />
-            </div>
-            
-            <FormField
+               <FormField
               control={form.control}
               name="location"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Localisation</FormLabel>
+                  <FormLabel className="text-gray-800 dark:text-white">Ville</FormLabel>
                   <FormControl>
                     <div className="relative">
                       <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500" />
                       <Input 
                         placeholder="ex: Casablanca, Anfa" 
-                        className="pl-10" 
                         {...field} 
+                        className="w-full pl-10 pr-3 py-2 border rounded-md bg-white dark:bg-gray-800 text-gray-800 dark:text-white border-gray-300 dark:border-gray-600 focus:ring-0 focus:outline-none transition-colors"
+
                       />
                     </div>
                   </FormControl>
@@ -428,6 +430,9 @@ entries.forEach(([key, value]) => {
                 </FormItem>
               )}
             />
+            </div>
+            
+           
             
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <FormField
@@ -435,14 +440,15 @@ entries.forEach(([key, value]) => {
                 name="area"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Superficie (m²)</FormLabel>
+                    <FormLabel className="text-gray-800 dark:text-white">Superficie (m²)</FormLabel>
                     <FormControl>
                       <div className="relative">
                         <Ruler className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500" />
                         <Input 
                           placeholder="ex: 150" 
-                          className="pl-10" 
                           {...field} 
+                          className="w-full pl-10 pr-3 py-2 border rounded-md bg-white dark:bg-gray-800 text-gray-800 dark:text-white border-gray-300 dark:border-gray-600 focus:ring-0 focus:outline-none transition-colors"
+
                         />
                       </div>
                     </FormControl>
@@ -456,14 +462,15 @@ entries.forEach(([key, value]) => {
                 name="bedrooms"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Chambres</FormLabel>
+                    <FormLabel className="text-gray-800 dark:text-white">Chambres</FormLabel>
                     <FormControl>
                       <div className="relative">
                         <Bed className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500" />
                         <Input 
                           placeholder="ex: 3" 
-                          className="pl-10" 
-                          {...field} 
+                          {...field}
+                          className="w-full pl-10 pr-3 py-2 border rounded-md bg-white dark:bg-gray-800 text-gray-800 dark:text-white border-gray-300 dark:border-gray-600 focus:ring-0 focus:outline-none transition-colors"
+ 
                         />
                       </div>
                     </FormControl>
@@ -477,14 +484,15 @@ entries.forEach(([key, value]) => {
                 name="bathrooms"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Salles de bain</FormLabel>
+                    <FormLabel className="text-gray-800 dark:text-white">Salles de bain</FormLabel>
                     <FormControl>
                       <div className="relative">
                         <Bath className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500" />
                         <Input 
                           placeholder="ex: 2" 
-                          className="pl-10" 
                           {...field} 
+                          className="w-full pl-10 pr-3 py-2 border rounded-md bg-white dark:bg-gray-800 text-gray-800 dark:text-white border-gray-300 dark:border-gray-600 focus:ring-0 focus:outline-none transition-colors"
+
                         />
                       </div>
                     </FormControl>
@@ -499,12 +507,13 @@ entries.forEach(([key, value]) => {
               name="description"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Description</FormLabel>
+                  <FormLabel className="text-gray-800 dark:text-white">Description</FormLabel>
                   <FormControl>
                     <Textarea 
                       placeholder="Description détaillée du bien..." 
-                      className="min-h-[120px]" 
                       {...field} 
+                      className="w-full min-h-[120px] pl-10 pr-3 py-2 border rounded-md bg-white dark:bg-gray-800 text-gray-800 dark:text-white border-gray-300 dark:border-gray-600 focus:ring-0 focus:outline-none transition-colors"
+
                     />
                   </FormControl>
                   <FormMessage />
@@ -518,64 +527,24 @@ entries.forEach(([key, value]) => {
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <FormField
-                control={form.control}
-                name="investmentType"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Type d'investissement</FormLabel>
-                    <Select 
-                      onValueChange={field.onChange} 
-                      defaultValue={field.value}
-                    >
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Sélectionner un type d'investissement" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="Résidentiel">
-                          <div className="flex items-center">
-                            <Home className="h-4 w-4 mr-2" />
-                            Résidentiel
-                          </div>
-                        </SelectItem>
-                        <SelectItem value="Commercial">
-                          <div className="flex items-center">
-                            <Briefcase className="h-4 w-4 mr-2" />
-                            Commercial
-                          </div>
-                        </SelectItem>
-                        <SelectItem value="Touristique">
-                          <div className="flex items-center">
-                            <Luggage className="h-4 w-4 mr-2" />
-                            Touristique
-                          </div>
-                        </SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
               
               <FormField
                 control={form.control}
                 name="projectStatus"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Statut du projet</FormLabel>
+                    <FormLabel className="text-gray-800 dark:text-white">Statut du projet</FormLabel>
                     <Select 
                       onValueChange={field.onChange} 
                       defaultValue={field.value}
                     >
                       <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Sélectionner un statut" />
+                      <SelectTrigger className="w-full flex items-center justify-between bg-white dark:bg-gray-800 text-gray-800 dark:text-white border border-gray-300 dark:border-gray-600 rounded-md transition-colors px-3 py-2">
+                      <SelectValue placeholder="Sélectionner un statut" />
                         </SelectTrigger>
                       </FormControl>
-                      <SelectContent>
-                        <SelectItem value="Pré-commercialisation">Pré-commercialisation</SelectItem>
+                      <SelectContent className="bg-white dark:bg-gray-800 text-gray-800 dark:text-white border border-gray-300 dark:border-gray-600 rounded-md shadow-lg transition-transform duration-200 transform origin-top scale-95 data-[state=open]:scale-100">
+                      <SelectItem value="Pré-commercialisation">Pré-commercialisation</SelectItem>
                         <SelectItem value="En cours">En cours</SelectItem>
                         <SelectItem value="Terminé">Terminé</SelectItem>
                       </SelectContent>
@@ -584,22 +553,44 @@ entries.forEach(([key, value]) => {
                   </FormItem>
                 )}
               />
+               <FormField
+                control={form.control}
+                name="recommendedDuration"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-gray-800 dark:text-white">Durée d'investissement recommandée</FormLabel>
+                    <FormControl>
+                      <div className="relative">
+                        <Clock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500" />
+                        <Input 
+                          placeholder="ex: 5-7 ans" 
+                          {...field} 
+                          className="w-full pl-10 pr-3 py-2 border rounded-md bg-white dark:bg-gray-800 text-gray-800 dark:text-white border-gray-300 dark:border-gray-600 focus:ring-0 focus:outline-none transition-colors"
+
+                        />
+                      </div>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
             </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <FormField
                 control={form.control}
                 name="returnRate"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Rentabilité estimée (%)</FormLabel>
+                    <FormLabel className="text-gray-800 dark:text-white">Rentabilité estimée (%)</FormLabel>
                     <FormControl>
                       <div className="relative">
                         <TrendingUp className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500" />
                         <Input 
                           placeholder="ex: 8.5" 
-                          className="pl-10" 
                           {...field} 
+                          className="w-full pl-10 pr-3 py-2 border rounded-md bg-white dark:bg-gray-800 text-gray-800 dark:text-white border-gray-300 dark:border-gray-600 focus:ring-0 focus:outline-none transition-colors"
+
                         />
                       </div>
                     </FormControl>
@@ -613,14 +604,14 @@ entries.forEach(([key, value]) => {
                 name="minEntryPrice"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Prix d'entrée minimal (MAD)</FormLabel>
+                    <FormLabel className="text-gray-800 dark:text-white">Prix d'entrée minimal (MAD)</FormLabel>
                     <FormControl>
                       <div className="relative">
-                        <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500" />
                         <Input 
                           placeholder="ex: 500,000" 
-                          className="pl-10" 
                           {...field} 
+                          className="w-full pl-10 pr-3 py-2 border rounded-md bg-white dark:bg-gray-800 text-gray-800 dark:text-white border-gray-300 dark:border-gray-600 focus:ring-0 focus:outline-none transition-colors"
+
                         />
                       </div>
                     </FormControl>
@@ -629,26 +620,7 @@ entries.forEach(([key, value]) => {
                 )}
               />
               
-              <FormField
-                control={form.control}
-                name="recommendedDuration"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Durée d'investissement recommandée</FormLabel>
-                    <FormControl>
-                      <div className="relative">
-                        <Clock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500" />
-                        <Input 
-                          placeholder="ex: 5-7 ans" 
-                          className="pl-10" 
-                          {...field} 
-                        />
-                      </div>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+             
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -657,7 +629,7 @@ entries.forEach(([key, value]) => {
     name="partners"
     render={({ field }) => (
       <FormItem>
-        <FormLabel>Partenaires ou promoteurs associés</FormLabel>
+        <FormLabel className="text-gray-800 dark:text-white">Partenaires ou promoteurs associés</FormLabel>
         <FormDescription>Séparés par des virgules</FormDescription>
         <FormControl>
           <Input
@@ -668,7 +640,10 @@ entries.forEach(([key, value]) => {
               const value = e.target.value;
               // Conserver la chaîne séparée par des virgules
               field.onChange(value);  // Ne pas convertir en tableau ici, garder une chaîne
+              
             }}
+            className="w-full pl-10 pr-3 py-2 border rounded-md bg-white dark:bg-gray-800 text-gray-800 dark:text-white border-gray-300 dark:border-gray-600 focus:ring-0 focus:outline-none transition-colors"
+
           />
         </FormControl>
         <FormMessage />
@@ -700,107 +675,117 @@ entries.forEach(([key, value]) => {
             </div>
             
             <div className="space-y-2">
-              <h3 className="text-lg font-medium">Médias et documents</h3>
-              <Separator />
-            </div>
-            
-            <div className="space-y-4">
-              <FormLabel>Images (glisser-déposer ou sélectionner)</FormLabel>
-              <div
-                className="border-2 border-dashed rounded-md p-6 flex flex-col items-center justify-center cursor-pointer hover:bg-gray-50 transition-colors"
-                onDragOver={(e) => e.preventDefault()}
-                onDrop={handleImageDrop}
-                onClick={() => fileInputRef.current?.click()}
-              >
-                <Image className="h-12 w-12 text-gray-400 mb-2" />
-                <p className="text-sm text-gray-500">
-                  Glisser-déposer vos images ici ou cliquer pour sélectionner
-                </p>
-                <p className="text-xs text-gray-400 mt-1">
-                  Formats supportés: JPG, PNG, WEBP
-                </p>
-                <input
-                  type="file"
-                  ref={fileInputRef}
-                  className="hidden"
-                  accept="image/*"
-                  multiple
-                  onChange={handleImageSelect}
-                />
-              </div>
-              
-              {images.length > 0 && (
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 mt-4">
-                  {images.map((image, index) => (
-                    <div 
-                      key={index} 
-                      className="relative group rounded-md overflow-hidden h-24"
-                    >
-                      <img
-                        src={URL.createObjectURL(image)}
-                        alt={`Image ${index + 1}`}
-                        className="w-full h-full object-cover"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => removeImage(index)}
-                        className="absolute top-1 right-1 bg-white rounded-full p-1 shadow-md opacity-0 group-hover:opacity-100 transition-opacity"
-                      >
-                        <X className="h-4 w-4" />
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-            
-            <div className="space-y-4">
-              <FormLabel>Documents (brochures, analyses, études)</FormLabel>
-              <div
-                className="border-2 border-dashed rounded-md p-6 flex flex-col items-center justify-center cursor-pointer hover:bg-gray-50 transition-colors"
-                onClick={() => documentInputRef.current?.click()}
-              >
-                <FileText className="h-12 w-12 text-gray-400 mb-2" />
-                <p className="text-sm text-gray-500">
-                  Cliquer pour ajouter des documents
-                </p>
-                <p className="text-xs text-gray-400 mt-1">
-                  Formats supportés: PDF, DOC, DOCX
-                </p>
-                <input
-                  type="file"
-                  ref={documentInputRef}
-                  className="hidden"
-                  accept=".pdf,.doc,.docx,.xls,.xlsx"
-                  multiple
-                  onChange={handleDocumentSelect}
-                />
-              </div>
-              
-              {documents.length > 0 && (
-                <div className="space-y-2 mt-4">
-                  {documents.map((doc, index) => (
-                    <div 
-                      key={index} 
-                      className="flex items-center justify-between p-3 bg-gray-50 rounded-md"
-                    >
-                      <div className="flex items-center">
-                        <FileText className="h-4 w-4 mr-2 text-blue-600" />
-                        <span className="text-sm">{doc.name}</span>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => removeDocument(index)}
-                        className="p-1 hover:bg-gray-200 rounded-full"
-                      >
-                        <X className="h-4 w-4" />
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-            
+  <h3 className="text-lg font-medium text-gray-800 dark:text-white">Médias et documents</h3>
+  <Separator className="bg-gray-300 dark:bg-gray-600" />
+</div>
+
+<div className="space-y-4">
+  <FormLabel className="text-gray-800 dark:text-white">Images (glisser-déposer ou sélectionner)</FormLabel>
+  <div
+    className="border-2 border-dashed rounded-md p-6 flex flex-col items-center justify-center cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+    onDragOver={(e) => e.preventDefault()}
+    onDrop={handleImageDrop}
+    onClick={() => fileInputRef.current?.click()}
+  >
+    <Image className="h-12 w-12 text-gray-400 dark:text-gray-500 mb-2" />
+    <p className="text-sm text-gray-500 dark:text-gray-400">
+      Glisser-déposer vos images ici ou cliquer pour sélectionner
+    </p>
+    <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
+      Formats supportés: JPG, PNG, WEBP
+    </p>
+    <input
+      type="file"
+      ref={fileInputRef}
+      className="hidden"
+      accept="image/*"
+      multiple
+      onChange={handleImageSelect}
+    />
+  </div>
+  
+  {images.length > 0 && (
+    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 mt-4">
+      {images.map((image, index) => (
+        <div 
+          key={index} 
+          className="relative group rounded-md overflow-hidden h-24 bg-gray-100 dark:bg-gray-800"
+        >
+          <img
+            src={URL.createObjectURL(image)}
+            alt={`Image ${index + 1}`}
+            className="w-full h-full object-cover transition-transform duration-200 group-hover:scale-105"
+          />
+          <button
+            type="button"
+            onClick={() => removeImage(index)}
+            className="absolute top-1 right-1 bg-white dark:bg-gray-700 rounded-full p-1 shadow-md opacity-0 group-hover:opacity-100 transition-opacity"
+          >
+            <X className="h-4 w-4 text-red-600 dark:text-red-400" />
+          </button>
+        </div>
+      ))}
+    </div>
+  )}
+</div>
+
+<div className="space-y-4">
+  <FormLabel className="text-gray-800 dark:text-white">Documents (brochures, analyses, études)</FormLabel>
+  <div
+    className="border-2 border-dashed rounded-md p-6 flex flex-col items-center justify-center cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+    onClick={() => {
+      if (documents.length < 5) {
+        documentInputRef.current?.click();
+      } else {
+        alert("Vous avez atteint la limite de 5 documents.");
+      }
+    }}
+  >
+    <FileText className="h-12 w-12 text-gray-400 dark:text-gray-500 mb-2" />
+    <p className="text-sm text-gray-500 dark:text-gray-400">
+      Cliquer pour ajouter des documents
+    </p>
+    <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
+      Formats supportés: PDF, DOC, DOCX, XLS, XLSX
+    </p>
+    <p className="text-xs text-red-500 mt-1">
+      {documents.length >= 5 && "Limite de 5 documents atteinte"}
+    </p>
+    <input
+      type="file"
+      ref={documentInputRef}
+      className="hidden"
+      accept=".pdf,.doc,.docx,.xls,.xlsx"
+      multiple
+      onChange={handleDocumentSelect}
+      disabled={documents.length >= 5}
+    />
+  </div>
+
+  {documents.length > 0 && (
+    <div className="space-y-2 mt-4">
+      {documents.map((doc, index) => (
+        <div 
+          key={index} 
+          className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-md transition-colors"
+        >
+          <div className="flex items-center">
+            <FileText className="h-4 w-4 mr-2 text-blue-600 dark:text-blue-400" />
+            <span className="text-sm text-gray-800 dark:text-white">{doc.name}</span>
+          </div>
+          <button
+            type="button"
+            onClick={() => removeDocument(index)}
+            className="p-1 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-full transition-colors"
+          >
+            <X className="h-4 w-4 text-red-600 dark:text-red-400" />
+          </button>
+        </div>
+      ))}
+    </div>
+  )}
+</div>
+
             <FormField
               control={form.control}
               name="isFeatured"
@@ -827,6 +812,8 @@ entries.forEach(([key, value]) => {
                 type="button"
                 variant="outline"
                 onClick={() => onOpenChange(false)}
+                className="text-gray-800 dark:text-black border-gray-300 dark:border-gray-600 transition-colors"
+
               >
                 Annuler
               </Button>

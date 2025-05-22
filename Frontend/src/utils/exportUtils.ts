@@ -1,135 +1,160 @@
-
 import { jsPDF } from "jspdf";
 import "jspdf-autotable";
 import { saveAs } from "file-saver";
+import { PropertyData } from "./types"; // adapte ce chemin selon ton projet
+import * as XLSX from "xlsx";
+import { Property } from "@/context/PropertiesContext"; // ou adapte selon ton type
 
-// Type for property data
+// Étend les données pour correspondre à tous les champs du tableau
 export interface PropertyData {
   id: string;
   title: string;
   location: string;
+  quartier?: string;
   price: string;
   type: string;
   status: string;
   bedrooms: number;
   bathrooms: number;
   area: string;
-  date: string;
+  description?: string;
+  is_featured?: boolean;
+  available_date?: string;
+  is_draft?: boolean;
+  construction_year?: string;
+  condition?: string;
+  exposition?: string;
+  cuisine?: string;
+  has_parking?: string;
+  parking_places?: number;
+  climatisation?: string;
+  terrasse?: string;
+  points_forts?: string[];
+  occupation_rate?: string;
+  estimated_valuation?: string;
+  estimated_charges?: string;
+  monthly_rent?: string;
+  proximite?: string[];
+  owner_name?: string;
+  owner_email?: string;
+  owner_phone?: string;
+  owner_nationality?: string;
+  map_link?: string;
+  created_at?: string;
+  isDraft?: boolean;
 }
 
-/**
- * Converts property data to CSV and initiates download
- */
-export const exportToCsv = (properties: PropertyData[]) => {
-  // Define headers
+export type PropertyData = Property;
+
+export const exportToXlsx = (properties: PropertyData[]) => {
   const headers = [
-    "ID", 
-    "Titre", 
-    "Localisation", 
-    "Prix", 
-    "Type", 
-    "Statut", 
-    "Chambres", 
-    "Salles de bain", 
-    "Surface", 
-    "Date"
+    "ID", "Titre", "Type", "Ville", "Quartier", "Prix", "Surface", "Chambres", "Salles de bain",
+    "Description", "Mis en avant", "Disponible le", "Brouillon", "Année de construction", "Condition",
+    "Orientation", "Cuisine", "Parking", "Climatisation", "Terrasse", "Points forts", "Taxe d'habitation",
+    "Valorisation estimée", "Frais de syndic", "Rendement locatif", "Proximité", "Nom propriétaire",
+    "Email propriétaire", "Téléphone propriétaire", "Nationalité", "Lien carte", "Date de création", "Statut"
   ];
-  
-  // Convert properties to CSV rows
-  const rows = properties.map((property) => [
-    property.id,
-    property.title,
-    property.location,
-    property.price,
-    property.type,
-    property.status,
-    property.bedrooms.toString(),
-    property.bathrooms.toString(),
-    property.area,
-    property.date,
+
+  const rows = properties.map(p => [
+    p.id,
+    p.title,
+    p.type,
+    p.location,
+    p.quartier || '',
+    p.price,
+    p.area,
+    p.bedrooms,
+    p.bathrooms,
+    p.description || '',
+    p.is_featured ? 'Oui' : 'Non',
+    p.available_date ? new Date(p.available_date).toLocaleDateString('fr-FR') : '',
+    p.is_draft ? 'Oui' : 'Non',
+    p.construction_year || '',
+    p.condition || '',
+    p.exposition || '',
+    p.cuisine || '',
+    p.has_parking === 'oui' ? `${p.parking_places || 1} place(s)` : 'Non',
+    p.climatisation || '',
+    p.terrasse || '',
+    p.points_forts?.join(', ') || '',
+    p.occupation_rate || '',
+    p.estimated_valuation || '',
+    p.estimated_charges || '',
+    p.monthly_rent || '',
+    p.proximite?.join(', ') || '',
+    p.owner_name || '',
+    p.owner_email || '',
+    p.owner_phone || '',
+    p.owner_nationality || '',
+    p.map_link || '',
+    p.created_at ? new Date(p.created_at).toLocaleDateString('fr-FR') : '',
+    p.isDraft ? 'Brouillon' : p.status
   ]);
-  
-  // Combine headers and rows
-  const csvContent = [
-    headers.join(","),
-    ...rows.map(row => row.join(","))
-  ].join("\n");
-  
-  // Create blob and download
-  const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8" });
+
+  const worksheetData = [headers, ...rows];
+
+  const worksheet = XLSX.utils.aoa_to_sheet(worksheetData);
+  const workbook = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(workbook, worksheet, "Biens");
+
+  const excelBuffer = XLSX.write(workbook, { bookType: "xlsx", type: "array" });
   const today = new Date().toISOString().slice(0, 10);
-  saveAs(blob, `Biens_Immobiliers_${today}.csv`);
+  const blob = new Blob([excelBuffer], { type: "application/octet-stream" });
+  saveAs(blob, `Biens_Immobiliers_${today}.xlsx`);
 };
 
-/**
- * Converts property data to PDF and initiates download
- */
+
 export const exportToPdf = (properties: PropertyData[]) => {
-  // Create new jsPDF instance
-  const doc = new jsPDF();
-  
-  // Add title
-  const title = "Liste des Biens Immobiliers";
-  doc.setFontSize(18);
-  doc.text(title, 14, 22);
-  
-  // Add date
+  const doc = new jsPDF("landscape", "pt");
   const today = new Date().toLocaleDateString("fr-FR");
+
+  doc.setFontSize(18);
+  doc.text("Liste des Biens Immobiliers", 40, 30);
   doc.setFontSize(11);
-  doc.text(`Généré le: ${today}`, 14, 30);
-  
-  // Define table columns
-  const columns = [
-    { header: "ID", dataKey: "id" },
-    { header: "Titre", dataKey: "title" },
-    { header: "Localisation", dataKey: "location" },
-    { header: "Prix", dataKey: "price" },
-    { header: "Type", dataKey: "type" },
-    { header: "Statut", dataKey: "status" },
-    { header: "Surface", dataKey: "area" },
+  doc.text(`Généré le: ${today}`, 40, 45);
+
+  const headers = [
+    "ID", "Titre", "Ville", "Quartier", "Type", "Prix", "Surface", "Chambres",
+    "Sdb", "Condition", "Parking", "Propriétaire", "Statut"
   ];
-  
-  // Convert properties to table data format
-  const data = properties.map((property) => ({
-    id: property.id,
-    title: property.title,
-    location: property.location,
-    price: property.price,
-    type: property.type,
-    status: property.status,
-    area: property.area,
-  }));
-  
-  // Add table to document
+
+  const rows = properties.map(p => [
+    p.id,
+    p.title,
+    p.location,
+    p.quartier || '',
+    p.type,
+    p.price,
+    p.area,
+    p.bedrooms,
+    p.bathrooms,
+    p.condition || '',
+    p.has_parking === 'oui' ? `${p.parking_places || 1}` : 'Non',
+    p.owner_name || '',
+    p.isDraft ? 'Brouillon' : (p.status || '—'),
+  ]);
+
   (doc as any).autoTable({
-    startY: 40,
-    head: [columns.map(col => col.header)],
-    body: data.map(item => columns.map(col => item[col.dataKey as keyof typeof item])),
-    theme: "grid",
+    startY: 60,
+    head: [headers],
+    body: rows,
+    theme: 'grid',
     headStyles: { fillColor: [41, 128, 185], textColor: 255 },
-    styles: { overflow: "linebreak", cellWidth: "auto" },
-    columnStyles: { 
-      0: { cellWidth: 15 }, // ID column
-      1: { cellWidth: 50 }, // Title column
-    },
+    styles: { fontSize: 8, cellWidth: 'wrap' },
   });
-  
-  // Save document
+
   doc.save(`Liste_Biens_Immobiliers_${today.replace(/\//g, "-")}.pdf`);
 };
 
-/**
- * Opens a print-optimized view of property data
- */
 export const printProperties = (properties: PropertyData[]) => {
-  // Create a new window for printing
+  console.log(properties); // ✅ ici c’est bon
+
   const printWindow = window.open("", "_blank");
   if (!printWindow) {
     alert("Veuillez autoriser les popups pour l'impression");
     return;
   }
-  
-  // Generate HTML content
+
   const today = new Date().toLocaleDateString("fr-FR");
   const htmlContent = `
     <!DOCTYPE html>
@@ -171,13 +196,6 @@ export const printProperties = (properties: PropertyData[]) => {
           .no-print {
             display: none;
           }
-          body {
-            margin: 0;
-            padding: 15px;
-          }
-          button {
-            display: none;
-          }
         }
       </style>
     </head>
@@ -196,43 +214,35 @@ export const printProperties = (properties: PropertyData[]) => {
           <tr>
             <th>ID</th>
             <th>Titre</th>
-            <th>Localisation</th>
-            <th>Prix</th>
+            <th>Ville</th>
+            <th>Quartier</th>
             <th>Type</th>
-            <th>Statut</th>
-            <th>Chambres</th>
+            <th>Prix</th>
             <th>Surface</th>
+            <th>Chambres</th>
+            <th>Statut</th>
           </tr>
         </thead>
         <tbody>
-          ${properties.map(property => `
+          ${properties.map(p => `
             <tr>
-              <td>${property.id}</td>
-              <td>${property.title}</td>
-              <td>${property.location}</td>
-              <td>${property.price}</td>
-              <td>${property.type}</td>
-              <td>${property.status}</td>
-              <td>${property.bedrooms}</td>
-              <td>${property.area}</td>
+              <td>${p.id}</td>
+              <td>${p.title}</td>
+              <td>${p.location}</td>
+              <td>${p.quartier || ''}</td>
+              <td>${p.type}</td>
+              <td>${p.price}</td>
+              <td>${p.area}</td>
+              <td>${p.bedrooms}</td>
+              <td>${p.isDraft ? 'Brouillon' : p.status}</td>
             </tr>
-          `).join('')}
+          `).join("")}
         </tbody>
       </table>
-      
-      <script>
-        // Auto-print when loaded
-        window.onload = function() {
-          setTimeout(function() {
-            // window.print();
-          }, 500);
-        };
-      </script>
     </body>
     </html>
   `;
-  
-  // Write content to new window
+
   printWindow.document.open();
   printWindow.document.write(htmlContent);
   printWindow.document.close();

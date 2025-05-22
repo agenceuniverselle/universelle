@@ -12,6 +12,8 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Property } from '@/context/PropertiesContext';
+import { toast } from 'sonner';
+
 import { 
   MapPin, 
   TrendingUp, 
@@ -22,10 +24,14 @@ import {
   FileText,
   Download,
   CheckCircle2,
-  Info
+  Info,
+  Bath,
+  Bed,
+  Ruler
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
+import { toast as toastSonner } from "sonner";
 
 interface InvestmentDetailDialogProps {
   property: Property;
@@ -41,7 +47,6 @@ const InvestmentDetailDialog: React.FC<InvestmentDetailDialogProps> = ({
   const { toast } = useToast();
   const { investmentDetails } = property;
   const ImageUrl = property.images.length > 0 ? `http://localhost:8000/${property.images}` : undefined;
-// Fonction pour télécharger le document
 
 // Fonction pour télécharger le document
 const [isDownloading, setIsDownloading] = useState(false); // Un état pour gérer le téléchargement
@@ -51,7 +56,14 @@ const handleDownload = (propertyId, documentIndex) => {
   if (isDownloading) return; // Empêche le double clic si le téléchargement est déjà en cours
 
   setIsDownloading(true); // Marquer le téléchargement comme en cours
-
+ // Toast démarrage
+ toastSonner("Téléchargement démarré", {
+  description: "Le plan est en cours de téléchargement.",
+  action: {
+    label: "Fermer",
+    onClick: () => {},
+  },
+});
   fetch(`http://localhost:8000/api/download/${propertyId}/${documentIndex}`)
     .then((response) => {
       if (!response.ok) {
@@ -102,8 +114,8 @@ const handleDownload = (propertyId, documentIndex) => {
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+    <Dialog open={open} onOpenChange={onOpenChange} >
+      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-autobg-white dark:bg-white text-gray-800 dark:text-gray-800">
         <DialogHeader>
           <DialogTitle className="text-2xl font-bold">{property.title}</DialogTitle>
           <DialogDescription className="flex items-center text-base mt-1">
@@ -208,6 +220,50 @@ const handleDownload = (propertyId, documentIndex) => {
             )}
           </div>
         </div>
+        <Separator className="my-4" />
+
+<div className="space-y-4">
+  <h3 className="text-lg font-semibold">Caractéristiques du bien</h3>
+  <div className="space-y-3">
+
+    <div className="flex justify-between items-center p-3 bg-gray-50 rounded-md">
+      <div className="flex items-center">
+        <Ruler className="h-5 w-5 mr-2 text-luxe-blue" />
+        <span className="text-gray-700">Superficie</span>
+      </div>
+      <span className="font-medium">{property.area} m²</span>
+    </div>
+
+    <div className="flex justify-between items-center p-3 bg-gray-50 rounded-md">
+      <div className="flex items-center">
+        <Badge className="h-5 w-5 mr-2 bg-luxe-blue" />
+        <span className="text-gray-700">Statut</span>
+      </div>
+      <span className="font-medium">{property.status}</span>
+    </div>
+
+    {Number(property.bedrooms) > 0 && (
+  <div className="flex justify-between items-center p-3 bg-gray-50 rounded-md">
+    <div className="flex items-center">
+      <Bed className="h-5 w-5 mr-2 text-luxe-blue" />
+      <span className="text-gray-700">Chambres</span>
+    </div>
+    <span className="font-medium">{property.bedrooms}</span>
+  </div>
+)}
+
+{Number(property.bathrooms) > 0 && (
+  <div className="flex justify-between items-center p-3 bg-gray-50 rounded-md">
+    <div className="flex items-center">
+      <Bath className="h-5 w-5 mr-2 text-luxe-blue" />
+      <span className="text-gray-700">Salles de bain</span>
+    </div>
+    <span className="font-medium">{property.bathrooms}</span>
+  </div>
+)}
+
+  </div>
+</div>
 
         <Separator className="my-4" />
         

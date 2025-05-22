@@ -18,6 +18,7 @@ export interface Lead {
   clientType?: 'Investisseur' | 'Acheteur' | 'Prospect';
   interestedProperty?: string;
   investmentCriteria?: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   formData?: Record<string, any>; // Pour stocker toutes les données du formulaire
 }
 

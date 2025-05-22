@@ -9,14 +9,17 @@ export default defineConfig(({ mode }) => ({
     host: "localhost",
     port: 8080,
     proxy: {
-      // Rediriger toutes les requêtes API vers ton serveur backend
-      '/api': 'http://127.0.0.1:8000',  // URL de ton API backend
+      '/api': {
+        target: 'http://localhost:8000',
+        changeOrigin: true,
+        secure: false,
+        rewrite: (path) => path.replace(/^\/api/, '/api'), // ✅ Réécrit correctement l'URL
+      },
     },
   },
   plugins: [
     react(),
-    mode === 'development' &&
-    componentTagger(),
+    mode === 'development' && componentTagger(),
   ].filter(Boolean),
   resolve: {
     alias: {

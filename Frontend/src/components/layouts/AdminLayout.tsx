@@ -1,9 +1,11 @@
-import React, { ReactNode, useState, useEffect } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
-import { Separator } from '@/components/ui/separator';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import React, { ReactNode, useState, useEffect } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { useDarkMode } from "@/context/DarkModeContext"; // ✅ IMPORTER DARK MODE
+
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   LayoutDashboard,
   Building2,
@@ -18,47 +20,117 @@ import {
   X,
   UserPlus,
   TrendingUp,
-} from 'lucide-react';
-import { cn } from '@/lib/utils';
-import { useIsMobile } from '@/hooks/use-mobile';
+  Sun,
+  Moon,
+} from "lucide-react";
+import { cn } from "@/lib/utils";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { useAuth } from "@/context/AuthContext";
+import { useToast } from "@/hooks/use-toast";
 
 interface AdminLayoutProps {
   children: ReactNode;
   title: string;
 }
-
+// ✅ Fonction pour obtenir les initiales d'un nom
+const getInitials = (name: string): string => {
+  if (!name) return "AA";
+  const parts = name.split(" ");
+  const initials = parts.map((part) => part[0]).join("").toUpperCase();
+  return initials.length > 2 ? initials.slice(0, 2) : initials;
+};
 const AdminLayout = ({ children, title }: AdminLayoutProps) => {
   const location = useLocation();
   const navigate = useNavigate();
   const isMobile = useIsMobile();
   const [sidebarOpen, setSidebarOpen] = useState(!isMobile);
-  
+  const { isDarkMode, toggleDarkMode } = useDarkMode(); // ✅ UTILISER DARK MODE
+
+  const { isAuthenticated, user, logout, permissions } = useAuth();
+
+  const { toast } = useToast();
+
   useEffect(() => {
-    // Check authentication status
-    const isAuthenticated = localStorage.getItem('adminAuth') === 'true';
-    if (!isAuthenticated && location.pathname !== '/admin') {
-      navigate('/admin');
+    if (!isAuthenticated) {
+      navigate("/admin", { replace: true });
     }
-  }, [location.pathname, navigate]);
+  }, [isAuthenticated, navigate]);
 
   const handleLogout = () => {
-    localStorage.removeItem('adminAuth');
-    navigate('/admin');
+    logout(); 
+    toast({
+      title: "Déconnexion réussie",
+      description: "Vous avez été déconnecté avec succès.",
+    });
+    navigate("/admin", { replace: true });
   };
 
-  const navItems = [
-    { path: '/admin/dashboard', label: 'Tableau de bord', icon: <LayoutDashboard className="h-5 w-5" /> },
-    { path: '/admin/biens', label: 'Biens immobiliers', icon: <Building2 className="h-5 w-5" /> },
-    { path: '/admin/investissements', label: 'Biens à Investir', icon: <TrendingUp className="h-5 w-5" /> },
-    { path: '/admin/crm', label: 'CRM', icon: <UserPlus className="h-5 w-5" /> },
-    { path: '/admin/users', label: 'Utilisateurs', icon: <Users className="h-5 w-5" /> },
-    { path: '/admin/transactions', label: 'Transactions', icon: <WalletCards className="h-5 w-5" /> },
-    { path: '/admin/content', label: 'Contenus', icon: <FileText className="h-5 w-5" /> },
-    { path: '/admin/stats', label: 'Statistiques', icon: <BarChart3 className="h-5 w-5" /> },
-  ];
+  const getInitials = (name: string) => {
+    if (!name) return "AA";
+    const initials = name
+      .split(" ")
+      .map((part) => part.charAt(0))
+      .join("")
+      .substring(0, 2)
+      .toUpperCase();
+    return initials;
+  };
+// ✅ Fonction pour obtenir les éléments du menu en fonction des permissions
+const getNavItems = () => {
+  return [
+    { 
+      path: "/admin/dashboard", 
+      label: "Tableau de bord", 
+      icon: <LayoutDashboard className="h-5 w-5" />,
+    },
+    permissions.includes("view_properties") && {
+      path: "/admin/biens",
+      label: "Biens immobiliers",
+      icon: <Building2 className="h-5 w-5" />,
+    },
+    permissions.includes("view_investments") && {
+      path: "/admin/investissements",
+      label: "Biens à Investir",
+      icon: <TrendingUp className="h-5 w-5" />,
+    },
+ {
+  path: "/admin/prospects",
+  label: "Prospects",
+  icon: <UserPlus className="h-5 w-5" />,
+},
+
+     /* { 
+      path: "/admin/crm", 
+      label: "CRM", 
+      icon: <UserPlus className="h-5 w-5" />,
+    },*/
+    permissions.includes("view_users") && {
+      path: "/admin/users",
+      label: "Utilisateurs",
+      icon: <Users className="h-5 w-5" />,
+    },
+    /*{ 
+      path: "/admin/transactions", 
+      label: "Transactions", 
+      icon: <WalletCards className="h-5 w-5" />,
+    }, */
+    permissions.includes("view_blogs") && {
+      path: "/admin/content",
+      label: "Contenus",
+      icon: <FileText className="h-5 w-5" />,
+    },
+    { 
+      path: "/admin/stats", 
+      label: "Statistiques", 
+      icon: <BarChart3 className="h-5 w-5" />,
+    },
+  
+  ].filter(Boolean); // ✅ Filtrer les éléments non autorisés
+};
+
 
   return (
-    <div className="flex h-screen bg-gray-100">
+    <div className="flex h-screen bg-gray-100 dark:bg-gray-900"> {/* ✅ GESTION DU MODE SOMBRE */}
       <div className="lg:hidden fixed top-4 left-4 z-50">
         <Button 
           variant="outline" 
@@ -71,96 +143,119 @@ const AdminLayout = ({ children, title }: AdminLayoutProps) => {
       </div>
       
       <aside 
-        className={cn(
-          "fixed inset-y-0 left-0 z-40 w-64 bg-white border-r transform transition-transform duration-200 ease-in-out lg:translate-x-0 lg:static",
-          sidebarOpen ? "translate-x-0" : "-translate-x-full"
-        )}
-      >
-        <div className="flex flex-col h-full">
-          <div className="p-4 border-b">
-            <div className="flex items-center space-x-3">
-              <div className="w-8 h-8 rounded-full bg-luxe-blue flex items-center justify-center text-white font-bold">
-                AU
-              </div>
-              <div>
-                <h1 className="font-playfair font-bold text-luxe-blue">Agence Universelle</h1>
-                <p className="text-xs text-gray-500">Admin Panel</p>
-              </div>
-            </div>
-          </div>
-          
-          <ScrollArea className="flex-1 py-4 px-3">
-            <nav className="space-y-1">
-              {navItems.map((item) => (
-                <Link
-                  key={item.path}
-                  to={item.path}
-                  className={cn(
-                    "flex items-center px-3 py-2.5 text-sm font-medium rounded-md",
-                    location.pathname === item.path
-                      ? "bg-luxe-blue text-white"
-                      : "text-gray-700 hover:bg-gray-100"
-                  )}
-                >
-                  <span className="mr-3">{item.icon}</span>
-                  {item.label}
-                </Link>
-              ))}
-            </nav>
-            
-            <Separator className="my-6" />
-            
-            <div className="space-y-1">
-              <button className="flex items-center px-3 py-2.5 text-sm font-medium rounded-md w-full text-gray-700 hover:bg-gray-100">
-                <Settings className="h-5 w-5 mr-3" />
-                Paramètres
-              </button>
-              <button 
-                className="flex items-center px-3 py-2.5 text-sm font-medium rounded-md w-full text-red-600 hover:bg-red-50"
-                onClick={handleLogout}
-              >
-                <LogOut className="h-5 w-5 mr-3" />
-                Déconnexion
-              </button>
-            </div>
-          </ScrollArea>
-          
-          <div className="p-4 border-t flex items-center">
-            <Avatar className="h-8 w-8 mr-3">
-              <AvatarImage src="" alt="Admin" />
-              <AvatarFallback className="bg-luxe-blue text-white">AA</AvatarFallback>
-            </Avatar>
-            <div>
-              <p className="text-sm font-medium">Admin User</p>
-              <p className="text-xs text-gray-500">admin@example.com</p>
-            </div>
-          </div>
+  className={cn(
+    "fixed inset-y-0 left-0 z-40 w-64 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 border-r dark:border-gray-700 transform transition-transform duration-200 ease-in-out lg:translate-x-0 lg:static",
+    sidebarOpen ? "translate-x-0" : "-translate-x-full"
+  )}
+>
+  <div className="flex flex-col h-full">
+    <div className="p-4 border-b dark:border-gray-700">
+      <div className="flex items-center space-x-3">
+        <div className="w-8 h-8 rounded-full flex items-center justify-center text-white font-bold">
+          <img 
+            src="/Cap2.png"  // ✅ Chemin de ton logo
+            alt="Agence Universelle" 
+            className="w-full h-full object-contain" 
+          />
         </div>
-      </aside>
-      
-      <div className="flex-1 flex flex-col overflow-hidden">
-        <header className="bg-white border-b px-4 py-3 flex items-center justify-between">
-          <h1 className="text-xl font-playfair font-semibold text-luxe-blue">{title}</h1>
-          <div className="flex items-center space-x-4">
-            <Button variant="outline" size="icon" className="relative">
-              <Bell className="h-5 w-5" />
-              <span className="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full"></span>
-            </Button>
-          </div>
-        </header>
-        
-        <main className="flex-1 overflow-auto p-4 md:p-6">
-          {children}
-        </main>
+        <div>
+          <h1 className="font-playfair font-bold text-luxe-blue dark:text-white">Agence Universelle</h1>
+          <p className="text-xs text-gray-500 dark:text-gray-400">
+            {user ? user.role : "Utilisateur Inconnu"} Panel
+          </p>
+        </div>
       </div>
-      
-      {sidebarOpen && isMobile && (
-        <div 
-          className="fixed inset-0 bg-black/50 z-30 lg:hidden"
-          onClick={() => setSidebarOpen(false)}
-        />
-      )}
     </div>
+    
+    <ScrollArea className="flex-1 py-4 px-3">
+      <nav className="space-y-1">
+        {getNavItems().map((item) => (
+          <Link
+            key={item.path}
+            to={item.path}
+            className={cn(
+              "flex items-center px-3 py-2.5 text-sm font-medium rounded-md",
+              location.pathname === item.path
+                ? "bg-luxe-blue text-white dark:bg-blue-600 dark:text-white"
+                : "text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
+            )}
+          >
+            <span className="mr-3">{item.icon}</span>
+            {item.label}
+          </Link>
+        ))}
+      </nav>
+      
+      <Separator className="my-6 dark:border-gray-700" />
+      
+      {/*  <div className="space-y-1">
+        <button 
+          className="flex items-center px-3 py-2.5 text-sm font-medium rounded-md w-full text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-600/20 mt-20" 
+          onClick={handleLogout}
+        >
+          <LogOut className="h-5 w-5 mr-3" />
+          Déconnexion
+        </button>
+      </div>*/}
+    </ScrollArea>
+    
+    <div className="p-4 border-t dark:border-gray-700 flex items-center">
+      <Avatar className="h-8 w-8 mr-3 bg-luxe-blue text-white flex items-center justify-center rounded-full">
+        <AvatarFallback className="bg-luxe-blue text-white">
+          {user ? getInitials(user.name) : "AA"}
+        </AvatarFallback>
+      </Avatar>
+      <div>
+        <p className="text-sm font-medium dark:text-white">{user ? user.name : "Utilisateur Inconnu"}</p>
+        <p className="text-xs text-gray-500 dark:text-gray-400">{user ? user.email : "admin@example.com"}</p>
+      </div>
+    </div>
+  </div>
+</aside>
+
+      
+<div className="flex-1 flex flex-col overflow-hidden">
+  <header className="bg-white dark:bg-gray-800 border-b dark:border-gray-700 px-4 py-3 flex items-center justify-between">
+    <h1 className="text-xl font-playfair font-semibold text-luxe-blue dark:text-white">{title}</h1>
+    <div className="flex items-center space-x-4">
+  <Button 
+    onClick={toggleDarkMode} 
+    variant="outline" 
+    size="icon" 
+    className="bg-white dark:bg-gray-700 dark:text-white dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-600"
+  >
+    {isDarkMode ? (
+      <Sun className="h-5 w-5 text-yellow-400" />
+    ) : (
+      <Moon className="h-5 w-5 text-blue-500" />
+    )}
+  </Button>
+
+  <Button 
+    variant="outline" 
+    size="icon" 
+    className="relative bg-white dark:bg-gray-700 dark:text-white dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-600"
+  >
+    <Bell className="h-5 w-5 text-gray-700 dark:text-gray-200" />
+    <span className="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full"></span>
+  </Button>
+   <Button
+        onClick={handleLogout}
+        variant="outline"
+        size="icon"
+        className="bg-white dark:bg-gray-700 dark:text-red-400 dark:border-gray-600 hover:bg-red-50 dark:hover:bg-red-600/20"
+      >
+        <LogOut className="h-5 w-5" />
+      </Button>
+</div>
+
+  </header>
+
+  <main className="flex-1 overflow-auto p-4 md:p-6 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200">
+    {children}
+  </main>
+</div>
+</div>
   );
 };
 

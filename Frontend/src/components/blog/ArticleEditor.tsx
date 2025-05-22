@@ -133,16 +133,7 @@ const ArticleEditor = ({ article, onSave, onCancel }: ArticleEditorProps) => {
             />
           </div>
           
-          <div className="space-y-2">
-            <label htmlFor="readTime" className="text-sm font-medium">Temps de lecture</label>
-            <Input 
-              id="readTime"
-              name="readTime"
-              value={editedArticle.readTime}
-              onChange={handleChange}
-              placeholder="Temps de lecture (ex: 5 min)"
-            />
-          </div>
+         
         </div>
       </CardContent>
       
