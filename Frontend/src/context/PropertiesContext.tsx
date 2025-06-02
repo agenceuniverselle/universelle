@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 
 export type PropertyImage = {
+ 
   url: string;
   id: string;
 };
@@ -15,6 +16,7 @@ export type InvestmentDetails = {
   projectStatus: 'Pré-commercialisation' | 'En cours' | 'Terminé';
   documents?: string[];
   investmentType:string;
+  
 
 };
 
@@ -28,7 +30,7 @@ export type Property = {
   bedrooms: number ;
   bathrooms: number ;
   area: string;
-  date: string;
+
   createdAt: string; // Ajout du champ createdAt
   description?: string;
   isFeatured?: boolean;
@@ -47,7 +49,7 @@ interface PropertiesContextType {
   properties: Property[];
   addProperty: (property: Property) => void;
   removeProperty: (id: string) => void;
-  updateProperty: (id: string, property: Partial<Property>) => void;
+  upcreatedAtProperty: (id: string, property: Partial<Property>) => void;
   getPropertyById: (id: string) => Property | undefined;
   publishProperty: (id: string) => void;
 }
@@ -91,9 +93,9 @@ export const PropertiesProvider: React.FC<PropertiesProviderProps> = ({ children
       property.id = prefix + Math.floor(Math.random() * 1000).toString().padStart(3, '0');
     }
 
-    if (!property.date) {
+    if (!property.createdAt) {
       const today = new Date();
-      property.date = `${today.getDate().toString().padStart(2, '0')}/${(today.getMonth() + 1).toString().padStart(2, '0')}/${today.getFullYear()}`;
+      property.createdAt = `${today.getDate().toString().padStart(2, '0')}/${(today.getMonth() + 1).toString().padStart(2, '0')}/${today.getFullYear()}`;
     }
 
     if (!property.return) {
@@ -110,10 +112,10 @@ export const PropertiesProvider: React.FC<PropertiesProviderProps> = ({ children
     setProperties(prev => prev.filter(property => property.id !== id));
   };
 
-  const updateProperty = (id: string, updatedProperty: Partial<Property>) => {
+  const upcreatedAtProperty = (id: string, upcreatedAtdProperty: Partial<Property>) => {
     setProperties(prev =>
       prev.map(property =>
-        property.id === id ? { ...property, ...updatedProperty } : property
+        property.id === id ? { ...property, ...upcreatedAtdProperty } : property
       )
     );
   };
@@ -123,11 +125,11 @@ export const PropertiesProvider: React.FC<PropertiesProviderProps> = ({ children
   };
 
   const publishProperty = (id: string) => {
-    updateProperty(id, { isDraft: false });
+    upcreatedAtProperty(id, { isDraft: false });
   };
 
   return (
-    <PropertiesContext.Provider value={{ properties, addProperty, removeProperty, updateProperty, getPropertyById, publishProperty }}>
+    <PropertiesContext.Provider value={{ properties, addProperty, removeProperty, upcreatedAtProperty, getPropertyById, publishProperty }}>
       {children}
     </PropertiesContext.Provider>
   );

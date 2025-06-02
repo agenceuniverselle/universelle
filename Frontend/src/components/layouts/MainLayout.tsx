@@ -49,7 +49,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
                 <li><a href="/nos-biens" className="text-sm text-gray-600 hover:text-primary transition-colors">Nos Biens</a></li>
                 <li><a href="/investir" className="text-sm text-gray-600 hover:text-primary transition-colors">Investir</a></li>
                 <li><a href="/nos-services" className="text-sm text-gray-600 hover:text-primary transition-colors">Nos Services</a></li>
-                <li><a href="/blog" className="text-sm text-gray-600 hover:text-primary transition-colors">Blog</a></li>
+                <li><a href="/blog" className="text-sm text-gray-600 hover:text-primary transition-colors">Articles</a></li>
               </ul>
             </div>
             <div>

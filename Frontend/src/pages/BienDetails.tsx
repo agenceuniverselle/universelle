@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import MainLayout from '@/components/layouts/MainLayout';
 import BienCard from '@/components/properties/BienCard';
 import MakeOfferDialog from '@/components/properties/MakeOfferDialog';
@@ -23,6 +23,12 @@ import autoTable from 'jspdf-autotable';
 import * as z from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import ReactCountryFlag from 'react-country-flag';
+import { parsePhoneNumberFromString, AsYouType } from 'libphonenumber-js';
+import { countryCodes, CountryData } from '@/lib/countryCodes'; // Make sure this path is correct
+import { cn } from '@/lib/utils';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Checkbox } from '@/components/ui/checkbox';
 
 const contactFormSchema = z.object({
   name: z.string().min(2, { message: "Le nom doit contenir au moins 2 caractères" }),
@@ -36,8 +42,22 @@ const contactFormSchema = z.object({
     required_error: "Veuillez sélectionner un type de visite",
   }),
   visitDate: z.string().optional(),
+  consent: z.boolean().optional(), 
 });
+const phoneNumber = "+2128086044195"; // Your phone number
 
+  const handleCallClick = () => {
+    // Check if the user is on a mobile device (a simple heuristic)
+    const isMobile = /Mobi|Android/i.test(navigator.userAgent);
+
+    if (isMobile) {
+      // If on mobile, use tel: protocol to initiate a call
+      window.location.href = `tel:${phoneNumber}`;
+    } else {
+      // If on PC, display an alert
+      alert(`Pour nous appeler, veuillez utiliser un téléphone.\nNuméro: ${phoneNumber}`);
+    }
+  };
 interface BienType {
   id: number;
   title: string;
@@ -93,7 +113,8 @@ const BienDetails = () => {
   const [makeOfferOpen, setMakeOfferOpen] = useState(false);
   const contactFormRef = useRef<HTMLDivElement>(null);
   const [isDownloading, setIsDownloading] = useState(false);
-
+  const [selectedCountry, setSelectedCountry] = useState<CountryData | null>(null);
+  const [isDetectingIp, setIsDetectingIp] = useState(true);
   const contactForm = useForm<z.infer<typeof contactFormSchema>>({
     resolver: zodResolver(contactFormSchema),
     defaultValues: {
@@ -104,9 +125,80 @@ const BienDetails = () => {
       contactMethod: "email",
       visitType: "none",
       visitDate: "",
+      consent: true,
     },
   });
+  useEffect(() => {
+    const detectCountryByIp = async () => {
+      try {
+        const response = await axios.get('http://ip-api.com/json');
+        const data = response.data;
 
+        if (data.status === 'success' && data.countryCode) {
+          const foundCountry = countryCodes.find(
+            c => c.iso2 === data.countryCode
+          );
+          if (foundCountry) {
+            setSelectedCountry(foundCountry);
+            contactForm.setValue('phone', `+${foundCountry.code} `);
+          } else {
+            console.warn(`Country code ${data.countryCode} from IP-API not found in your countryCodes list.`);
+            // Fallback if country code from IP-API is not in your list
+            const morocco = countryCodes.find(c => c.iso2 === 'MA');
+            if (morocco) {
+              setSelectedCountry(morocco);
+              contactForm.setValue('phone', `+${morocco.code} `);
+            }
+          }
+        } else {
+          // Fallback if IP detection fails or returns no country code
+          const morocco = countryCodes.find(c => c.iso2 === 'MA');
+          if (morocco) {
+            setSelectedCountry(morocco);
+            contactForm.setValue('phone', `+${morocco.code} `);
+          }
+        }
+      } catch (error) {
+        console.error("Error detecting country by IP for BienDetails contact form:", error);
+        // Fallback in case of error
+        const morocco = countryCodes.find(c => c.iso2 === 'MA');
+        if (morocco) {
+          setSelectedCountry(morocco);
+          contactForm.setValue('phone', `+${morocco.code} `);
+        }
+      } finally {
+        setIsDetectingIp(false);
+      }
+    };
+
+    
+    detectCountryByIp();
+
+
+    return () => {
+      contactForm.setValue('phone', '');
+      setSelectedCountry(null);
+      setIsDetectingIp(true); // Reset for next time
+    };
+  }, [contactForm]);
+  const handleCountrySelectChange = (iso2Code: string, fieldOnChange: (value: string) => void) => {
+    const selected = countryCodes.find(c => c.iso2 === iso2Code);
+    if (selected) {
+      setSelectedCountry(selected);
+
+      const currentPhoneValue = contactForm.getValues('phone');
+      const currentPhoneNumber = parsePhoneNumberFromString(currentPhoneValue);
+
+      let newPhoneNumberString = '';
+      if (currentPhoneNumber && currentPhoneNumber.nationalNumber) {
+        newPhoneNumberString = `+${selected.code}${currentPhoneNumber.nationalNumber}`;
+      } else {
+        newPhoneNumberString = `+${selected.code} `;
+      }
+      fieldOnChange(newPhoneNumberString);
+      contactForm.trigger('phone'); // Re-validate phone field after change
+    }
+  };
   useEffect(() => {
     const fetchBien = async () => {
       try {
@@ -146,33 +238,55 @@ const BienDetails = () => {
   };
 
   const onContactSubmit = async (data: z.infer<typeof contactFormSchema>) => {
-    try {
-      await axios.post('/api/messages', {
-        bien_id: bien.id,
-        name: data.name,
-        email: data.email,
-        phone: data.phone,
-        contact_method: data.contactMethod,
-        visit_type: data.visitType,
-        visit_date: data.visitDate || null,
-        message: data.message,
-      });
-  
-      toast("Message envoyé avec succès !");
-      contactForm.reset({
-        name: "",
-        email: "",
-        phone: "",
-        message: `Bonjour, je suis intéressé par "${bien.title}" (réf. ${bien.id}) à ${bien.location}. J'aimerais obtenir plus d'informations sur ce bien.`,
-        contactMethod: "email",
-        visitType: "none",
-        visitDate: "",
-      });
-    } catch (error) {
-      toast("Erreur lors de l'envoi du message.");
-      console.error(error);
+  try {
+    // 1. Ensure `bien` exists before trying to access its properties
+    if (!bien) {
+      toast("Erreur: Les détails du bien ne sont pas disponibles. Veuillez réessayer.");
+      return; // Exit if bien is null
     }
-  };
+
+    // 2. Parse phone number to E.164 format using selectedCountry as default region
+    const phoneNumberParsed = parsePhoneNumberFromString(data.phone, selectedCountry?.iso2);
+    // Use the E.164 format if parsing was successful, otherwise use the raw data.phone
+    const phoneNumberForDb = phoneNumberParsed ? phoneNumberParsed.format('E.164') : data.phone;
+
+    await axios.post('/api/messages', {
+      bien_id: bien.id, // Now it's safe to access bien.id
+      name: data.name,
+      email: data.email,
+      phone: phoneNumberForDb, // Use the E.164 formatted phone number here
+      contact_method: data.contactMethod,
+      visit_type: data.visitType,
+      visit_date: data.visitDate || null,
+      message: data.message,
+      consent: data.consent,
+    });
+
+    toast("Message envoyé avec succès !");
+
+    // Reset the form after successful submission
+    contactForm.reset({
+      name: "",
+      email: "",
+      // Reset phone to an empty string, so the useEffect for IP detection
+      // can re-initialize it with the correct country code prefix for the next submission.
+      phone: "",
+      message: `Bonjour, je suis intéressé par "${bien.title}" (réf. ${bien.id}) à ${bien.location}. J'aimerais obtenir plus d'informations sur ce bien.`,
+      contactMethod: "email",
+      visitType: "none",
+      visitDate: "",
+    });
+
+    // Reset selectedCountry and isDetectingIp to ensure fresh IP detection on next form use
+    setSelectedCountry(null);
+    setIsDetectingIp(true);
+
+  } catch (error) {
+    console.error("Error submitting contact form:", error);
+    // You might want to display a more specific error message based on the error
+    toast("Erreur lors de l'envoi du message. Veuillez réessayer.");
+  }
+};
   
   const handleOfferClick = () => {
     setMakeOfferOpen(true);
@@ -273,36 +387,63 @@ doc.text(titreFiche, 105, topMargin + 20, { align: "center" });
       ? ((parseFloat(bien.monthly_rent) * 12 / parseFloat(bien.price.replace(/\s/g, ''))) * 100).toFixed(2)
       : null;
   
-    const rows = [
-      ['Titre', bien.title],
-      ['Type', bien.type],
-      ['Statut', bien.status],
-      ['Prix', bien.price + ' MAD'],
-      ['Ville', bien.location],
-      ['Quartier', bien.quartier || 'Non spécifié'],
-      ['Superficie', bien.area + ' m²'],
-      ['Année de construction', bien.construction_year || '—'],
-      ['État général', bien.condition || '—'],
-      ['Exposition', bien.exposition || '—'],
-      ['Date de disponibilité', bien.available_date ? new Date(bien.available_date).toLocaleDateString() : '—'],
-      ['Chambres', bien.bedrooms || '—'],
-      ['Salles de bain', bien.bathrooms || '—'],
-      ['Cuisine', bien.cuisine || '—'],
-      ['Parking', bien.has_parking === 'oui' ? `${bien.parking_places} place(s)` : 'Non'],
-      ['Climatisation', bien.climatisation || '—'],
-      ['Terrasse/Balcon', bien.terrasse || '—'],
-      ['Frais de syndic', bien.estimated_charges ? `${bien.estimated_charges} MAD/mois` : '—'],
-      ['Rendement', rendement ? `${rendement}%` : '—'],
-      ['Valorisation estimée', bien.estimated_valuation ? `+${bien.estimated_valuation}%` : '—'],
-      ['Points forts', bien.points_forts?.length ? bien.points_forts.join(', ') : '—'],
-      ['Proximité', bien.proximite?.length ? bien.proximite.join(', ') : '—'],
-      ['Taxe d\'habitation', bien.occupation_rate ? `${bien.occupation_rate} MAD/an` : '—'],
-    ];
+    const dataForPdf = [
+ { label: 'Titre', value: bien.title },
+ { label: 'Type', value: bien.type },
+ { label: 'Statut', value: bien.status },
+ { label: 'Prix', value: bien.price ? bien.price + ' MAD' : null },
+ { label: 'Ville', value: bien.location },
+ { label: 'Quartier', value: bien.quartier },
+ { label: 'Superficie', value: bien.area ? bien.area + ' m²' : null },
+ { label: 'Année de construction', value: bien.construction_year },
+ { label: 'État général', value: bien.condition },
+ { label: 'Exposition', value: bien.exposition },
+ { label: 'Date de disponibilité', value: bien.available_date ? new Date(bien.available_date).toLocaleDateString() : null },
+ { label: 'Chambres', value: bien.bedrooms && Number(bien.bedrooms) > 0 ? bien.bedrooms : null },
+ { label: 'Salles de bain', value: bien.bathrooms && Number(bien.bathrooms) > 0 ? bien.bathrooms : null },
+ { label: 'Cuisine', value: bien.cuisine },
+ { label: 'Parking', value: bien.has_parking === 'oui' ? `${bien.parking_places || 'Nombre non spécifié'} place(s)` : (bien.has_parking === 'non' ? 'Non' : null) },
+ { label: 'Climatisation', value: bien.climatisation },
+ { label: 'Terrasse/Balcon', value: bien.terrasse },
+ { label: 'Frais de syndic', value: bien.estimated_charges ? `${bien.estimated_charges} MAD/mois` : null },
+{ label: 'Rendement', value: rendement ? `${rendement}%` : null },
+ { label: 'Valorisation estimée', value: bien.estimated_valuation ? `+${bien.estimated_valuation}%` : null },
+ { label: 'Points forts', value: bien.points_forts?.length ? bien.points_forts.join(', ') : null },
+ { label: 'Proximité', value: bien.proximite?.length ? bien.proximite.map(item => proximiteDescriptions[item]?.label || item).join(', ') : null },
+ { label: 'Taxe d\'habitation', value: bien.occupation_rate ? `${bien.occupation_rate} MAD/an` : null },
+ ];
+
+ // Filtrer les lignes dont la valeur est null ou une chaîne vide
+ const filteredRows = dataForPdf
+ .filter(row => row.value !== null && row.value !== undefined && String(row.value).trim() !== '' && String(row.value).trim() !== '0')
+ .map(row => [row.label, row.value]); // Transformer en format [clé, valeur] pour autoTable
+
+ autoTable(doc, {
+ startY: topMargin + 30,
+ head: [['Élément', 'Description']],
+ body: filteredRows, // Utilise les lignes filtrées ici
+ styles: {
+ fontSize: 10,
+ cellPadding: 2,
+ overflow: 'linebreak',
+ },
+ headStyles: {
+ fillColor: [212, 159, 28], // #d49f1c
+ textColor: [255, 255, 255],
+ fontStyle: 'bold',
+ },
+ columnStyles: {
+ 0: { cellWidth: 60 }, // Élément
+ 1: { cellWidth: 120 }, // Description
+ },
+margin: { top: 20, bottom: 30 },
+ pageBreak: 'auto',
+ });
   
     autoTable(doc, {
       startY: topMargin + 30,
       head: [['Élément', 'Description']],
-      body: rows,
+       body: filteredRows, 
       styles: {
         fontSize: 10,
         cellPadding: 2,
@@ -621,10 +762,10 @@ doc.text("Adresse : IMM17 N°9 Touzine, Complexe Bayt Laatik, Tanger 90000", 105
 )}
 
             
-            <Button variant="outline" size="sm" className="flex gap-1.5 text-sm">
+    {/*  <Button variant="outline" size="sm" className="flex gap-1.5 text-sm">
               <Share2 className="h-4 w-4" />
               Partager
-            </Button>
+            </Button>*/}
             
           </div>
         </div>
@@ -655,35 +796,44 @@ doc.text("Adresse : IMM17 N°9 Touzine, Complexe Bayt Laatik, Tanger 90000", 105
                   )}
                 </div>
                 
-                <h3 className="text-xl font-semibold mb-4">Points forts</h3>
-<ul className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-3 mb-10">
-  {(bien.points_forts && bien.points_forts.length > 0) ? (
-    bien.points_forts.map((feature: string, index: number) => (
-      <li key={index} className="flex items-center">
-        <CheckCircle className="h-5 w-5 mr-2 text-gold" />
-        <span>{feature}</span>
-      </li>
-    ))
-  ) : (
-    <li className="text-gray-500 italic">Aucun point fort renseigné</li>
-  )}
+               {bien.points_forts && bien.points_forts.length > 0 && ( // <-- Condition ajoutée ici
+ <div> {/* Ajout d'un div conteneur pour le titre et la liste */}
+ <h3 className="text-xl font-semibold mb-4">Points forts</h3>
+ <ul className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-3 mb-10">
+ {bien.points_forts.map((feature: string, index: number) => (
+ <li key={index} className="flex items-center">
+ <CheckCircle className="h-5 w-5 mr-2 text-gold" />
+ <span>{feature}</span>
+</li>
+ ))}
 </ul>
+</div>
+)}
 
                 
-                <h3 className="text-xl font-semibold mb-4">Investissement</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
-                  <div className="bg-gray-50 p-6 rounded-lg border">
-                    <h4 className="font-semibold mb-2 text-luxe-blue">Rendement locatif</h4>
-                    <div className="text-3xl font-bold text-gold mb-2"> {rendement ? `${rendement}%` : 'Non disponible'}</div>
-                    <p className="text-sm text-gray-600">Basé sur le marché locatif actuel</p>
-                  </div>
-                  <div className="bg-gray-50 p-6 rounded-lg border">
-                    <h4 className="font-semibold mb-2 text-luxe-blue">Valorisation estimée</h4>
-                    <div className="text-3xl font-bold text-gold mb-2">{bien.estimated_valuation ? `+${bien.estimated_valuation}%` : 'Non disponible'}
-                    </div>
-                    <p className="text-sm text-gray-600">Sur les 5 prochaines années</p>
-                  </div>
-                </div>
+               {/* START MODIFICATION FOR INVESTISSEMENT */}
+ {(rendement || bien.estimated_valuation) && ( // Condition pour masquer tout le bloc
+ <div> {/* Conteneur pour le titre et les cartes */}
+<h3 className="text-xl font-semibold mb-4">Investissement</h3>
+ <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+ {rendement && ( // Affiche la carte du rendement seulement si rendement est disponible
+ <div className="bg-gray-50 p-6 rounded-lg border">
+ <h4 className="font-semibold mb-2 text-luxe-blue">Rendement locatif</h4>
+ <div className="text-3xl font-bold text-gold mb-2"> {rendement}%</div> {/* Plus besoin du ternaire ici */}
+ <p className="text-sm text-gray-600">Basé sur le marché locatif actuel</p>
+ </div>
+ )}
+ {bien.estimated_valuation && ( // Affiche la carte de valorisation seulement si bien.estimated_valuation est disponible
+ <div className="bg-gray-50 p-6 rounded-lg border">
+<h4 className="font-semibold mb-2 text-luxe-blue">Valorisation estimée</h4>
+ <div className="text-3xl font-bold text-gold mb-2">+{bien.estimated_valuation}%</div> {/* Plus besoin du ternaire ici */}
+ <p className="text-sm text-gray-600">Sur les 5 prochaines années</p>
+ </div>
+ )}
+ </div>
+ </div>
+ )}
+ {/* END MODIFICATION FOR INVESTISSEMENT */}
               </TabsContent>
               
               <TabsContent value="details">
@@ -732,54 +882,61 @@ doc.text("Adresse : IMM17 N°9 Touzine, Complexe Bayt Laatik, Tanger 90000", 105
       </ul>
     </div>
 
-    <div>
-      <h3 className="text-lg font-semibold mb-4 flex items-center">
-        <Clock className="h-5 w-5 mr-2 text-luxe-blue" />
-        Équipements
-      </h3>
-      <ul className="space-y-3">
-        {Number(bien.bedrooms) > 0 && (
-          <li className="flex justify-between border-b pb-2">
-            <span className="text-gray-600">Chambres</span>
-            <span className="font-medium">{bien.bedrooms}</span>
-          </li>
-        )}
-        {Number(bien.bathrooms) > 0 && (
-          <li className="flex justify-between border-b pb-2">
-            <span className="text-gray-600">Salles de bain</span>
-            <span className="font-medium">{bien.bathrooms}</span>
-          </li>
-        )}
-        {bien.cuisine && (
-          <li className="flex justify-between border-b pb-2">
-            <span className="text-gray-600">Cuisine</span>
-            <span className="font-medium">{bien.cuisine}</span>
-          </li>
-        )}
-        {bien.has_parking && (
-          <li className="flex justify-between border-b pb-2">
-            <span className="text-gray-600">Parking</span>
-            <span className="font-medium">
-              {bien.has_parking === 'oui'
-                ? `${bien.parking_places || '1'} place(s)`
-                : 'Non'}
-            </span>
-          </li>
-        )}
-        {bien.climatisation && (
-          <li className="flex justify-between border-b pb-2">
-            <span className="text-gray-600">Climatisation</span>
-            <span className="font-medium">{bien.climatisation}</span>
-          </li>
-        )}
-        {bien.terrasse && (
-          <li className="flex justify-between border-b pb-2">
-            <span className="text-gray-600">Terrasse/Balcon</span>
-            <span className="font-medium">{bien.terrasse}</span>
-          </li>
-        )}
-      </ul>
-    </div>
+   {(Number(bien.bedrooms) > 0 ||
+ Number(bien.bathrooms) > 0 ||
+ bien.cuisine ||
+ bien.has_parking ||
+ bien.climatisation ||
+ bien.terrasse) && (
+ <div>
+ <h3 className="text-lg font-semibold mb-4 flex items-center">
+ <Clock className="h-5 w-5 mr-2 text-luxe-blue" />
+ Équipements
+ </h3>
+<ul className="space-y-3">
+ {Number(bien.bedrooms) > 0 && (
+ <li className="flex justify-between border-b pb-2">
+ <span className="text-gray-600">Chambres</span>
+ <span className="font-medium">{bien.bedrooms}</span>
+ </li>
+ )}
+{Number(bien.bathrooms) > 0 && (
+ <li className="flex justify-between border-b pb-2">
+<span className="text-gray-600">Salles de bain</span>
+ <span className="font-medium">{bien.bathrooms}</span>
+</li>
+)}
+{bien.cuisine && (
+<li className="flex justify-between border-b pb-2">
+ <span className="text-gray-600">Cuisine</span>
+ <span className="font-medium">{bien.cuisine}</span>
+ </li>
+ )}
+ {bien.has_parking && (
+ <li className="flex justify-between border-b pb-2">
+ <span className="text-gray-600">Parking</span>
+ <span className="font-medium">
+ {bien.has_parking === 'oui'
+ ? `${bien.parking_places || '1'} place(s)`
+ : 'Non'}
+ </span>
+ </li>
+)}
+ {bien.climatisation && (
+<li className="flex justify-between border-b pb-2">
+<span className="text-gray-600">Climatisation</span>
+ <span className="font-medium">{bien.climatisation}</span>
+ </li>
+ )}
+{bien.terrasse && (
+ <li className="flex justify-between border-b pb-2">
+<span className="text-gray-600">Terrasse/Balcon</span>
+<span className="font-medium">{bien.terrasse}</span>
+ </li>
+ )}
+ </ul>
+ </div>
+ )}
   </div>
 
   <div className="mt-10">
@@ -849,50 +1006,54 @@ doc.text("Adresse : IMM17 N°9 Touzine, Complexe Bayt Laatik, Tanger 90000", 105
 )}
 
                 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-                <div>
-  <h3 className="text-lg font-semibold mb-4">Proximité</h3>
-  <ul className="space-y-3">
-    {bien.proximite?.map((item, index) => {
-      const data = proximiteDescriptions[item];
-      if (!data) return null;
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
 
-      return (
-        <li key={index} className="flex items-start gap-2">
-          <div className="mt-1 bg-luxe-blue/10 p-1 rounded-full">
-            {data.icon}
-          </div>
-          <div>
-            <p className="font-medium">{data.label}</p>
-            <p className="text-sm text-gray-600">{data.description}</p>
-          </div>
-        </li>
-      );
-    })}
-  </ul>
-</div>
+ {/* START MODIFICATION FOR PROXIMITÉ - Masque tout si vide */}
+ {bien.proximite && bien.proximite.length > 0 && (
+ <div>
+ <h3 className="text-lg font-semibold mb-4">Proximité</h3>
+ <ul className="space-y-3">
+ {bien.proximite.map((item, index) => {
+ const data = proximiteDescriptions[item];
+ if (!data) return null;
+
+ return (
+ <li key={index} className="flex items-start gap-2">
+ <div className="mt-1 bg-luxe-blue/10 p-1 rounded-full">
+ {data.icon}
+ </div>
+ <div>
+ <p className="font-medium">{data.label}</p>
+ <p className="text-sm text-gray-600">{data.description}</p>
+ </div>
+ </li>
+ );
+ })}
+ </ul>
+ </div>
+ )}
+ {/* END MODIFICATION FOR PROXIMITÉ */}
 
 
-                  
-                  <div>
-                    <h3 className="text-lg font-semibold mb-4">Quartier</h3>
-                    <div className="prose text-gray-700">
-                      <p>
-                        Le quartier de {bien.quartier ? bien.quartier.split(',')[0] : 'inconnu'} est reconnu pour sa qualité de vie exceptionnelle. 
-                        Bénéficiant d'infrastructures modernes et d'espaces verts, il offre un cadre de vie idéal 
-                        pour les familles et les professionnels.
-                      </p>
-                      <p>
-                        La zone est en plein développement avec plusieurs projets d'urbanisme en cours, 
-                        ce qui en fait un investissement prometteur pour l'avenir.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </TabsContent>
-            </Tabs>
-          </div>
-          
+ {/* QUARTIER - Reste inchangé, affiche 'inconnu' si bien.quartier est vide */}
+ <div>
+ <h3 className="text-lg font-semibold mb-4">Quartier</h3>
+ <div className="prose text-gray-700">
+ <p>
+ Le quartier de {bien.quartier ? bien.quartier.split(',')[0] : 'inconnu'} est reconnu pour sa qualité de vie exceptionnelle. 
+ Bénéficiant d'infrastructures modernes et d'espaces verts, il offre un cadre de vie idéal 
+ pour les familles et les professionnels.
+ </p>
+ <p>
+ La zone est en plein développement avec plusieurs projets d'urbanisme en cours, 
+ ce qui en fait un investissement prometteur pour l'avenir.
+ </p>
+ </div>
+ </div>
+ </div>
+ </TabsContent>
+ </Tabs>
+ </div>
           <div ref={contactFormRef}>
             <div className="bg-gray-50 rounded-xl border p-6 sticky top-24">
               <h3 className="text-xl font-bold mb-6 text-center">Intéressé par ce bien ?</h3>
@@ -913,7 +1074,7 @@ doc.text("Adresse : IMM17 N°9 Touzine, Complexe Bayt Laatik, Tanger 90000", 105
                     )}
                   />
                   
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-1 gap-4">
                     <FormField
                       control={contactForm.control}
                       name="email"
@@ -928,20 +1089,83 @@ doc.text("Adresse : IMM17 N°9 Touzine, Complexe Bayt Laatik, Tanger 90000", 105
                       )}
                     />
                     
-                    <FormField
-                      control={contactForm.control}
-                      name="phone"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Téléphone</FormLabel>
-                          <FormControl>
-                            <Input placeholder="+212 600000000" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
+                  <FormField
+  control={contactForm.control}
+  name="phone"
+  render={({ field }) => (
+    <FormItem className='dark:text-black'>
+      <FormLabel>Téléphone <span className="text-red-500">*</span></FormLabel>
+      <div className={cn(
+        "mt-1 flex items-center border rounded-md overflow-hidden bg-white",
+        contactForm.formState.errors.phone && "border-red-500"
+      )}>
+        {/* Country Code Selector (Dropdown) */}
+        <Select
+          onValueChange={(value) => handleCountrySelectChange(value, field.onChange)}
+          value={selectedCountry?.iso2 || ''}
+          disabled={isDetectingIp}
+        >
+          {/* ADJUSTED WIDTH HERE: w-[90px] became w-[75px] */}
+          <SelectTrigger className="flex-shrink-0 w-[75px] border-y-0 border-l-0 rounded-none focus:ring-0 focus:ring-offset-0 px-2 py-2">
+            {isDetectingIp ? (
+              <span className="animate-pulse text-gray-500 text-sm">Chargement...</span>
+            ) : selectedCountry ? (
+              <span className="flex items-center space-x-1">
+                <ReactCountryFlag
+                  countryCode={selectedCountry.iso2}
+                  svg
+                  style={{ width: '2.25em', height: '1.25em' }}
+                  className="!rounded-none"
+                />
+              </span>
+            ) : (
+              <span className="text-gray-500">Choisir</span>
+            )}
+          </SelectTrigger>
+          <SelectContent className="max-h-[300px] overflow-y-auto">
+            {countryCodes.map((country) => (
+              <SelectItem key={country.iso2} value={country.iso2}>
+                <span className="flex items-center">
+                  <ReactCountryFlag
+                    countryCode={country.iso2}
+                    svg
+                    style={{ width: '2.25em', height: '1.25em' }}
+                    className="mr-2 !rounded-none"
+                  />
+                  {country.name} (+{country.code})
+                </span>
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+
+        {/* Phone Input */}
+        <Input
+          type="tel"
+          className="flex-1 border-0 ring-0 focus-visible:ring-0 focus-visible:ring-offset-0"
+          placeholder={selectedCountry ? `ex: ${selectedCountry.code === '212' ? '6XXXXXXXX ou 7XXXXXXXX' : 'Numéro national'}` : "Votre numéro de téléphone"}
+          value={field.value}
+          onChange={(e) => {
+            const newValue = e.target.value;
+            if (selectedCountry) {
+              const formatter = new AsYouType(selectedCountry.iso2);
+              const formattedValue = formatter.input(newValue);
+              field.onChange(formattedValue);
+            } else {
+              // If no country is selected (e.g., still detecting IP),
+              // just pass the raw value to allow initial typing.
+              field.onChange(newValue);
+            }
+          }}
+          onBlur={() => field.onBlur()}
+          name={field.name}
+          ref={field.ref}
+        />
+      </div>
+      <FormMessage />
+    </FormItem>
+  )}
+/>          </div>
                   
                   <FormField
                     control={contactForm.control}
@@ -1038,7 +1262,7 @@ doc.text("Adresse : IMM17 N°9 Touzine, Complexe Bayt Laatik, Tanger 90000", 105
   )}
 />
 
-                  {(contactForm.watch("visitType") === "physical" || contactForm.watch("visitType") === "virtual") && (
+                  {contactForm.watch("visitType") === "physical" && (
                     <FormField
                       control={contactForm.control}
                       name="visitDate"
@@ -1050,9 +1274,9 @@ doc.text("Adresse : IMM17 N°9 Touzine, Complexe Bayt Laatik, Tanger 90000", 105
                           </FormControl>
                           <FormMessage />
                         </FormItem>
-                      )}
-                    />
-                  )}
+                    )}
+    />
+)}
                   
                   <FormField
                     control={contactForm.control}
@@ -1071,7 +1295,40 @@ doc.text("Adresse : IMM17 N°9 Touzine, Complexe Bayt Laatik, Tanger 90000", 105
                       </FormItem>
                     )}
                   />
-                  
+                  <FormField
+                                control={contactForm.control}
+                                name="consent"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <div className="flex items-center space-x-2">
+                                            <FormControl>
+                                               <Checkbox
+    id="contact-consent"
+    checked={field.value} // `field.value` will be `true` from defaultValues
+    onCheckedChange={field.onChange}
+    className="data-[state=checked]:bg-luxe-blue data-[state=checked]:text-white border-gray-300"
+/>
+                                            </FormControl>
+                                            <FormLabel htmlFor="contact-consent" className="text-sm font-normal text-gray-700">
+                  J'accepte les{' '}
+                  <Link
+                    to="/PrivacyPolicyPage"
+                    className="text-blue-600 hover:text-blue-800 underline cursor-pointer"
+                  >
+                    conditions générales et la politique de confidentialité
+                  </Link>
+            
+                                            </FormLabel>
+                                        </div>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                             {contactForm.formState.errors.root?.serverError && (
+                                <p className="text-sm text-red-500 mt-2">
+                                    {contactForm.formState.errors.root.serverError.message}
+                                </p>
+                            )}
                   <Button 
                     type="submit" 
                     className="w-full bg-gold hover:bg-gold-dark"
@@ -1082,16 +1339,15 @@ doc.text("Adresse : IMM17 N°9 Touzine, Complexe Bayt Laatik, Tanger 90000", 105
                 </form>
               </Form>
               
-              <div className="mt-6 flex justify-center">
-              <Button variant="link" className="text-luxe-blue flex flex-col items-center text-center w-full">
-  <div className="flex items-center">
-    <CalendarCheck className="h-4 w-4 mr-2" />
-    <span>Ou appelez-nous directement au :</span>
-  </div>
-  <span className="font-semibold mt-1">+212 8086044195</span>
-</Button>
-
-              </div>
+             <div className="mt-6 flex justify-center">
+      <Button variant="link" className="text-luxe-blue flex flex-col items-center text-center w-full" onClick={handleCallClick}>
+        <div className="flex items-center">
+          <CalendarCheck className="h-4 w-4 mr-2" />
+          <span>Ou appelez-nous directement au :</span>
+        </div>
+        <span className="font-semibold mt-1">{phoneNumber}</span>
+      </Button>
+    </div>
             </div>
           </div>
         </div>

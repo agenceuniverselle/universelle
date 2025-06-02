@@ -7,6 +7,7 @@ use App\Models\Role;
 use App\Models\Permission;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\DB;
 
 class SuperAdminSeeder extends Seeder
 {
@@ -39,7 +40,8 @@ class SuperAdminSeeder extends Seeder
         // ✅ Associer toutes les permissions à ce rôle Super Admin
         foreach ($allPermissions as $permissionId) {
             // ✅ Ajouter la permission au rôle Super Admin s'il ne l'a pas déjà
-            \DB::table('role_permissions')->updateOrInsert(
+           DB::table('role_permissions')->updateOrInsert(
+
                 ['role_id' => $role->id, 'permission_id' => $permissionId]
             );
         }

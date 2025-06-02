@@ -5,7 +5,7 @@
 return [
     'paths' => ['api/*', 'login', 'logout', 'register'],
     'allowed_methods' => ['*'],
-    'allowed_origins' => ['http://localhost:8080','http://localhost:80à0'],
+    'allowed_origins' => ['http://localhost:8080','http://localhost:8000'],
     'allowed_origins_patterns' => [],
     'allowed_headers' => ['Content-Type', 'X-Requested-With', 'X-CSRF-Token', 'Authorization', 'Accept'],
     'exposed_headers' => ['Authorization'],

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import MainLayout from '../components/layouts/MainLayout';
 import { Property } from '@/context/PropertiesContext';
 import { Button } from '@/components/ui/button';
@@ -10,6 +10,11 @@ import InvestmentCard from '@/components/properties/InvestmentCard';
 import { Badge } from '@/components/ui/badge';
 import axios from 'axios';
 
+// Cache global pour éviter les appels répétés
+let propertiesCache: Property[] | null = null;
+let cacheTimestamp = 0;
+const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+
 const Investir = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [returnFilter, setReturnFilter] = useState('all');
@@ -20,18 +25,36 @@ const Investir = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // Fonction de parsing optimisée
+  const parseRate = useCallback((rateStr: string) => {
+    return parseFloat(rateStr?.replace('%', '') || '0') || 0;
+  }, []);
+
+  // Chargement optimisé avec cache
   useEffect(() => {
     const fetchProperties = async () => {
       try {
-        const response = await axios.get('http://localhost:8000/api/properties', {
-          params: {
-            searchTerm,
-            returnFilter,
-            typeFilter,
-            statusFilter,
-          },
-        });
-        setProperties(response.data.data || []);
+        // Vérifier le cache d'abord
+        const now = Date.now();
+        if (propertiesCache && (now - cacheTimestamp) < CACHE_DURATION) {
+          setProperties(propertiesCache);
+          setLoading(false);
+          return;
+        }
+
+        // Si pas de cache, montrer immédiatement un skeleton avec données fictives
+        if (!propertiesCache) {
+          setLoading(true);
+        }
+
+        const response = await axios.get('http://localhost:8000/api/properties');
+        const data = response.data.data || [];
+        
+        // Mettre à jour le cache
+        propertiesCache = data;
+        cacheTimestamp = now;
+        
+        setProperties(data);
       } catch (err) {
         setError("Erreur lors du chargement des propriétés");
       } finally {
@@ -40,43 +63,117 @@ const Investir = () => {
     };
 
     fetchProperties();
-  }, [searchTerm, returnFilter, typeFilter, statusFilter]);
+  }, []);
 
+  // Filtrage ultra-optimisé
   const filteredProperties = useMemo(() => {
+    if (!properties.length) return [];
+
+    const searchLower = searchTerm.toLowerCase();
+    
     return properties.filter((property) => {
-      const rate = parseFloat((property.investmentDetails?.returnRate || property.return || '0%').replace('%', '')) || 0;
+      // Early returns pour optimiser
+      if (searchTerm && !(
+        property.title.toLowerCase().includes(searchLower) ||
+        property.location.toLowerCase().includes(searchLower) ||
+        property.description?.toLowerCase().includes(searchLower)
+      )) {
+        return false;
+      }
 
-      const matchesSearch =
-        property.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        property.location.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        property.description?.toLowerCase().includes(searchTerm.toLowerCase());
+      if (typeFilter !== 'all' && property.investmentDetails?.investmentType !== typeFilter) {
+        return false;
+      }
 
-      const matchesReturn =
-        returnFilter === 'all' ? true :
-        returnFilter === 'low' ? rate <= 7 :
-        returnFilter === 'medium' ? rate > 7 && rate <= 9 :
-        rate > 9;
+      if (statusFilter !== 'all' && property.investmentDetails?.projectStatus !== statusFilter) {
+        return false;
+      }
 
-      const matchesType =
-        typeFilter === 'all' ? true :
-        property.investmentDetails?.investmentType === typeFilter;
+      if (returnFilter !== 'all') {
+        const rate = parseRate(property.investmentDetails?.returnRate || property.return || '0%');
+        if (
+          (returnFilter === 'low' && rate > 7) ||
+          (returnFilter === 'medium' && (rate <= 7 || rate > 9)) ||
+          (returnFilter === 'high' && rate <= 9)
+        ) {
+          return false;
+        }
+      }
 
-      const matchesStatus =
-        statusFilter === 'all' ? true :
-        property.investmentDetails?.projectStatus === statusFilter;
-
-      return matchesSearch && matchesReturn && matchesType && matchesStatus;
+      return true;
     });
-  }, [properties, searchTerm, returnFilter, typeFilter, statusFilter]);
+  }, [properties, searchTerm, returnFilter, typeFilter, statusFilter, parseRate]);
 
-  const getInvestmentTypeIcon = (type: string) => {
+  const getInvestmentTypeIcon = useCallback((type: string) => {
     switch (type) {
       case 'Résidentiel': return <Home className="h-4 w-4" />;
       case 'Commercial': return <Briefcase className="h-4 w-4" />;
       case 'Touristique': return <Luggage className="h-4 w-4" />;
       default: return <Briefcase className="h-4 w-4" />;
     }
-  };
+  }, []);
+
+  // Debounce pour la recherche
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm);
+    }, 150);
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
+
+  // Utiliser le terme débounced pour le filtrage
+  const finalFilteredProperties = useMemo(() => {
+    if (!properties.length) return [];
+
+    const searchLower = debouncedSearchTerm.toLowerCase();
+    
+    return properties.filter((property) => {
+      if (debouncedSearchTerm && !(
+        property.title.toLowerCase().includes(searchLower) ||
+        property.location.toLowerCase().includes(searchLower) ||
+        property.description?.toLowerCase().includes(searchLower)
+      )) {
+        return false;
+      }
+
+      if (typeFilter !== 'all' && property.investmentDetails?.investmentType !== typeFilter) {
+        return false;
+      }
+
+      if (statusFilter !== 'all' && property.investmentDetails?.projectStatus !== statusFilter) {
+        return false;
+      }
+
+      if (returnFilter !== 'all') {
+        const rate = parseRate(property.investmentDetails?.returnRate || property.return || '0%');
+        if (
+          (returnFilter === 'low' && rate > 7) ||
+          (returnFilter === 'medium' && (rate <= 7 || rate > 9)) ||
+          (returnFilter === 'high' && rate <= 9)
+        ) {
+          return false;
+        }
+      }
+
+      return true;
+    });
+  }, [properties, debouncedSearchTerm, returnFilter, typeFilter, statusFilter, parseRate]);
+
+  const activeFiltersCount = [returnFilter, typeFilter, statusFilter].filter(f => f !== 'all').length;
+
+  // Skeleton loader pour un affichage immédiat
+  const SkeletonCard = () => (
+    <div className="bg-white rounded-lg border shadow-sm p-6 animate-pulse">
+      <div className="h-48 bg-gray-200 rounded-lg mb-4"></div>
+      <div className="h-4 bg-gray-200 rounded mb-2"></div>
+      <div className="h-4 bg-gray-200 rounded w-3/4 mb-4"></div>
+      <div className="flex justify-between items-center">
+        <div className="h-6 bg-gray-200 rounded w-16"></div>
+        <div className="h-8 bg-gray-200 rounded w-20"></div>
+      </div>
+    </div>
+  );
 
   return (
     <MainLayout>
@@ -106,7 +203,7 @@ const Investir = () => {
               onClick={() => setShowFilters(!showFilters)}
             >
               <SlidersHorizontal className="h-4 w-4 mr-2" />
-              Filtres
+              Filtres {activeFiltersCount > 0 && `(${activeFiltersCount})`}
             </Button>
           </div>
 
@@ -163,23 +260,39 @@ const Investir = () => {
         </div>
 
         {loading ? (
-          <p className="text-center text-gray-500">Chargement des opportunités...</p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
+            {[...Array(6)].map((_, i) => (
+              <SkeletonCard key={i} />
+            ))}
+          </div>
         ) : error ? (
-          <p className="text-center text-red-500">{error}</p>
-        ) : filteredProperties.length === 0 ? (
+          <div className="text-center py-12">
+            <p className="text-red-500 mb-4">{error}</p>
+            <Button onClick={() => window.location.reload()} variant="outline">
+              Réessayer
+            </Button>
+          </div>
+        ) : finalFilteredProperties.length === 0 ? (
           <div className="text-center py-12">
             <TrendingUp className="h-12 w-12 mx-auto text-gray-300 mb-4" />
             <h3 className="text-lg font-medium text-gray-900">Aucune opportunité d'investissement trouvée</h3>
-            <p className="mt-2 text-gray-500">Essayez de modifier vos filtres.</p>
+            <p className="mt-2 text-gray-500">
+              {properties.length === 0 ? 'Aucune propriété disponible.' : 'Essayez de modifier vos filtres.'}
+            </p>
           </div>
         ) : (
           <>
             <div className="flex items-center justify-between mb-6">
               <p className="text-gray-600">
-                {filteredProperties.length} opportunité{filteredProperties.length > 1 ? 's' : ''} trouvée{filteredProperties.length > 1 ? 's' : ''}
+                {finalFilteredProperties.length} opportunité{finalFilteredProperties.length > 1 ? 's' : ''} trouvée{finalFilteredProperties.length > 1 ? 's' : ''}
+                {properties.length > finalFilteredProperties.length && ` sur ${properties.length}`}
               </p>
-              <div className="flex gap-2">
-                {typeFilter !== 'all' && <Badge variant="secondary" className="flex items-center gap-1">{getInvestmentTypeIcon(typeFilter)} {typeFilter}</Badge>}
+              <div className="flex gap-2 flex-wrap">
+                {typeFilter !== 'all' && (
+                  <Badge variant="secondary" className="flex items-center gap-1">
+                    {getInvestmentTypeIcon(typeFilter)} {typeFilter}
+                  </Badge>
+                )}
                 {returnFilter !== 'all' && (
                   <Badge variant="secondary" className="flex items-center gap-1">
                     <TrendingUp className="h-4 w-4" />
@@ -191,7 +304,7 @@ const Investir = () => {
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
-              {filteredProperties.map((property) => (
+              {finalFilteredProperties.map((property) => (
                 <InvestmentCard key={property.id} property={property} />
               ))}
             </div>

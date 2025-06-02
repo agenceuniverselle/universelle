@@ -18,8 +18,8 @@ class InvestorRequest extends Model
         'email',
         'telephone',
         'nationalite',
-        'adresse',
         'commentaire',
+        'consent',
     ];
 
     public function property()

@@ -42,9 +42,9 @@ class InvestorRequestController extends Controller
             'email' => 'required|email|unique:investor_requests,email',
             'telephone' => 'required|string',
             'nationalite' => 'required|string',
-            'adresse' => 'nullable|string',
             'commentaire' => 'nullable|string',
-            'property_id' => 'nullable|exists:properties,id', // Optionnel pour les prospects
+            'property_id' => 'nullable|exists:properties,id',
+            'consent' => 'required|boolean', // Optionnel pour les prospects
         ]);
 
         $prospect = InvestorRequest::create([
@@ -56,8 +56,8 @@ class InvestorRequestController extends Controller
             'email' => $validated['email'],
             'telephone' => $validated['telephone'],
             'nationalite' => $validated['nationalite'],
-            'adresse' => $validated['adresse'] ?? null,
             'commentaire' => $validated['commentaire'] ?? null,
+            'consent' => $validated['consent'],
         ]);
 
         return response()->json([
@@ -77,13 +77,14 @@ class InvestorRequestController extends Controller
             'email' => 'required|email',
             'telephone' => 'required|string',
             'nationalite' => 'required|string',
-            'adresse' => 'required|string',
             'commentaire' => 'nullable|string',
+            'consent' => 'required|boolean',
         ]);
 
         $investorRequest = InvestorRequest::create([
             'property_id' => $propertyId,
-            ...$validated
+            ...$validated,
+              'consent' => $validated['consent'],
         ]);
 
         return response()->json([
@@ -110,8 +111,8 @@ class InvestorRequestController extends Controller
         'email' => 'required|email',
         'telephone' => 'required|string',
         'nationalite' => 'nullable|string',
-        'adresse' => 'nullable|string',
         'commentaire' => 'nullable|string',
+        'consent' => 'nullable|boolean',
     ]);
 
     $investorRequest->update($validated);

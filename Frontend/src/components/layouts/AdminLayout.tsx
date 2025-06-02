@@ -22,6 +22,7 @@ import {
   TrendingUp,
   Sun,
   Moon,
+  BrickWall,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -92,6 +93,11 @@ const getNavItems = () => {
       path: "/admin/investissements",
       label: "Biens à Investir",
       icon: <TrendingUp className="h-5 w-5" />,
+    },
+     { 
+      path: "/admin/projet", 
+      label: "Projet Réalisé", 
+      icon: <BrickWall className="h-5 w-5" />,
     },
  {
   path: "/admin/prospects",

@@ -1,6 +1,6 @@
 
 export interface ExclusiveOffer {
-    id: number;
+    id: string; // Changed from number to string
     property_id: number;
     current_value: number;
     monthly_rental_income: number;

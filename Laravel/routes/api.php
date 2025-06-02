@@ -19,8 +19,9 @@ use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\AdminDashboardController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\ActivityController;
-
-
+use App\Http\Controllers\ConseillerContactController;
+use App\Http\Controllers\ExpertContactController;
+use App\Http\Controllers\ProjectController;
 
 /*
 |--------------------------------------------------------------------------
@@ -66,9 +67,9 @@ Route::get('/biens/similaires/{id}', [BienController::class, 'similaires']);
 Route::get('/download/{BienId}', [BienController::class, 'downloadDocument']);
 Route::get('/download-owner/{id}', [BienController::class, 'downloadOwnerDocument']);
 Route::middleware('auth:api')->group(function () {
-Route::post('/biens', [BienController::class, 'store']);
-Route::put('/biens/{id}', [BienController::class, 'update']);
-Route::delete('/biens/{id}', [BienController::class, 'destroy']);
+    Route::post('/biens', [BienController::class, 'store']);
+    Route::put('/biens/{id}', [BienController::class, 'update']);
+    Route::delete('/biens/{id}', [BienController::class, 'destroy']);
 });
 Route::delete('/biens/{id}/images/{index}', [BienController::class, 'deleteImage']);
 Route::delete('/biens/{id}/document', [BienController::class, 'deleteDocument']);
@@ -85,15 +86,15 @@ Route::get('/messages', [MessageController::class, 'index']);
 Route::delete('/messages/{id}', [MessageController::class, 'destroy']);
 //admin blog
 Route::middleware(['auth:api'])->group(function () {
-Route::post('/admin/blogs', [BlogArticleController::class, 'store']);    
-Route::delete('/admin/blogs/{id}', [BlogArticleController::class, 'destroy']);
-Route::put('/blogs/{id}', [BlogArticleController::class, 'update']);
+    Route::post('/admin/blogs', [BlogArticleController::class, 'store']);
+    Route::delete('/admin/blogs/{id}', [BlogArticleController::class, 'destroy']);
+    Route::put('/blogs/{id}', [BlogArticleController::class, 'update']);
 });
 //blog 
 Route::get('/blogs', [BlogArticleController::class, 'index']);
 Route::get('/blogs/{id}', action: [BlogArticleController::class, 'show']);
 Route::post('/admin/upload', [BlogArticleController::class, 'uploadImage']);
-Route::get('/admin/blogs/{id}', [BlogArticleController::class, 'show']);  
+Route::get('/admin/blogs/{id}', [BlogArticleController::class, 'show']);
 Route::post('/blogs/{id}/rate', [BlogArticleController::class, 'rate']);
 
 //blog similaires 
@@ -118,17 +119,17 @@ Route::delete('/contacts/{id}', [ContactController::class, 'destroy']);
 //offre exclusive
 
 Route::middleware(['auth:api'])->group(function () {
-Route::post('/exclusive-offers', [ExclusiveOfferController::class, 'store']);
-Route::put('/exclusive-offers/{id}', [ExclusiveOfferController::class, 'update']);
-Route::delete('/exclusive-offers/{id}', [ExclusiveOfferController::class, 'destroy']);
+    Route::post('/exclusive-offers', [ExclusiveOfferController::class, 'store']);
+    Route::put('/exclusive-offers/{id}', [ExclusiveOfferController::class, 'update']);
+    Route::delete('/exclusive-offers/{id}', [ExclusiveOfferController::class, 'destroy']);
 });
 Route::get('/exclusive-offers/{id}', [ExclusiveOfferController::class, 'show']);
 Route::get('/exclusive-offers', [ExclusiveOfferController::class, 'index']);
 //testimonials 
 Route::middleware(['auth:api'])->group(function () {
-Route::post('/testimonials', [TestimonialController::class, 'store']);
-Route::put('/testimonials/{id}', [TestimonialController::class, 'update']);
-Route::delete('/testimonials/{id}', [TestimonialController::class, 'destroy']);
+    Route::post('/testimonials', [TestimonialController::class, 'store']);
+    Route::put('/testimonials/{id}', [TestimonialController::class, 'update']);
+    Route::delete('/testimonials/{id}', [TestimonialController::class, 'destroy']);
 });
 Route::get('/testimonials', [TestimonialController::class, 'index']);
 Route::get('/testimonials/{id}', [TestimonialController::class, 'show']);
@@ -141,7 +142,6 @@ Route::middleware('auth:api')->group(function () {
     Route::put('/admin/roles/{id}', [RoleController::class, 'update']);
     Route::delete('/admin/roles/{id}', [RoleController::class, 'destroy']);
     Route::get('/admin/permissions', [RoleController::class, 'allPermissions']);
-
 });
 
 // CSRF Token Route (Needed for Axios)
@@ -163,14 +163,32 @@ Route::middleware('auth:api')->group(function () {
     Route::put('/admin/users/{id}', [UserController::class, 'update']); // Modification d'un utilisateur
     Route::delete('/admin/users/{id}', [UserController::class, 'destroy']); // Suppression d'un utilisateur
     Route::get('/user/permissions', [UserController::class, 'getUserPermissions']);
-
 });
 
-
+//conseiller
+Route::post('/advisor-requests', [ConseillerContactController::class, 'store']);
+Route::get('/advisor-requests', [ConseillerContactController::class, 'index']);
+Route::get('/advisor-requests/{id}', [ConseillerContactController::class, 'show']);
+Route::put('/advisor-requests/{id}', [ConseillerContactController::class, 'update']);
+Route::delete('/advisor-requests/{id}', [ConseillerContactController::class, 'destroy']);
 // routes/api.php
 Route::middleware('auth:api')->group(function () {
     Route::get('/activities', [ActivityController::class, 'index']);
     Route::get('/activities/latest', [ActivityController::class, 'latestThree']);
-
 });
+//Expert
+Route::post('/expert-contact', [ExpertContactController::class, 'store']);
+Route::get('/expert-contacts', [ExpertContactController::class, 'index']); // This route is now protected
+Route::put('/expert-contacts/{id}', action: [ExpertContactController::class, 'update']);
+Route::delete('/expert-contacts/{id}', [ExpertContactController::class, 'destroy']);
 
+// 📂 Routes publiques
+Route::get('/projects', [ProjectController::class, 'index']);       // Liste des projets
+Route::get('/projects/{id}', [ProjectController::class, 'show']);   // Détail d’un projet
+
+// 🔐 Routes protégées (admin ou authentifiées)
+Route::middleware('auth:api')->group(function () {
+    Route::post('/projects', [ProjectController::class, 'store']);          // Créer un projet
+    Route::put('/projects/{id}', [ProjectController::class, 'update']);     // Mettre à jour un projet
+    Route::delete('/projects/{id}', [ProjectController::class, 'destroy']); // Supprimer un projet
+});

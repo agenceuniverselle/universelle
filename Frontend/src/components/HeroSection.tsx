@@ -1,9 +1,10 @@
 
-import React, { useEffect, useRef } from 'react';
-import { ArrowRight } from 'lucide-react';
+import React, { useEffect, useRef, useState } from 'react';
+import { ArrowRight, X } from 'lucide-react';
 import { Autoplay } from 'swiper/modules';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import 'swiper/css';
+import Contact from './Contact';
 const images = [
   "https://images.unsplash.com/photo-1580587771525-78b9dba3b914?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80",
   "https://www.decoactuelle.ma/wp-content/uploads/2022/06/vue-large-RS.jpg",
@@ -12,7 +13,8 @@ const images = [
 ];
 const HeroSection = () => {
   const parallaxRef = useRef<HTMLDivElement>(null);
-  
+  const [showVipForm, setShowVipForm] = useState(false);
+
   useEffect(() => {
     const handleScroll = () => {
       if (parallaxRef.current) {
@@ -70,11 +72,36 @@ const HeroSection = () => {
           
           {/* CTA Section */}
           <div className="mt-10 flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
-            <a href="#contact" className="gold-button inline-flex items-center justify-center">
-              Recevoir une Consultation VIP
-              <ArrowRight className="ml-2 h-5 w-5" />
-            </a>
-            
+           <>
+    <a
+  href="#"
+  className="gold-button inline-flex items-center justify-center"
+  onClick={(e) => {
+    e.preventDefault(); // empêcher le scroll vers #
+    setShowVipForm(true); // afficher le formulaire
+  }}
+>
+  Recevoir une Consultation VIP
+  <ArrowRight className="ml-2 h-5 w-5" />
+</a>
+  {showVipForm && (
+<div
+  className="fixed left-1/2 -translate-x-1/2 z-[100] w-full max-w-xl p-3 bg-white rounded-lg shadow-2xl border"
+  style={{ top: '80px' }}
+>
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-xl font-semibold text-luxe-blue">Contact VIP</h2>
+           <button
+      className="text-gray-500 hover:text-red-500"
+      onClick={() => setShowVipForm(false)}
+    >
+      <X size={18} />
+    </button>
+          </div>
+  <Contact onSuccess={() => setShowVipForm(false)} />
+          </div>
+      )}
+    </>
             <a href="#opportunities" className="inline-flex items-center justify-center px-8 py-3 border-2 border-white text-white rounded-md bg-transparent hover:bg-white/10 transition-colors">
               Découvrir nos Opportunités
             </a>

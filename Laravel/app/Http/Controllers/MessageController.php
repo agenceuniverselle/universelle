@@ -19,6 +19,8 @@ class MessageController extends Controller
             'visit_type' => 'nullable|string',
             'visit_date' => 'nullable|date',
             'message' => 'nullable|string',
+            'consent'    => 'nullable|boolean',
+
         ]);
 
         $message = Message::create($validated);

@@ -30,10 +30,10 @@ const ContactFormContainer: React.FC = () => {
     setLoading(true);
     
     const budgetMapping: Record<string, string> = {
-      '100-300k': '100,000€ - 300,000€',
-      '300-500k': '300,000€ - 500,000€',
-      '500-1M': '500,000€ - 1,000,000€',
-      '1M+': 'Plus de 1,000,000€'
+      '100-300k': '100,000MAD - 300,000MAD',
+      '300-500k': '300,000MAD - 500,000MAD',
+      '500-1M': '500,000MAD - 1,000,000MAD',
+      '1M+': 'Plus de 1,000,000MAD'
     };
     
     // Determine client type based on purpose

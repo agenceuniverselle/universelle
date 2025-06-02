@@ -19,6 +19,7 @@ class OfferController extends Controller
         'offer' => 'required|string',
         'financing' => 'required|in:cash,mortgage,other',
         'message' => 'nullable|string',
+        'consent'    => 'nullable|boolean',
     ]);
 
     $offer = Offer::create($validated);

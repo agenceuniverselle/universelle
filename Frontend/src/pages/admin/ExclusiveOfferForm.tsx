@@ -11,8 +11,8 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '
 import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form';
 import { Loader2, Save, TrendingUp } from 'lucide-react';
 import { Property } from '@/context/PropertiesContext';
-import { toast } from '@/hooks/use-toast';
 import { Separator } from '@/components/ui/separator';
+import { toast } from '@/hooks/use-toast';
 
 // Zod Schema
 const formSchema = z.object({
@@ -21,8 +21,7 @@ const formSchema = z.object({
   monthlyRentalIncome: z.string().min(1, "Revenu locatif mensuel requis."),
   annualGrowthRate: z.string().min(1, "Taux de croissance annuel requis."),
   durationYears: z.string().min(1, "Durée requise."),
-  initialInvestment: z.string().min(1, "Investissement initial requis."), // <-- NOUVEAU
-
+  initialInvestment: z.string().min(1, "Investissement initial requis."),
 });
 
 type ExclusiveOfferFormValues = z.infer<typeof formSchema>;
@@ -30,13 +29,12 @@ type ExclusiveOfferFormValues = z.infer<typeof formSchema>;
 interface ExclusiveOfferDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onOfferAdded: () => void; // callback après succès
+  onOfferAdded: () => void;
 }
 
 const ExclusiveOfferDialog: React.FC<ExclusiveOfferDialogProps> = ({ open, onOpenChange, onOfferAdded }) => {
   const [properties, setProperties] = useState<Property[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [exclusiveDialogOpen, setExclusiveDialogOpen] = useState(false);
 
   const form = useForm<ExclusiveOfferFormValues>({
     resolver: zodResolver(formSchema),
@@ -46,6 +44,7 @@ const ExclusiveOfferDialog: React.FC<ExclusiveOfferDialogProps> = ({ open, onOpe
       monthlyRentalIncome: '',
       annualGrowthRate: '',
       durationYears: '',
+      initialInvestment: '',
     },
   });
 
@@ -55,66 +54,64 @@ const ExclusiveOfferDialog: React.FC<ExclusiveOfferDialogProps> = ({ open, onOpe
         const { data } = await axios.get('/api/properties');
         setProperties(data.data || []);
       } catch (error) {
-        console.error(error);
+        console.error('Erreur récupération propriétés:', error);
       }
     };
-
     fetchProperties();
   }, []);
 
-  const onSubmit = async (data: ExclusiveOfferFormValues) => {
+  const onSubmit = async (values: ExclusiveOfferFormValues) => {
+    setIsSubmitting(true);
+
+    // Récupération token
+    const token = localStorage.getItem('access_token');
+    if (!token) {
+      alert("Votre session a expiré. Veuillez vous reconnecter.");
+      onOpenChange(false);
+      setIsSubmitting(false);
+      return;
+    }
+
     try {
-      setIsSubmitting(true);
-  
-      // ✅ Récupération du token depuis le localStorage
-      const token = localStorage.getItem("access_token");
-      if (!token) {
-        toast({
-          title: "Erreur d'authentification",
-          description: "Votre session a expiré. Veuillez vous reconnecter.",
-          variant: "destructive",
-        });
-        onOpenChange(false);
-        return;
-      }
-  
-      // ✅ Requête de création avec authentification
-      await axios.post('/api/exclusive-offers', {
-        property_id: Number(data.propertyId),
-        current_value: Number(data.currentValue),
-        monthly_rental_income: Number(data.monthlyRentalIncome),
-        annual_growth_rate: Number(data.annualGrowthRate),
-        duration_years: Number(data.durationYears),
-        initial_investment: Number(data.initialInvestment),
-      }, {
+      // Préparation des données à envoyer
+      const payload = {
+        propertyId: values.propertyId,
+        currentValue: values.currentValue,
+        monthlyRentalIncome: values.monthlyRentalIncome,
+        annualGrowthRate: values.annualGrowthRate,
+        durationYears: values.durationYears,
+        initialInvestment: values.initialInvestment,
+      };
+
+      const response = await axios.post('/api/exclusive-offers', payload, {
         headers: {
-          Authorization: `Bearer ${token}`, // ✅ Token ajouté dans les headers
+          Authorization: `Bearer ${token}`,
         },
       });
-  
+
       toast({
-        title: "Succès",
-        description: "Offre exclusive ajoutée avec succès !",
+        title: 'Offre ajoutée',
+        description: 'Votre offre exclusive a été enregistrée avec succès.',
+      
       });
-  
-      form.reset();
-      onOpenChange(false);  // Fermer le dialog
-      onOfferAdded();       // Rafraîchir la liste si besoin
+
+      onOfferAdded(); // Notifier le parent
+      onOpenChange(false); // Fermer le dialog
     } catch (error) {
-      console.error(error);
+      console.error('Erreur lors de l\'ajout de l\'offre:', error);
       toast({
-        title: "Erreur",
-        description: "Impossible d'ajouter l'offre exclusive.",
-        variant: "destructive",
+        title: 'Erreur',
+        description: error.response?.data?.message || error.message || 'Une erreur est survenue',
+        variant: 'destructive',
       });
     } finally {
       setIsSubmitting(false);
     }
   };
-  
+
   return (
-<Dialog open={open} onOpenChange={onOpenChange}>
-<DialogContent className="sm:max-w-[600px]">
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-[600px]">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <TrendingUp className="h-5 w-5" />
@@ -132,14 +129,13 @@ const ExclusiveOfferDialog: React.FC<ExclusiveOfferDialogProps> = ({ open, onOpe
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Bien associé</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <Select onValueChange={field.onChange} value={field.value}>
                     <FormControl>
-                    <SelectTrigger className="w-full flex items-center justify-between bg-white dark:bg-gray-800 text-gray-800 dark:text-white border border-gray-300 dark:border-gray-600 rounded-md transition-colors px-3 py-2">
+                      <SelectTrigger className="w-full flex items-center justify-between bg-white dark:bg-gray-800 text-gray-800 dark:text-white border border-gray-300 dark:border-gray-600 rounded-md transition-colors px-3 py-2">
                         <SelectValue placeholder="Sélectionner un bien" />
                       </SelectTrigger>
                     </FormControl>
-                    <SelectContent 
-      className="bg-white dark:bg-gray-800 text-gray-800 dark:text-white border border-gray-300 dark:border-gray-600 rounded-md shadow-lg transition-transform duration-200 transform origin-top scale-95 data-[state=open]:scale-100 max-h-60 overflow-y-auto">
+                    <SelectContent className="bg-white dark:bg-gray-800 text-gray-800 dark:text-white border border-gray-300 dark:border-gray-600 rounded-md shadow-lg transition-transform duration-200 transform origin-top scale-95 data-[state=open]:scale-100 max-h-60 overflow-y-auto">
                       {properties.map((prop) => (
                         <SelectItem key={prop.id} value={String(prop.id)}>
                           {prop.title}
@@ -151,20 +147,20 @@ const ExclusiveOfferDialog: React.FC<ExclusiveOfferDialogProps> = ({ open, onOpe
                 </FormItem>
               )}
             />
-<FormField
-  control={form.control}
-  name="initialInvestment"
-  render={({ field }) => (
-    <FormItem>
-      <FormLabel>Investissement initial (MAD)</FormLabel>
-      <FormControl>
-        <Input placeholder="ex: 2,000,000" {...field}   className="w-full pl-3 pr-3 py-2 border rounded-md bg-white dark:bg-gray-800 text-gray-800 dark:text-white border-gray-300 dark:border-gray-600 focus:ring-0 focus:outline-none transition-colors"
-        />
-      </FormControl>
-      <FormMessage />
-    </FormItem>
-  )}
-/>
+
+            <FormField
+              control={form.control}
+              name="initialInvestment"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Investissement initial (MAD)</FormLabel>
+                  <FormControl>
+                    <Input placeholder="ex: 2,000,000" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
             <FormField
               control={form.control}
@@ -173,8 +169,7 @@ const ExclusiveOfferDialog: React.FC<ExclusiveOfferDialogProps> = ({ open, onOpe
                 <FormItem>
                   <FormLabel>Valeur actuelle (MAD)</FormLabel>
                   <FormControl>
-                    <Input placeholder="ex: 2,500,000" {...field}  className="w-full pl-3 pr-3 py-2 border rounded-md bg-white dark:bg-gray-800 text-gray-800 dark:text-white border-gray-300 dark:border-gray-600 focus:ring-0 focus:outline-none transition-colors"
-        /> 
+                    <Input placeholder="ex: 2,500,000" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -188,8 +183,7 @@ const ExclusiveOfferDialog: React.FC<ExclusiveOfferDialogProps> = ({ open, onOpe
                 <FormItem>
                   <FormLabel>Revenu locatif mensuel (MAD)</FormLabel>
                   <FormControl>
-                    <Input placeholder="ex: 15,000" {...field}   className="w-full pl-3 pr-3 py-2 border rounded-md bg-white dark:bg-gray-800 text-gray-800 dark:text-white border-gray-300 dark:border-gray-600 focus:ring-0 focus:outline-none transition-colors"
-        />
+                    <Input placeholder="ex: 15,000" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -203,8 +197,7 @@ const ExclusiveOfferDialog: React.FC<ExclusiveOfferDialogProps> = ({ open, onOpe
                 <FormItem>
                   <FormLabel>Taux de croissance (%)</FormLabel>
                   <FormControl>
-                    <Input placeholder="ex: 7" {...field}   className="w-full pl-3 pr-3 py-2 border rounded-md bg-white dark:bg-gray-800 text-gray-800 dark:text-white border-gray-300 dark:border-gray-600 focus:ring-0 focus:outline-none transition-colors"
-        />
+                    <Input placeholder="ex: 7" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -218,48 +211,41 @@ const ExclusiveOfferDialog: React.FC<ExclusiveOfferDialogProps> = ({ open, onOpe
                 <FormItem>
                   <FormLabel>Durée d'investissement (années)</FormLabel>
                   <FormControl>
-                    <Input placeholder="ex: 5" {...field}  className="w-full pl-3 pr-3 py-2 border rounded-md bg-white dark:bg-gray-800 text-gray-800 dark:text-white border-gray-300 dark:border-gray-600 focus:ring-0 focus:outline-none transition-colors"
-        />
+                    <Input placeholder="ex: 5" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
 
-                
-<DialogFooter>
-      <Button
-        type="button"
-        variant="outline"
-        onClick={() => onOpenChange(false)}
-        className="text-gray-800 dark:text-Black border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+            <DialogFooter>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => onOpenChange(false)}
+                className="text-gray-800 dark:text-Black border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+              >
+                Annuler
+              </Button>
 
-      >
-        Annuler
-      </Button>
-
-      <Button
-        type="button"
-        disabled={isSubmitting}
-        className="bg-green-600 hover:bg-green-700 text-white"
-        onClick={() => {
-          form.handleSubmit(onSubmit)();
-        }}
-      >
-        {isSubmitting ? (
-          <>
-            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-            Enregistrement...
-          </>
-        ) : (
-          <>
-            <Save className="h-4 w-4 mr-2" />
-            Enregistrer
-          </>
-        )}
-      </Button>
-    </DialogFooter>
-
+              <Button
+                type="submit"
+                disabled={isSubmitting}
+                className="bg-green-600 hover:bg-green-700 text-white"
+              >
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Enregistrement...
+                  </>
+                ) : (
+                  <>
+                    <Save className="h-4 w-4 mr-2" />
+                    Enregistrer
+                  </>
+                )}
+              </Button>
+            </DialogFooter>
           </form>
         </Form>
       </DialogContent>

@@ -29,17 +29,18 @@ const InvestmentOpportunities = () => {
       bgImage: "https://images.unsplash.com/photo-1460317442991-0ec209397118?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
     },
     {
-      icon: <Key className="w-10 h-10 text-white" />,
-      title: "Gestion Locative Premium",
-      description: "Maximisez vos revenus locatifs sans stress. Notre service de gestion prend en charge tous les aspects de la location.",
-      benefits: [
-        "Recherche et sélection rigoureuse des locataires",
-        "Gestion des contrats et des loyers",
-        "Maintenance et services de conciergerie",
-        "Reporting mensuel et bilan annuel"
-      ],
-      bgImage: "https://images.unsplash.com/photo-1493809842364-78817add7ffb?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
-    }
+  icon: <Key className="w-10 h-10 text-white" />,
+  title: "Vente et Achat Immobilier",
+  description: "Trouvez et vendez votre bien immobilier en toute sérénité grâce à notre accompagnement personnalisé.",
+  benefits: [
+    "Evaluation précise de votre bien",
+    "Accompagnement personnalisé tout au long du processus",
+    "Large réseau d'acheteurs et de vendeurs qualifiés",
+    "Négociation optimisée pour obtenir le meilleur prix"
+  ],
+  bgImage: "https://images.unsplash.com/photo-1493809842364-78817add7ffb?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
+}
+
   ];
 
   return (
@@ -88,12 +89,18 @@ const InvestmentOpportunities = () => {
                 </ul>
                 
                 <div className="mt-auto">
-                  <a 
-                    href="#contact" 
-                    className="inline-block w-full text-center py-3 px-6 bg-white text-luxe-blue rounded-md font-medium transition-all hover:bg-gold hover:text-white"
-                  >
-                    En savoir plus
-                  </a>
+                 <a
+  href={
+    opportunity.title === "Vente et Achat Immobilier" ? "/nos-biens" :
+    opportunity.title === "Études de Rentabilité & Conseil" ? "#contact" :
+    opportunity.title === "Investissement Clé en Main" ? "/investir" :
+    "#"
+  }
+  className="inline-block w-full text-center py-3 px-6 bg-white text-luxe-blue rounded-md font-medium transition-all hover:bg-gold hover:text-white"
+>
+  En savoir plus
+</a>
+
                 </div>
               </div>
             </div>

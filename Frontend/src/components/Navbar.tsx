@@ -7,13 +7,16 @@ import {
   Sheet,
   SheetContent,
   SheetTrigger,
+  SheetHeader, // Import SheetHeader
+  SheetTitle,   // Import SheetTitle
+  SheetDescription, // Import SheetDescription
 } from "@/components/ui/sheet";
-import Contact from "@/components/Contact"; // ⬅️ importe bien ton composant Contact
+import Contact from "@/components/Contact";
 
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [showVipForm, setShowVipForm] = useState(false); // ⬅️ état pour afficher Contact VIP
+  const [showVipForm, setShowVipForm] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
   const isHomePage = location.pathname === "/";
@@ -34,14 +37,8 @@ const Navbar = () => {
     return location.pathname.startsWith(path);
   };
 
-  const handleWhyUsClick = (e: React.MouseEvent) => {
-    e.preventDefault();
-    if (isHomePage) {
-      const element = document.getElementById('why-choose-us');
-      if (element) element.scrollIntoView({ behavior: 'smooth' });
-    } else {
-      navigate('/', { state: { scrollTo: 'why-choose-us' } });
-    }
+  const handleWhyUsClick = () => {
+    navigate('/PourquoiNous');
     setIsMobileMenuOpen(false);
   };
 
@@ -94,19 +91,18 @@ const Navbar = () => {
             </a>
           </div>
 
-          {/* Desktop Menu */}
           <div className="hidden lg:flex items-center space-x-8">
             <Link to="/" className={getLinkClasses('/')}>Accueil</Link>
             <Link to="/investir" className={getLinkClasses('/investir')}>Investir</Link>
             <Link to="/nos-biens" className={getLinkClasses('/nos-biens')}>Nos Biens</Link>
             <Link to="/nos-services" className={getLinkClasses('/nos-services')}>Nos Services</Link>
-            <a
-              href="/pourquoi-nous"
+            <Link
+              to="/PourquoiNous"
               onClick={handleWhyUsClick}
-              className={getLinkClasses('/pourquoi-nous')}
+              className={getLinkClasses('/PourquoiNous')}
             >
               Pourquoi Nous
-            </a>
+            </Link>
             <Link to="/blog" className={getLinkClasses('/blog')}>Articles</Link>
 
             <button
@@ -118,7 +114,6 @@ const Navbar = () => {
             </button>
           </div>
 
-          {/* Mobile Menu */}
           {isMobile && (
             <Sheet>
               <SheetTrigger asChild>
@@ -129,28 +124,54 @@ const Navbar = () => {
                   <Menu className={isScrolled || !isHomePage ? "text-luxe-blue" : "text-white"} size={24} />
                 </button>
               </SheetTrigger>
-             <SheetContent
-  side="right"
-  className="bg-luxe-blue/95 backdrop-blur-md border-none p-0 w-full sm:w-[350px] pt-24 h-screen overflow-y-auto"
->
-
-                <div className="container px-8 py-6 flex flex-col space-y-8 items-center">
+              <SheetContent
+                side="right"
+                className="bg-luxe-blue/95 backdrop-blur-md border-none p-0 w-full sm:w-[350px] h-screen flex flex-col"
+              >
+                {/* Add SheetHeader, SheetTitle, and SheetDescription here */}
+                <SheetHeader className="px-8 py-6 flex justify-between items-center border-b border-white/10">
+                  <SheetTitle className="sr-only">Menu de Navigation</SheetTitle> {/* Visually hidden title for accessibility */}
+                  <SheetDescription className="sr-only">
+                    Navigation principale du site, liens vers les différentes sections.
+                  </SheetDescription> {/* Visually hidden description */}
                   <img
                     src="/lovable-uploads/37ca5075-6512-4b7c-a62a-fe0e20d523d6.png"
                     alt="Logo"
-                    className="h-16 mx-auto"
+                    className="h-16"
                   />
-                  <Link to="/" className={getMobileLinkClasses('/')}>Accueil</Link>
-                  <Link to="/investir" className={getMobileLinkClasses('/investir')}>Investir</Link>
-                  <Link to="/nos-biens" className={getMobileLinkClasses('/nos-biens')}>Nos Biens</Link>
-                  <Link to="/nos-services" className={getMobileLinkClasses('/nos-services')}>Nos Services</Link>
-                  <a href="/pourquoi-nous" onClick={handleWhyUsClick} className={getMobileLinkClasses('/why')}>
-                    Pourquoi Nous
-                  </a>
-                  <Link to="/blog" className={getMobileLinkClasses('/blog')}>Blog</Link>
+                  {/* The Sheet component already provides a close button internally, often using an X icon */}
+                </SheetHeader>
+
+                <div className="flex-1 overflow-y-auto py-4">
+                  <div className="container px-8 flex flex-col space-y-2 items-center">
+                    <Link to="/" className={getMobileLinkClasses('/')} onClick={() => setIsMobileMenuOpen(false)}>
+                      Accueil
+                    </Link>
+                    <Link to="/investir" className={getMobileLinkClasses('/investir')} onClick={() => setIsMobileMenuOpen(false)}>
+                      Investir
+                    </Link>
+                    <Link to="/nos-biens" className={getMobileLinkClasses('/nos-biens')} onClick={() => setIsMobileMenuOpen(false)}>
+                      Nos Biens
+                    </Link>
+                    <Link to="/nos-services" className={getMobileLinkClasses('/nos-services')} onClick={() => setIsMobileMenuOpen(false)}>
+                      Nos Services
+                    </Link>
+                    <Link to="/PourquoiNous" className={getMobileLinkClasses('/PourquoiNous')} onClick={handleWhyUsClick}>
+                      Pourquoi Nous
+                    </Link>
+                    <Link to="/blog" className={getMobileLinkClasses('/blog')} onClick={() => setIsMobileMenuOpen(false)}>
+                      Blog
+                    </Link>
+                  </div>
+                </div>
+
+                <div className="p-6 border-t border-white/10">
                   <button
-                    onClick={() => setShowVipForm(true)}
-                    className="flex items-center justify-center w-full space-x-2 text-white rounded-md px-5 py-4 transition-all bg-gold hover:bg-gold-dark font-montserrat shadow-lg mt-6"
+                    onClick={() => {
+                      setShowVipForm(true);
+                      setIsMobileMenuOpen(false);
+                    }}
+                    className="flex items-center justify-center w-full space-x-2 text-white rounded-md px-5 py-4 transition-all bg-gold hover:bg-gold-dark font-montserrat shadow-lg"
                   >
                     <Phone size={20} />
                     <span className="font-semibold">Contact VIP</span>
@@ -162,7 +183,6 @@ const Navbar = () => {
         </div>
       </nav>
 
-      {/* Contact VIP Modal */}
       {showVipForm && (
         <div className="fixed top-4 left-1/2 -translate-x-1/2 z-[100] w-full max-w-xl p-6 bg-white rounded-lg shadow-2xl border">
           <div className="flex justify-between items-center mb-4">
@@ -171,11 +191,11 @@ const Navbar = () => {
               className="text-gray-500 hover:text-red-500"
               onClick={() => setShowVipForm(false)}
             >
-<X size={20}/>
+              <X size={20} />
             </button>
           </div>
           <Contact onSuccess={() => setShowVipForm(false)} />
-          </div>
+        </div>
       )}
     </>
   );

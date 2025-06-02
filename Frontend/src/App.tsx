@@ -49,6 +49,9 @@ import AdminProspects from "./pages/admin/ProspectTable";
 import EditProspectForm from "./pages/admin/EditProspectForm";
 import InvestmentForm from "./components/properties/InvestmentForm";
 import AddProspectForm from "./pages/admin/AddProspectForm";
+import PrivacyPolicyPage from "./pages/PrivacyPolicyPage";
+import PourquoiNous from "./components/PourquoiNous";
+import ProjetPage from "./pages/ProjetPage";
 
 const queryClient = new QueryClient();
 
@@ -73,7 +76,7 @@ const App = () => (
           <Route path="/conditions-generales-de-vente" element={<CGV />} />
           <Route path="/politique-de-confidentialite" element={<Confidentialite />} />
           <Route path="/politique-des-cookies" element={<Cookies />} />
-          
+
           {/* Admin Dashboard */}
           <Route path="/admin" element={<AdminLogin />} />
           <Route path="/admin/prospects" element={<AdminProspects />} />
@@ -105,8 +108,9 @@ const App = () => (
           <Route path="/admin/activities" element={<ActivityHistory />} />
 
           </Route>
-
-          
+          <Route path="/PrivacyPolicyPage" element={<PrivacyPolicyPage />} />
+          <Route path="/PourquoiNous" element={<PourquoiNous />} />
+          <Route path="/admin/projet" element={<ProjetPage />}/>
           {/* Catch-all route for 404 */}
           <Route path="*" element={<NotFound />} />
         </Routes>

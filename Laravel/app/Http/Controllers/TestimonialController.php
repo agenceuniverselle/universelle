@@ -126,8 +126,8 @@ public function destroy($id)
     }
 
     // Supprimer l'image associée s'il y en a une
-    if ($testimonial->image && \Storage::disk('public')->exists($testimonial->image)) {
-        \Storage::disk('public')->delete($testimonial->image);
+    if ($testimonial->image && Storage::disk('public')->exists($testimonial->image)) {
+        Storage::disk('public')->delete($testimonial->image);
     }
 
     $testimonial->delete();

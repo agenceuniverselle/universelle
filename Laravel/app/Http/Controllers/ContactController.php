@@ -16,6 +16,7 @@ class ContactController extends Controller
             'budget'  => 'required|string',
             'purpose' => 'required|string',
             'message' => 'nullable|string',
+            'consent' => 'nullable|boolean',
         ]);
 
         $contact = Contact::create($validated);

@@ -21,6 +21,7 @@ return new class extends Migration
             $table->string('visit_type')->nullable();
             $table->date('visit_date')->nullable();
             $table->text('message')->nullable();
+            $table->boolean(column: 'consent')->default(true);
             $table->timestamps();
         });
     }

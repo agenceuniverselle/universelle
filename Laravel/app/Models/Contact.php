@@ -15,5 +15,6 @@ class Contact extends Model
         'budget',
         'purpose',
         'message',
+        'consent',
     ];
 }
