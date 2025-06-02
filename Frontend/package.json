@@ -68,6 +68,7 @@
     "react-router-dom": "^6.26.2",
     "react-simple-star-rating": "^5.1.7",
     "recharts": "^2.12.7",
+    "serve": "^14.2.4",
     "sonner": "^1.5.0",
     "swiper": "^11.2.6",
     "tailwind-merge": "^2.5.2",
