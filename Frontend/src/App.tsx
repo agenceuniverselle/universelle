@@ -78,7 +78,7 @@ const App = () => (
           <Route path="/politique-des-cookies" element={<Cookies />} />
 
           {/* Admin Dashboard */}
-          <Route path="/admin" element={<AdminLogin />} />
+          <Route path="/login" element={<AdminLogin />} />
           <Route path="/admin/prospects" element={<AdminProspects />} />
           <Route path="/admin/prospects/edit/:id" element={<EditProspectForm />} />
           <Route path="/admin/prospects/add" element={<AddProspectForm />} />
