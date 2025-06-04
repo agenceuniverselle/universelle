@@ -11,18 +11,20 @@ export default defineConfig(({ mode }) => ({
     outDir: "dist", // ✅ le dossier que DigitalOcean attend
   },
 
-  server: {
-    host: "localhost",
-    port: 8080,
-    proxy: {
-      "/api": {
-        target: "http://localhost:8000",
-        changeOrigin: true,
-        secure: false,
-        rewrite: (path) => path.replace(/^\/api/, "/api"),
+ server: mode === "development"
+  ? {
+      host: "localhost",
+      port: 8080,
+      proxy: {
+        "/api": {
+          target: "http://localhost:8000",
+          changeOrigin: true,
+          secure: false,
+          rewrite: (path) => path.replace(/^\/api/, "/api"),
+        },
       },
-    },
-  },
+    }
+  : undefined,
 
   plugins: [
     react(),
