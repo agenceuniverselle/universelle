@@ -20,3 +20,12 @@ Route::get('/', function () {
 Route::view('/{any}', 'app')->where('any', '.*');
 
 
+// Route pour servir votre application React
+Route::get('/{any}', function () {
+    return view('app'); // Vue principale qui charge votre app React
+})->where('any', '.*');
+
+// Ou si vous voulez des routes spécifiques :
+Route::get('/login', function () {
+    return view('app');
+});

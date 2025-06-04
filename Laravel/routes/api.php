@@ -151,6 +151,8 @@ Route::get('/sanctum/csrf-cookie', function () {
 Route::post('/login', [JwtAuthController::class, 'login']);
 Route::post('/logout', [JwtAuthController::class, 'logout'])->middleware('auth:api');
 Route::post('/refresh', [JwtAuthController::class, 'refresh'])->middleware('auth:api');
+Route::get('/login', [JwtAuthController::class, 'testLogin']);
+
 // routes/api.php
 Route::middleware('auth:api')->get('/me', function (Request $request) {
     return response()->json($request->user());
