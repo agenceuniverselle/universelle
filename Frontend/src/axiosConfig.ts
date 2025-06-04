@@ -1,18 +1,19 @@
 // src/axiosConfig.ts
 import axios from 'axios';
 
-// Configurer Axios globalement avec les credentials
-axios.defaults.baseURL = 'http://localhost:8000';
-axios.defaults.withCredentials = true;
+const api = axios.create({
+  baseURL: import.meta.env.VITE_API_URL,
+  withCredentials: true,
+});
 
-// Récupération automatique du CSRF Token avant chaque requête
-axios.interceptors.request.use(async (config) => {
+// Intercepteur : récupération du CSRF token
+api.interceptors.request.use(async (config) => {
   if (!document.cookie.includes('XSRF-TOKEN')) {
-    await axios.get('/sanctum/csrf-cookie');
+    await api.get('/sanctum/csrf-cookie');
   }
   return config;
 }, (error) => {
   return Promise.reject(error);
 });
 
-export default axios;
+export default api;
