@@ -2,32 +2,39 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
 import { componentTagger } from "lovable-tagger";
+import { viteStaticCopy } from 'vite-plugin-static-copy'; // 👈
 
-// https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
-  base: "/", // ✅ indispensable pour que les routes React fonctionnent en prod
-
+  base: "/",
   build: {
-    outDir: "dist", // ✅ le dossier que DigitalOcean attend
+    outDir: "dist",
   },
 
- server: mode === "development"
-  ? {
-      host: "localhost",
-      port: 8080,
-      proxy: {
-        "/api": {
-          target: "http://localhost:8000",
-          changeOrigin: true,
-          secure: false,
-          rewrite: (path) => path.replace(/^\/api/, "/api"),
+  server: mode === "development"
+    ? {
+        host: "localhost",
+        port: 8080,
+        proxy: {
+          "/api": {
+            target: "http://localhost:8000",
+            changeOrigin: true,
+            secure: false,
+            rewrite: (path) => path.replace(/^\/api/, "/api"),
+          },
         },
-      },
-    }
-  : undefined,
+      }
+    : undefined,
 
   plugins: [
     react(),
+    viteStaticCopy({
+      targets: [
+        {
+          src: 'public/_redirects',
+          dest: '.', // 👈 copie dans dist/
+        },
+      ],
+    }),
     mode === "development" && componentTagger(),
   ].filter(Boolean),
 
