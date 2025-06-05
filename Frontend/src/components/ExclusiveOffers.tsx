@@ -336,44 +336,30 @@ const ExclusiveOffers = () => {
                 <div className="space-y-4 mb-8">
                   <p className="text-white/80">{offer.property?.description || "Pas de description disponible"}</p>
 
-                  <div className="grid grid-cols-2 gap-4 mt-6">
-                    <div className="bg-white/10 rounded-lg p-4">
-                      <h4 className="text-gold font-medium text-sm">Investissement initial</h4>
-                     <p className="text-2xl font-bold">
-  {typeof offer.initial_investment === 'number'
-    ? offer.initial_investment.toLocaleString()
-    : 'N/A'} MAD
-</p>
+                 <div className="grid grid-cols-2 gap-4 mt-6">
+  <div className="bg-white/10 rounded-lg p-4">
+    <h4 className="text-gold font-medium text-sm">Investissement initial</h4>
+    <p className="text-2xl font-bold">{formatNumber(offer.initial_investment)} MAD</p>
+  </div>
 
-                    </div>
+  <div className="bg-white/10 rounded-lg p-4">
+    <h4 className="text-gold font-medium text-sm">Valeur actuelle</h4>
+    <p className="text-2xl font-bold">{formatNumber(offer.current_value)} MAD</p>
+  </div>
 
-                    <div className="bg-white/10 rounded-lg p-4">
-                      <h4 className="text-gold font-medium text-sm">Valeur actuelle</h4>
-                      <p className="text-2xl font-bold">
-  {typeof offer.current_value === 'number'
-    ? offer.current_value.toLocaleString()
-    : 'N/A'} MAD
-</p>
+  <div className="bg-white/10 rounded-lg p-4">
+    <h4 className="text-gold font-medium text-sm">Revenu locatif annuel</h4>
+    <p className="text-2xl font-bold">{formatNumber(annualRental)} MAD</p>
+  </div>
 
-                      <p className="text-2xl font-bold">{offer.current_value.toLocaleString()} MAD</p>
-                    </div>
+  <div className="bg-white/10 rounded-lg p-4">
+    <h4 className="text-gold font-medium text-sm">ROI annuel estimé</h4>
+    <p className="text-2xl font-bold">{formatPercent(roi)}</p>
+  </div>
+</div>
 
-                    <div className="bg-white/10 rounded-lg p-4">
-                      <h4 className="text-gold font-medium text-sm">Revenu locatif annuel</h4>
-                        <p className="text-2xl font-bold">
-  {typeof annualRental === 'number'
-    ? annualRental.toLocaleString()
-    : 'N/A'} MAD
-</p>
-                   
-                    </div>
 
-                    <div className="bg-white/10 rounded-lg p-4">
-                      <h4 className="text-gold font-medium text-sm">ROI annuel estimé</h4>
-                      <p className="text-2xl font-bold">{roi.toFixed(2)}%</p>
-                    </div>
-                  </div>
-                </div>
+                    
 
                 <div className="space-y-3">
                   {/* Bouton de réservation */}
