@@ -72,6 +72,8 @@ const ContactFormFields: React.FC<ContactFormFieldsProps> = ({ onSuccess }) => {
     setIsDetectingIp(false);
   }
 };
+     detectCountryByIp(); // ✅ appel ici
+}, []);
  // Run only once on component mount
 
   const handleChange = (
