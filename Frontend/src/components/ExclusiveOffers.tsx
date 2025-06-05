@@ -315,7 +315,7 @@ const calculateAnnualLocatif = (monthlyRental?: number) => {
                   <>
                     <div
                       className="absolute inset-0 bg-cover bg-center"
-                      style={{ backgroundImage: url("${firstImageUrl}") }}
+                      style={{ backgroundImage: `url("${firstImageUrl}")` }}
                     />
                     <img
                       src={firstImageUrl}
