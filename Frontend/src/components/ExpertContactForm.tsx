@@ -97,7 +97,7 @@ const ExpertContactForm: React.FC<ExpertContactFormProps> = ({
   useEffect(() => {
     const detectCountryByIp = async () => {
       try {
-        const response = await axios.get("http://ip-api.com/json");
+        const response = await axios.get("https://ip-api.com/json");
         const data = response.data;
 
         let detectedCountry: CountryData | undefined;
