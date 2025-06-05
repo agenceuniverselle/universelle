@@ -47,7 +47,7 @@ const ContactFormFields: React.FC<ContactFormFieldsProps> = ({ onSuccess }) => {
   useEffect(() => {
     const detectCountryByIp = async () => {
       try {
-        const response = await axios.get('https://ip-api.com/json'); // Use HTTPS for production
+        const response = await axios.get('https://ipwho.is/'); // Use HTTPS for production
         const data = response.data;
 
         if (data.status === 'success' && data.countryCode) {
