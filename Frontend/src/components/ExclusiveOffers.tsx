@@ -400,7 +400,7 @@ const calculateAnnualLocatif = (monthlyRental?: number) => {
               {currentIndex + 1} / {offers.length}
             </span>
           </div>
-        </div>
+        
       </section>
 
      {/* Formulaire d'investissement */}
