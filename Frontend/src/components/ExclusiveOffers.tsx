@@ -204,9 +204,10 @@ const formatPercent = (value: unknown) => {
     return currentValue * Math.pow(1 + rate / 100, years);
   };
 
-  const calculateAnnualLocatif = (monthlyRental: number) => {
-    return monthlyRental * 12;
-  };
+const calculateAnnualLocatif = (monthlyRental?: number) => {
+  return typeof monthlyRental === 'number' ? monthlyRental * 12 : null;
+};
+
 
   const calculateAnnualROI = (initial_investment: number, final_investment: number) => {
     return ((final_investment - initial_investment) / initial_investment) * 100;
@@ -362,7 +363,7 @@ const formatPercent = (value: unknown) => {
 
   <div className="bg-white/10 rounded-lg p-4">
     <h4 className="text-gold font-medium text-sm">Revenu locatif annuel</h4>
-    <p className="text-2xl font-bold">{formatNumber(annualRental)} MAD</p>
+  <p className="text-2xl font-bold">{formatNumber(annualRental)} MAD</p>
   </div>
 
   <div className="bg-white/10 rounded-lg p-4">
