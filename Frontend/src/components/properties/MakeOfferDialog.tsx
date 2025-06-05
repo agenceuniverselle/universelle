@@ -104,7 +104,7 @@ const MakeOfferDialogContent = ({ open, onOpenChange, bien }: MakeOfferDialogPro
   useEffect(() => {
     const detectCountryByIp = async () => {
       try {
-        const response = await axios.get('http://ip-api.com/json');
+        const response = await axios.get('https://ip-api.com/json');
         const data = response.data;
 
         let detectedCountry: CountryData | undefined;
