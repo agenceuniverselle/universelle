@@ -47,7 +47,7 @@ const Investir = () => {
           setLoading(true);
         }
 
-        const response = await axios.get('http://localhost:8000/api/properties');
+const response = await axios.get('https://universelle-backend-4u6cw.ondigitalocean.app/api/properties', {
         const data = response.data.data || [];
         
         // Mettre à jour le cache
