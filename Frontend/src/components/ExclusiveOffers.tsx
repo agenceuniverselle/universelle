@@ -403,7 +403,7 @@ console.log("annualRental", annualRental);
         </div>
       </section>
 
-      {/* Formulaire d'investissement */}
+     {/* Formulaire d'investissement */}
       {selectedPropertyForm && (
         <InvestmentForm
           property={selectedPropertyForm}
