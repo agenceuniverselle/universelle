@@ -51,10 +51,12 @@ const ExclusiveOffers = () => {
   const [isInvestmentFormOpen, setIsInvestmentFormOpen] = useState(false);
   const [selectedPropertyForm, setSelectedPropertyForm] = useState<Property | null>(null);
   const [imageError, setImageError] = useState<{ [key: number]: boolean }>({});
-const formatNumber = (value: any) => {
+const formatNumber = (value: unknown): string => {
+  if (value === null || value === undefined) return 'N/A';
   const number = Number(value);
   return !isNaN(number) ? number.toLocaleString() : 'N/A';
 };
+
 
 
 const formatPercent = (value: unknown) => {
