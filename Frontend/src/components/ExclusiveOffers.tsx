@@ -164,7 +164,7 @@ const formatPercent = (value: unknown): string => {
         type: (offer.property.investmentDetails?.type || offer.property.type) as 'Résidentiel' | 'Commercial' | 'Touristique',
         returnRate: offer.property.investmentDetails?.returnRate || offer.property.returnRate,
         minEntryPrice: offer.property.investmentDetails?.minEntryPrice || offer.property.price,
-        recommendedDuration: offer.property.investmentDetails?.recommendedDuration || ${offer.duration_years} ans,
+        recommendedDuration: offer.property.investmentDetails?.recommendedDuration || `${offer.duration_years} ans`,
         financingEligibility: offer.property.investmentDetails?.financingEligibility || false,
         partners: parsedPartners,
         projectStatus: (offer.property.investmentDetails?.projectStatus || 'En cours') as 'Pré-commercialisation' | 'En cours' | 'Terminé',
