@@ -51,6 +51,11 @@ const ExclusiveOffers = () => {
   const [isInvestmentFormOpen, setIsInvestmentFormOpen] = useState(false);
   const [selectedPropertyForm, setSelectedPropertyForm] = useState<Property | null>(null);
   const [imageError, setImageError] = useState<{ [key: number]: boolean }>({});
+const formatNumber = (value: number | null | undefined) =>
+  typeof value === 'number' ? value.toLocaleString() : 'N/A';
+
+const formatPercent = (value: number | null | undefined) =>
+  typeof value === 'number' ? `${value.toFixed(2)}%` : 'N/A';
 
   // États pour le dialog
   const [isDialogOpen, setIsDialogOpen] = useState(false);
