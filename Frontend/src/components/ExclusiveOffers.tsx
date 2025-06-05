@@ -148,7 +148,7 @@ const formatPercent = (value: unknown): string => {
       title: offer.property.title,
       description: offer.property.description || '',
       images: offer.property.images.map((imagePath, index) => ({
-        id: ${offer.property.id}-${index},
+        id: `${offer.property.id}-${index}`,
         url: imagePath
       })),
       location: offer.property.location,
