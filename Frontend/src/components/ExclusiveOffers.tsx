@@ -60,12 +60,13 @@ const formatNumber = (value: unknown): string => {
 
 
 
-const formatPercent = (value: unknown) => {
+const formatPercent = (value: unknown): string => {
   if (typeof value === 'number' && !isNaN(value)) {
-    return ${value.toFixed(2)}%;
+    return `${value.toFixed(2)}%`;
   }
   return 'N/A';
 };
+
 
 
   // États pour le dialog
