@@ -123,6 +123,7 @@ const formatPercent = (value: unknown): string => {
    return imagePath.startsWith('http')
   ? imagePath
   : `http://localhost:8000/${imagePath}`;
+    };
 
 
   // Fonction pour créer un objet Property à partir d'une ExclusiveOffer
@@ -343,7 +344,6 @@ const calculateAnnualLocatif = (monthlyRental?: number) => {
                   </svg>
                 </div>
               </div>
-console.log("annualRental", annualRental);
 
               {/* Infos */}
               <div className="p-8 lg:p-12">
