@@ -88,7 +88,7 @@ useEffect(() => {
     const fetchTestimonials = async () => {
       try {
         const response = await axios.get('/api/testimonials');
-        setTestimonials(response.data);
+setTestimonials(Array.isArray(response.data) ? response.data : response.data?.data || []);
       } catch (err) {
         setErrorTestimonials(err.message);
         console.error('Error fetching testimonials:', err);
