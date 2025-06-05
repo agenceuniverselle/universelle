@@ -401,9 +401,9 @@ const calculateAnnualLocatif = (monthlyRental?: number) => {
             </span>
           </div>
         
-      </section>
+            </section>
 
-     {/* Formulaire d'investissement */}
+      {/* Formulaire d'investissement */}
       {selectedPropertyForm && (
         <InvestmentForm
           property={selectedPropertyForm}
@@ -425,3 +425,4 @@ const calculateAnnualLocatif = (monthlyRental?: number) => {
 };
 
 export default ExclusiveOffers;
+
