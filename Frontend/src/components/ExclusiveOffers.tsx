@@ -394,7 +394,7 @@ const calculateAnnualLocatif = (monthlyRental?: number) => {
               </div>
             </div>
           </div>
-
+ </div>
           <div className="flex justify-center">
             <span className="text-sm text-white/70 bg-black/30 rounded-full px-3 py-1 -mt-8">
               {currentIndex + 1} / {offers.length}
@@ -419,10 +419,10 @@ const calculateAnnualLocatif = (monthlyRental?: number) => {
           open={isDialogOpen}
           onOpenChange={setIsDialogOpen}
         />
-      )}
-    </>
-  );
-};
+       )}
+      </>
+    );
+  };
 
 export default ExclusiveOffers;
 
