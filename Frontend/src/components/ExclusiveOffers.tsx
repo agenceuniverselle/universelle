@@ -120,10 +120,10 @@ const formatPercent = (value: unknown): string => {
   // Fonction pour obtenir l'URL de l'image avec gestion d'erreur
   const getImageUrl = (imagePath: string): string => {
     if (!imagePath) return '';
-    return imagePath.startsWith('http')
-      ? imagePath
-      : http://localhost:8000/${imagePath};
-  };
+   return imagePath.startsWith('http')
+  ? imagePath
+  : `http://localhost:8000/${imagePath}`;
+
 
   // Fonction pour créer un objet Property à partir d'une ExclusiveOffer
   const createPropertyFromOffer = (offer: ExclusiveOffer): Property => {
