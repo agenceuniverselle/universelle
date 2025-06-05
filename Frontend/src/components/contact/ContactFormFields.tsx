@@ -46,35 +46,33 @@ const ContactFormFields: React.FC<ContactFormFieldsProps> = ({ onSuccess }) => {
   // Effect for IP detection on initial component mount
   useEffect(() => {
     const detectCountryByIp = async () => {
-      try {
-        const response = await axios.get('https://ipwho.is/'); // Use HTTPS for production
-        const data = response.data;
+  try {
+    const response = await axios.get('https://ipwho.is/');
+    const data = response.data;
 
-        if (data.status === 'success' && data.countryCode) {
-          const foundCountry = countryCodes.find(
-            c => c.iso2 === data.countryCode
-          );
-          if (foundCountry) {
-            setSelectedCountry(foundCountry);
-            setFormData(prev => ({ ...prev, phone: `+${foundCountry.code} ` }));
-          } else {
-            console.warn(`Country code ${data.countryCode} from IP-API not found in your countryCodes list. Falling back to Morocco.`);
-            setSelectedCountry(countryCodes.find(c => c.iso2 === "MA") || null); // Fallback to Morocco
-          }
-        } else {
-          console.warn("IP-API call failed or returned no country code. Falling back to Morocco.");
-          setSelectedCountry(countryCodes.find(c => c.iso2 === "MA") || null); // Fallback to Morocco
-        }
-      } catch (error) {
-        console.error("Error detecting country by IP for ContactFormFields:", error);
-        setSelectedCountry(countryCodes.find(c => c.iso2 === "MA") || null); // Fallback to Morocco on error
-      } finally {
-        setIsDetectingIp(false); // IP detection is complete
+    if (data.success && data.country_code) {
+      const foundCountry = countryCodes.find(
+        c => c.iso2 === data.country_code
+      );
+      if (foundCountry) {
+        setSelectedCountry(foundCountry);
+        setFormData(prev => ({ ...prev, phone: `+${foundCountry.code} ` }));
+      } else {
+        console.warn(`Country code ${data.country_code} from ipwho.is not found. Fallback to Morocco.`);
+        setSelectedCountry(countryCodes.find(c => c.iso2 === "MA") || null);
       }
-    };
-
-    detectCountryByIp();
-  }, []); // Run only once on component mount
+    } else {
+      console.warn("ipwho.is call failed or returned invalid data. Fallback to Morocco.");
+      setSelectedCountry(countryCodes.find(c => c.iso2 === "MA") || null);
+    }
+  } catch (error) {
+    console.error("Error detecting country by IP for ContactFormFields:", error);
+    setSelectedCountry(countryCodes.find(c => c.iso2 === "MA") || null);
+  } finally {
+    setIsDetectingIp(false);
+  }
+};
+ // Run only once on component mount
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
