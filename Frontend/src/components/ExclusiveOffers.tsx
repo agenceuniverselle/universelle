@@ -108,7 +108,8 @@ const formatPercent = (value: unknown): string => {
     const month = (date.getMonth() + 1).toString().padStart(2, '0'); // mois commence à 0
     const year = date.getFullYear();
 
-    return ${day}/${month}/${year};
+    return `${day}/${month}/${year}`;
+
   };
 
   // Fonction pour gérer les erreurs d'image
