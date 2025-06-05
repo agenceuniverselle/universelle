@@ -99,21 +99,31 @@ setTestimonials(Array.isArray(response.data) ? response.data : response.data?.da
 
     fetchTestimonials();
   }, []);
-  useEffect(() => {
-    const fetchProjects = async () => {
-      try {
-        const response = await axios.get('/api/projects');
-        setProjects(response.data);
-      } catch (err) {
-        setError(err.message);
-        console.error('Error fetching projects:', err);
-      } finally {
-        setLoading(false);
-      }
-    };
+ useEffect(() => {
+  const fetchProjects = async () => {
+    try {
+      const response = await axios.get('/api/projects');
 
-    fetchProjects();
-  }, []);
+      const raw = response.data;
+
+      const projectList = Array.isArray(raw)
+        ? raw
+        : Array.isArray(raw?.data)
+        ? raw.data
+        : [];
+
+      setProjects(projectList);
+    } catch (err) {
+      setError(err.message);
+      console.error('Error fetching projects:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  fetchProjects();
+}, []);
+
 
   return (
     <MainLayout>
