@@ -1,7 +1,11 @@
 [build]
   base = "Frontend"
-  publish = "dist"
-  command = "npm run build"
+  publish = "Frontend/dist"
+  command = "CI=false pnpm run build"
+
+[build.environment]
+  NODE_VERSION = "18"
+  NPM_FLAGS = "--package-lock-only=false"
 
 [[redirects]]
   from = "/*"
