@@ -31,39 +31,27 @@ const Investir = () => {
   }, []);
 
   // Chargement optimisé avec cache
-  useEffect(() => {
-    const fetchProperties = async () => {
-      try {
-        // Vérifier le cache d'abord
-        const now = Date.now();
-        if (propertiesCache && (now - cacheTimestamp) < CACHE_DURATION) {
-          setProperties(propertiesCache);
-          setLoading(false);
-          return;
-        }
+ useEffect(() => {
+  const fetchProperties = async () => {
+    try {
+      const response = await axios.get('https://universelle-backend-4u6cw.ondigitalocean.app/api/properties', {
+        withCredentials: true,
+      });
 
-        // Si pas de cache, montrer immédiatement un skeleton avec données fictives
-        if (!propertiesCache) {
-          setLoading(true);
-        }
+      const data = response.data?.data || [];
 
-const response = await axios.get('https://universelle-backend-4u6cw.ondigitalocean.app/api/properties', {
-        const data = response.data.data || [];
-        
-        // Mettre à jour le cache
-        propertiesCache = data;
-        cacheTimestamp = now;
-        
-        setProperties(data);
-      } catch (err) {
-        setError("Erreur lors du chargement des propriétés");
-      } finally {
-        setLoading(false);
-      }
-    };
+      propertiesCache = data;
+      cacheTimestamp = Date.now();
+      setProperties(data);
+    } catch (err) {
+      setError("Erreur lors du chargement des propriétés");
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    fetchProperties();
-  }, []);
+  fetchProperties();
+}, []);
 
   // Filtrage ultra-optimisé
   const filteredProperties = useMemo(() => {
