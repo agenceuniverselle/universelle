@@ -111,7 +111,7 @@ const AdminProspects = () => {
     const fetchInvestorRequests = async () => {
       try {
         setLoading(true);
-        const res = await axios.get('http://localhost:8000/api/investor-requests');
+        const res = await axios.get('https://back-qhore.ondigitalocean.app/api/investor-requests');
         // Make sure the data structure matches our expectation
         const data = res.data?.data || [];
         setProspects(Array.isArray(data) ? data : []);
@@ -158,7 +158,7 @@ const AdminProspects = () => {
   const fetchMessages = async () => {
     try {
       setLoading(true);
-      const response = await axios.get('http://localhost:8000/api/messages');
+      const response = await axios.get('https://back-qhore.ondigitalocean.app/api/messages');
       console.log("Messages response:", response.data); // Pour vérification
 
       setMessages(Array.isArray(response.data?.data) ? response.data.data : []);
@@ -177,7 +177,7 @@ const AdminProspects = () => {
       setLoading(true);
       
       // Récupérer tous les commentaires
-      const res = await axios.get('http://localhost:8000/api/comments');
+      const res = await axios.get('https://back-qhore.ondigitalocean.app/api/comments');
       
       console.log("Comments response:", res.data);
       setComments(Array.isArray(res.data) ? res.data : []);
@@ -195,7 +195,7 @@ const AdminProspects = () => {
     try {
       setLoading(true);
       // À remplacer par votre endpoint API réel
-      const response = await axios.get('http://localhost:8000/api/contacts');
+      const response = await axios.get('https://back-qhore.ondigitalocean.app/api/contacts');
       console.log("Contacts response:", response.data);
       
       setContacts(Array.isArray(response.data?.data) ? response.data.data : []);
@@ -213,7 +213,7 @@ const AdminProspects = () => {
     try {
       setLoading(true);
       // À remplacer par votre endpoint API réel
-      const response = await axios.get('http://localhost:8000/api/newsletters');
+      const response = await axios.get('https://back-qhore.ondigitalocean.app/api/newsletters');
       console.log("Newsletters response:", response.data);
       
       setNewsletters(Array.isArray(response.data?.data) ? response.data.data : []);
@@ -239,7 +239,7 @@ const AdminProspects = () => {
  const fetchOffers = async () => {
   try {
     setLoading(true);
-    const response = await axios.get('http://localhost:8000/api/offers');
+    const response = await axios.get('https://back-qhore.ondigitalocean.app/api/offers');
     console.log("Offers response:", response.data); // Pour vérification
     
     // Vérifiez la structure exacte de la réponse
@@ -315,27 +315,27 @@ console.log("Offres filtrées à afficher:", filteredOffers);
       setLoading(true);
 
       if (deleteTarget.type === 'prospect') {
-        await axios.delete(`http://localhost:8000/api/investor-requests/${deleteTarget.id}`);
+        await axios.delete(`https://back-qhore.ondigitalocean.app/api/investor-requests/${deleteTarget.id}`);
         setProspects(prev => prev.filter(p => p.id !== deleteTarget.id));
         toast({ title: 'Prospect supprimé avec succès.' });
       } else if (deleteTarget.type === 'message') {
-        await axios.delete(`http://localhost:8000/api/messages/${deleteTarget.id}`);
+        await axios.delete(`https://back-qhore.ondigitalocean.app/api/messages/${deleteTarget.id}`);
         setMessages(prev => prev.filter(m => m.id !== deleteTarget.id));
         toast({ title: 'Message supprimé avec succès.' });
       } else if (deleteTarget.type === 'commentaire') {
-        await axios.delete(`http://localhost:8000/api/comments/${deleteTarget.id}`);
+        await axios.delete(`https://back-qhore.ondigitalocean.app/api/comments/${deleteTarget.id}`);
         setComments(prev => prev.filter(c => c.id !== deleteTarget.id));
         toast({ title: 'Commentaire supprimé avec succès.' });
       } else if (deleteTarget.type === 'offer') {
-        await axios.delete(`http://localhost:8000/api/offers/${deleteTarget.id}`);
+        await axios.delete(`https://back-qhore.ondigitalocean.app/api/offers/${deleteTarget.id}`);
         setOffers(prev => prev.filter(o => o.id !== deleteTarget.id));
         toast({ title: 'Offre supprimée avec succès.' });
       } else if (deleteTarget.type === 'contact') {
-        await axios.delete(`http://localhost:8000/api/contacts/${deleteTarget.id}`);
+        await axios.delete(`https://back-qhore.ondigitalocean.app/api/contacts/${deleteTarget.id}`);
         setContacts(prev => prev.filter(c => c.id !== deleteTarget.id));
         toast({ title: 'Contact supprimé avec succès.' });
       } else if (deleteTarget.type === 'newsletter') {
-        await axios.delete(`http://localhost:8000/api/newsletters/${deleteTarget.id}`);
+        await axios.delete(`https://back-qhore.ondigitalocean.app/api/newsletters/${deleteTarget.id}`);
         setNewsletters(prev => prev.filter(n => n.id !== deleteTarget.id));
         toast({ title: 'Abonné supprimé avec succès.' });
       }
