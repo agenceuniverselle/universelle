@@ -695,7 +695,7 @@ doc.text("Adresse : IMM17 N°9 Touzine, Complexe Bayt Laatik, Tanger 90000", 105
           
           <Carousel className="mb-6">
   <CarouselContent>
-    {mockImages.slice(1).map((img, index) => (
+    {mockImages.map((img, index) => (
       <CarouselItem key={index} className="md:basis-1/2 lg:basis-1/3">
         <div className="relative h-60 md:h-72 overflow-hidden rounded-lg">
           <img
