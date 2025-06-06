@@ -85,7 +85,7 @@ export const UserTabsContainer: React.FC<UserTabsContainerProps> = ({
     }
 
     try {
-      const response = await axios.get("http://localhost:8000/api/admin/roles", {
+      const response = await axios.get("https://back-qhore.ondigitalocean.app/api/admin/roles", {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -123,7 +123,7 @@ export const UserTabsContainer: React.FC<UserTabsContainerProps> = ({
   }
 
   try {
-    await axios.post('http://localhost:8000/api/admin/users', userData, {
+    await axios.post('https://back-qhore.ondigitalocean.app/api/admin/users', userData, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
