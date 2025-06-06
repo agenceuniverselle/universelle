@@ -798,11 +798,8 @@ doc.text("Adresse : IMM17 N°9 Touzine, Complexe Bayt Laatik, Tanger 90000", 105
                   )}
                 </div>
                 
-               {bien.points_forts && bien.points_forts.length > 0 && ( // <-- Condition ajoutée ici
- <div> {/* Ajout d'un div conteneur pour le titre et la liste */}
- <h3 className="text-xl font-semibold mb-4">Points forts</h3>
- <ul className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-3 mb-10">
- {Array.isArray(bien.points_forts) && bien.points_forts.length > 0 && (
+                 
+              {Array.isArray(bien.points_forts) && bien.points_forts.length > 0 && (
   <ul>
     {bien.points_forts.map((feature, index) => (
       <li key={index}>{feature}</li>
@@ -810,9 +807,6 @@ doc.text("Adresse : IMM17 N°9 Touzine, Complexe Bayt Laatik, Tanger 90000", 105
   </ul>
 )}
 
-</ul>
-</div>
-)}
 
                 
                {/* START MODIFICATION FOR INVESTISSEMENT */}
@@ -1013,12 +1007,8 @@ doc.text("Adresse : IMM17 N°9 Touzine, Complexe Bayt Laatik, Tanger 90000", 105
               <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
 
  {/* START MODIFICATION FOR PROXIMITÉ - Masque tout si vide */}
- {bien.proximite && bien.proximite.length > 0 && (
- <div>
- <h3 className="text-lg font-semibold mb-4">Proximité</h3>
-
 {Array.isArray(bien.proximite) && bien.proximite.length > 0 && (
-   <ul className="space-y-3">
+  <ul>
     {bien.proximite.map((item, index) => {
       const data = proximiteDescriptions[item];
       if (!data) return null;
