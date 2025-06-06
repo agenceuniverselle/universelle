@@ -320,21 +320,7 @@ const countryCode = data.country_code; // e.g. 'FR'
 
   // CSRF token is not strictly necessary for this client-side form logic,
   // but keeping it if your API actually uses it.
-  const [csrfToken, setCsrfToken] = useState<string>('');
 
-  useEffect(() => {
-    const fetchCsrfToken = async () => {
-      try {
-        const response = await fetch('/api/init');
-        const data = await response.json();
-        setCsrfToken(data.csrf_token);
-      } catch (error) {
-        console.error("Error fetching CSRF token:", error);
-      }
-    };
-
-    fetchCsrfToken();
-  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
