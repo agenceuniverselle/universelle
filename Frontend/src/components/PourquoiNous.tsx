@@ -156,37 +156,20 @@ setTestimonials(Array.isArray(response.data) ? response.data : response.data?.da
 
 
         {/* Right Video */}
-        <div className="relative">
-<div className="w-full md:w-[800px] lg:w-[900px] h-96 md:h-[500px] lg:h-[600px] rounded-2xl overflow-hidden shadow-2xl bg-black/20 backdrop-blur-sm border border-white/10">
-            {/* Option 1: Video locale */}
-            <video 
-              className="w-full h-full object-cover"
-              controls
-              poster="https://drive.google.com/file/d/13dGcHeOtZmiHOSNfczAWP5G3_f7GzrQo/view?usp=sharing"
-            >
-              <source src="https://drive.google.com/file/d/1iJ7QK9Ph3QULtCRJENL5zIhTv4RXW7YA/view?pli=1" />
-              Votre navigateur ne supporte pas la lecture vidéo.
-            </video>
-
-            {/* Option 2: Video YouTube (décommentez si vous préférez) */}
-            {/* 
-            <iframe
-              className="w-full h-full"
-              src="https://www.youtube.com/embed/YOUR_VIDEO_ID"
-              title="Vidéo de présentation"
-              frameBorder="0"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-              allowFullScreen
-            ></iframe>
-            */}
-          </div>
-          
-          {/* Decorative elements */}
-        
-        </div>
-      </div>
-    </div>
+      <div className="relative">
+  <div className="w-full md:w-[800px] lg:w-[900px] h-96 md:h-[500px] lg:h-[600px] rounded-2xl overflow-hidden shadow-2xl bg-black/20 backdrop-blur-sm border border-white/10">
+    {/* Vidéo YouTube intégrée */}
+    <iframe
+      className="w-full h-full"
+      src="https://www.youtube.com/embed/LRq7qI4wJU8"
+      title="Vidéo de présentation"
+      frameBorder="0"
+      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+      allowFullScreen
+    ></iframe>
   </div>
+</div>
+
 </section>
         {/* Problem Section */}
         <section className="py-20 bg-gray-50">
