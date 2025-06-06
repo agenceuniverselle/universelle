@@ -339,7 +339,7 @@ const AdminInvestissements = () => {
 
   const fetchProperties = async () => {
     try {
-      const response = await axios.get("http://localhost:8000/api/properties");
+      const response = await axios.get("https://back-qhore.ondigitalocean.app/api/properties");
       setProperties(response.data.data || []);
     } catch (error) {
       console.error("Erreur de chargement des biens :", error);
