@@ -18,7 +18,7 @@ interface BienCardProps {
 }
 
 const BienCard: React.FC<BienCardProps> = ({ bien }) => {
-  const firstImageUrl = bien.images.length > 0 ? `http://localhost:8000/${bien.images[0]}` : undefined;
+  const firstImageUrl = bien.images.length > 0 ? `https://back-qhore.ondigitalocean.app/${bien.images[0]}` : undefined;
   const navigate = useNavigate();
 
   const handleClick = () => {
