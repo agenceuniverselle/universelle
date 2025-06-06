@@ -177,7 +177,7 @@ const AdminContent = () => {
   
  useEffect(() => {
   if (activeView === 'temoignages') {
-  axios.get('/api/testimonials')
+  axios.get('https://back-qhore.ondigitalocean.app/api/testimonials')
   .then(res => {
     console.log("[Testimonials API Response]", res.data);
     if (Array.isArray(res.data)) {
