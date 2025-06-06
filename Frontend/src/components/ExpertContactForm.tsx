@@ -275,7 +275,7 @@ const ExpertContactForm: React.FC<ExpertContactFormProps> = ({
     };
 
     try {
-      const response = await fetch("/api/expert-contact", {
+      const response = await fetch("https://back-qhore.ondigitalocean.app/api/expert-contact", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
