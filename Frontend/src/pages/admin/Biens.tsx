@@ -308,7 +308,7 @@ const AdminBiens = () => {
         return;
       }
   
-      await axios.delete(`http://localhost:8000/api/biens/${id}`, {
+      await axios.delete(`https://back-qhore.ondigitalocean.app/api/biens/${id}`, {
         headers: {
           Authorization: `Bearer ${token}`, // ✅ Ajout du token dans les headers
         },
@@ -698,7 +698,7 @@ const AdminBiens = () => {
   <div className="flex items-center space-x-3 w-[100px]"> {/* ✅ Largeur fixe pour "Bien" */}
     {bien.images?.[0] ? (
       <img
-        src={`http://localhost:8000/${bien.images[0]}`}
+        src={`https://back-qhore.ondigitalocean.app/${bien.images[0]}`}
         alt={bien.title}
         className="h-10 w-10 object-cover rounded-md"
       />
