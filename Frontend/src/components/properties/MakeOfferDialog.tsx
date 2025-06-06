@@ -234,8 +234,8 @@ useEffect(() => {
       const phoneNumberParsed = parsePhoneNumberFromString(data.phone, selectedCountry?.iso2);
       const phoneNumberForDb = phoneNumberParsed ? phoneNumberParsed.format('E.164') : data.phone;
 
-      await axios.post('https://back-qhore.ondigitalocean.app
-/api/offers', {
+      await axios.post('https://back-qhore.ondigitalocean.app/api/offers', {
+
         bien_id: bien.id,
         first_name: firstName,
         last_name: lastName,
