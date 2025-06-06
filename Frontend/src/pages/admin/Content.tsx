@@ -73,7 +73,7 @@ const AdminContent = () => {
 
   useEffect(() => {
     if (activeView === 'blog') {
-      axios.get('http://localhost:8000/api/blogs')
+      axios.get('https://back-qhore.ondigitalocean.app/api/blogs')
         .then((res) => {
           setBlogArticles(res.data);
         })
@@ -104,9 +104,9 @@ const AdminContent = () => {
       let deleteUrl = "";
   
       if (selectedType === "testimonial") {
-        deleteUrl = `http://localhost:8000/api/testimonials/${selectedId}`;
+        deleteUrl = `https://back-qhore.ondigitalocean.app/api/testimonials/${selectedId}`;
       } else if (selectedType === "blog") {
-        deleteUrl = `http://localhost:8000/api/admin/blogs/${selectedId}`;
+        deleteUrl = `https://back-qhore.ondigitalocean.app/api/admin/blogs/${selectedId}`;
       }
   
       if (deleteUrl) {
@@ -396,7 +396,7 @@ const AdminContent = () => {
                   <TableCell>
                     {item.image ? (
                       <img
-                      src={`http://localhost:8000/storage/${item.image}`}
+                      src={`https://back-qhore.ondigitalocean.app/storage/${item.image}`}
                       alt={item.name}
                       className="w-12 h-12 rounded-full object-cover"
                     />
