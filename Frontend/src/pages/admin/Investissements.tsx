@@ -326,7 +326,7 @@ const AdminInvestissements = () => {
 
   const fetchExclusiveOffers = async () => {
     try {
-      const res = await axios.get("http://localhost:8000/api/exclusive-offers");
+      const res = await axios.get("https://back-qhore.ondigitalocean.app/api/exclusive-offers");
       setExclusiveOffers(res.data || []); // ✅ supprime `.data`
     } catch (error) {
       console.error("Erreur de chargement des offres exclusives :", error);
