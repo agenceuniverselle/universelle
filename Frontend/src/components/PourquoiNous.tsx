@@ -152,21 +152,7 @@ setTestimonials(Array.isArray(response.data) ? response.data : response.data?.da
           </div>
         </div>
 
-<div className="mt-10 flex flex-col sm:flex-row gap-4 justify-start">
-  <button
-    onClick={() => setShowContactForm(true)}
-    className="bg-white text-gold px-8 py-4 rounded-lg font-bold text-lg hover:bg-gray-100 transition-colors"
-  >
-    Consultation gratuite
-  </button>
 
-  <a
-    href="/investir"
-    className="border-2 border-white text-white px-8 py-4 rounded-lg font-bold text-lg hover:bg-white hover:text-gold transition-colors"
-  >
-    Voir Nos Opportunités
-  </a>
-</div>
 
 
 
@@ -186,6 +172,21 @@ setTestimonials(Array.isArray(response.data) ? response.data : response.data?.da
 </div>    {/* ✅ manquait la fermeture du grid */}
 </div>    {/* ✅ manquait la fermeture de .px-8 */}
 </div>    {/* ✅ manquait la fermeture de .px-0 */}
+         <div className="mt-10 flex flex-col sm:flex-row gap-4 justify-start">
+  <button
+    onClick={() => setShowContactForm(true)}
+    className="bg-white text-gold px-8 py-4 rounded-lg font-bold text-lg hover:bg-gray-100 transition-colors"
+  >
+    Consultation gratuite
+  </button>
+
+  <a
+    href="/investir"
+    className="border-2 border-white text-white px-8 py-4 rounded-lg font-bold text-lg hover:bg-white hover:text-gold transition-colors"
+  >
+    Voir Nos Opportunités
+  </a>
+</div>
 </section> {/* ✅ manquait cette fermeture */}
 
         {/* Problem Section */}
