@@ -31,26 +31,30 @@ const [loading, setLoading] = useState(true);
   const [showFilters, setShowFilters] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
 
-  useEffect(() => {
-    const fetchArticles = async () => {
-  try {
-    const response = await axios.get('https://back-qhore.ondigitalocean.app/api/blogs');
-    console.log('[API Response]', response.data);
+useEffect(() => {
+  const fetchArticles = async () => {
+    try {
+      const response = await axios.get('https://back-qhore.ondigitalocean.app/api/blogs');
+      console.log('[API Response]', response.data);
 
-    const data: BlogPost[] = response.data?.data || [];
+      const data: BlogPost[] = response.data?.data || [];
 
-    const formatted = data.map((item) => ({
-      ...item,
-      category: item.category?.toLowerCase().replace(/\s+/g, '-'),
-    }));
+      const formatted = data.map((item) => ({
+        ...item,
+        category: item.category?.toLowerCase().replace(/\s+/g, '-'),
+      }));
 
-    setBlogPosts(formatted);
-  } catch (error) {
-    console.error('Erreur lors du chargement des articles', error);
-  } finally {
-    setLoading(false);
-  }
-};
+      setBlogPosts(formatted);
+    } catch (error) {
+      console.error('Erreur lors du chargement des articles', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  fetchArticles(); // ✅ TU OUBLIES CETTE LIGNE !!
+}, []); // ✅ Ajoute cette ligne pour terminer le useEffect
+
 
 
   const filteredPosts = blogPosts.filter(post =>
