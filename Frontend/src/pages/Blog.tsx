@@ -33,23 +33,25 @@ const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchArticles = async () => {
-      try {
-        const response = await axios.get('https://back-qhore.ondigitalocean.app/api/blogs');
-        const data: BlogPost[] = response.data;
-        const formatted = data.map((item) => ({
-          ...item,
-          category: item.category?.toLowerCase().replace(/\s+/g, '-'),
-        }));
-        setBlogPosts(formatted);
-      } catch (error) {
-        console.error('Erreur lors du chargement des articles', error);
-      } finally {
-        setLoading(false);
-      }
-    };
+  try {
+    const response = await axios.get('https://back-qhore.ondigitalocean.app/api/blogs');
+    console.log('[API Response]', response.data);
 
-    fetchArticles();
-  }, []);
+    const data: BlogPost[] = response.data?.data || [];
+
+    const formatted = data.map((item) => ({
+      ...item,
+      category: item.category?.toLowerCase().replace(/\s+/g, '-'),
+    }));
+
+    setBlogPosts(formatted);
+  } catch (error) {
+    console.error('Erreur lors du chargement des articles', error);
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   const filteredPosts = blogPosts.filter(post =>
     (selectedCategory.category === 'all' || !selectedCategory.category || post.category === selectedCategory.category) &&
