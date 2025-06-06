@@ -131,8 +131,9 @@ const BienDetails = () => {
   useEffect(() => {
     const detectCountryByIp = async () => {
       try {
-        const response = await axios.get('https://ip-api.com/json');
-        const data = response.data;
+        const response = await axios.get('https://ipwho.is');
+const { country_code, country } = response.data;
+
 
         if (data.status === 'success' && data.countryCode) {
           const foundCountry = countryCodes.find(
@@ -516,7 +517,10 @@ doc.text("Adresse : IMM17 N°9 Touzine, Complexe Bayt Laatik, Tanger 90000", 105
   ? `http://localhost:8000/${bien.images[0]}`
   : undefined;
 
-  const mockImages = bien.images?.map(img => `http://localhost:8000/${img}`) || [];
+  const mockImages = Array.isArray(bien.images)
+  ? bien.images.map(img => `http://localhost:8000/${img}`)
+  : [];
+
   const proximiteDescriptions: Record<string, { icon: JSX.Element; label: string; description: string }> = {
     Transports: {
       icon: <Car className="h-4 w-4 text-luxe-blue" />,
