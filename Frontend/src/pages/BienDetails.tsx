@@ -202,7 +202,7 @@ useEffect(() => {
   useEffect(() => {
     const fetchBien = async () => {
       try {
-        const response = await axios.get(`https://back-qhore.ondigitalocean.app/api/biens/${id}`);
+        const response = await axios.get(`/api/biens/${id}`);
         const data = response.data;
         setBien(data);
         contactForm.setValue(
@@ -210,8 +210,7 @@ useEffect(() => {
           `Bonjour, je suis intéressé par "${data.title}" (réf. ${data.id}) à ${data.location}. J'aimerais obtenir plus d'informations sur ce bien.`
         );
         // Fetch similar biens
-        const resSimilar = await axios.get(`https://back-qhore.ondigitalocean.app/api/biens/similaires/${data.id}`);
-        const biens = Array.isArray(res.data?.biens) ? res.data.biens : [];
+        const resSimilar = await axios.get(`/api/biens/similaires/${data.id}`);
         setSimilarBiens(resSimilar.data || []);
       } catch (err) {
         navigate('/not-found');
@@ -222,6 +221,7 @@ useEffect(() => {
 
     if (id) fetchBien();
   }, [id, contactForm, navigate]);
+
 
   useEffect(() => {
     const handleScroll = () => {
