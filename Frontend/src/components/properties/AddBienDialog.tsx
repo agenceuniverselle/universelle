@@ -192,80 +192,87 @@ const form = useForm<PropertyFormValues>({
   const removeImage = (index: number) => {
     setImages(prev => prev.filter((_, i) => i !== index));
   };
+const onSubmit = async (data: PropertyFormValues, publish = false) => {
+  if (publish) {
+    setIsPublishing(true);
+  } else {
+    setIsSubmitting(true);
+  }
 
-  const onSubmit = async (data: PropertyFormValues, publish = false) => {
-    if (publish) {
-      setIsPublishing(true);
-    } else {
-      setIsSubmitting(true);
-    }
-  
-    const formDataToSend = new FormData();
-  
-    // Remplir les données du formulaire
-    formDataToSend.append("title", data.title);
-    formDataToSend.append("type", data.type);
-    formDataToSend.append("status", data.status);
-    formDataToSend.append("price", data.price);
-    formDataToSend.append("location", data.location);
-    formDataToSend.append("area", data.area);
-    formDataToSend.append("bedrooms", data.bedrooms || "0");
-    formDataToSend.append("bathrooms", data.bathrooms || "0");
-    formDataToSend.append("description", data.description);
-    formDataToSend.append("is_featured", data.isFeatured ? "1" : "0");
-    formDataToSend.append("is_draft", publish ? "0" : "1");
-  
-    const token = localStorage.getItem("access_token"); // ✅ Récupérer le token
-  
-    try {
-      const response = await axios.post("https://back-qhore.ondigitalocean.app/api/biens", formDataToSend, {
+  const formDataToSend = new FormData();
+
+  // Remplir les données du formulaire
+  formDataToSend.append("title", data.title);
+  formDataToSend.append("type", data.type);
+  formDataToSend.append("status", data.status);
+  formDataToSend.append("price", data.price);
+  formDataToSend.append("location", data.location);
+  formDataToSend.append("area", data.area);
+  formDataToSend.append("bedrooms", data.bedrooms || "0");
+  formDataToSend.append("bathrooms", data.bathrooms || "0");
+  formDataToSend.append("description", data.description);
+  formDataToSend.append("is_featured", data.isFeatured ? "1" : "0");
+  formDataToSend.append("is_draft", publish ? "0" : "1");
+
+  // ✅ Ajouter les images
+  images.forEach((image, index) => {
+    formDataToSend.append(`images[${index}]`, image);
+  });
+
+  const token = localStorage.getItem("access_token");
+
+  try {
+    const response = await axios.post(
+      "https://back-qhore.ondigitalocean.app/api/biens",
+      formDataToSend,
+      {
         headers: {
           "Content-Type": "multipart/form-data",
-          "Authorization": `Bearer ${token}`, // ✅ Ajouter le token
+          "Authorization": `Bearer ${token}`,
         },
-      });
-  
-      const { data: savedProperty } = response;
-  
-      toast({
-        title: publish ? "Bien publié avec succès" : "Brouillon enregistré",
-        description: publish
-          ? "Redirection vers la page d'édition..."
-          : "Le bien a été enregistré en tant que brouillon.",
-      });
-  
-      if (publish) {
-        onOpenChange(false);
-        setTimeout(() => {
-          navigate(`/admin/biens`);
-        }, 500);
-      } else {
-        onPropertyAdded(savedProperty.data.id);
       }
-  
-    } catch (error) {
-      console.error("Erreur lors de l'ajout du bien :", error);
-      if (error.response?.status === 401) {
-        toast({
-          title: "Erreur d'authentification",
-          description: "Votre session a expiré. Veuillez vous reconnecter.",
-          variant: "destructive",
-        });
-        // Rediriger vers la page de connexion ou demander de se reconnecter
-        logout();
-        navigate("/login");
-      } else {
-        toast({
-          title: "Erreur",
-          description: "Une erreur est survenue lors de l'envoi.",
-          variant: "destructive",
-        });
-      }
-    } finally {
-      setIsSubmitting(false);
-      setIsPublishing(false);
+    );
+
+    const { data: savedProperty } = response;
+
+    toast({
+      title: publish ? "Bien publié avec succès" : "Brouillon enregistré",
+      description: publish
+        ? "Redirection vers la page d'édition..."
+        : "Le bien a été enregistré en tant que brouillon.",
+    });
+
+    if (publish) {
+      onOpenChange(false);
+      setTimeout(() => {
+        navigate(`/admin/biens`);
+      }, 500);
+    } else {
+      onPropertyAdded(savedProperty.data.id);
     }
-  };
+  } catch (error) {
+    console.error("Erreur lors de l'ajout du bien :", error);
+    if (error.response?.status === 401) {
+      toast({
+        title: "Erreur d'authentification",
+        description: "Votre session a expiré. Veuillez vous reconnecter.",
+        variant: "destructive",
+      });
+      logout();
+      navigate("/login");
+    } else {
+      toast({
+        title: "Erreur",
+        description: "Une erreur est survenue lors de l'envoi.",
+        variant: "destructive",
+      });
+    }
+  } finally {
+    setIsSubmitting(false);
+    setIsPublishing(false);
+  }
+};
+
   
  const handleDocumentSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
