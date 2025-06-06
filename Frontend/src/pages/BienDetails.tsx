@@ -1349,21 +1349,20 @@ doc.text("Adresse : IMM17 N°9 Touzine, Complexe Bayt Laatik, Tanger 90000", 105
             </Button>
           </div>
           
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-    {Array.isArray(similarBiens) && similarBiens.length > 0 ? (
-      similarBiens.map((prop) => (
-        <BienCard key={prop.id} bien={prop} />
-      ))
-    ) : (
-      <div className="col-span-full text-center py-8">
-        <p className="text-gray-500">
-          Aucun bien similaire disponible pour le moment.
-        </p>
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {similarBiens.length > 0 ? (
+              similarBiens.map((prop) => (
+                <BienCard key={prop.id} bien={prop} />
+              ))
+            ) : (
+              <div className="col-span-full text-center py-8">
+                <p className="text-gray-500">Aucun bien similaire disponible pour le moment.</p>
+              </div>
+            )}
+          </div>
+        </div>
       </div>
-    )}
-  </div>
-</div>
-
+      
 
       
       {bien && (
