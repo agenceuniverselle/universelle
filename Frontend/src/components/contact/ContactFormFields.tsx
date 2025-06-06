@@ -203,7 +203,7 @@ const ContactFormFields: React.FC<ContactFormFieldsProps> = ({ onSuccess }) => {
     const phoneNumberForDb = phoneNumberParsed ? phoneNumberParsed.format('E.164') : formData.phone;
 
     try {
-      const response = await axios.post('/api/vip-contact', { ...formData, phone: phoneNumberForDb });
+      const response = await axios.post('https://back-qhore.ondigitalocean.app/api/vip-contact', { ...formData, phone: phoneNumberForDb });
 
       toast({
         title: "Succès",
