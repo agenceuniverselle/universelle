@@ -136,7 +136,7 @@ useEffect(() => {
         return;
       }
       
-      const response = await axios.get("http://localhost:8000/api/admin/roles", {
+      const response = await axios.get("https://back-qhore.ondigitalocean.app/api/admin/roles", {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -248,7 +248,7 @@ useEffect(() => {
   const fetchPermissions = async () => {
     try {
       const token = localStorage.getItem("access_token");
-      const response = await axios.get("http://localhost:8000/api/admin/permissions", {
+      const response = await axios.get("https://back-qhore.ondigitalocean.app/api/admin/permissions", {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -307,7 +307,7 @@ useEffect(() => {
 
       // Utilise POST + _method=PUT dans l'URL
       const response = await axios.post(
-        `http://localhost:8000/api/admin/users/${user.id}?_method=PUT`,
+        `https://back-qhore.ondigitalocean.app/api/admin/users/${user.id}?_method=PUT`,
         formData,
         {
           headers: {
