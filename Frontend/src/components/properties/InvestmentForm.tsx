@@ -85,8 +85,10 @@ useEffect(() => {
                 // Using a public IP geolocation API. Consider moving this to your backend
                 // in a production environment to avoid exposing client IPs directly
                 // or for more reliable IP detection.
-                const response = await axios.get('https://ip-api.com/json');
-                const data = response.data;
+               const response = await axios.get('https://ipapi.co/json');
+const data = response.data;
+const countryCode = data.country_code; // e.g. 'FR'
+
 
                 if (data.status === 'success' && data.countryCode) {
                     const foundCountry = countryCodes.find(
