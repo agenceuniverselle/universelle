@@ -799,7 +799,7 @@ doc.text("Adresse : IMM17 N°9 Touzine, Complexe Bayt Laatik, Tanger 90000", 105
                 </div>
                 
                  
-              {Array.isArray(bien.points_forts) && bien.points_forts.length > 0 && (
+{Array.isArray(bien.points_forts) && bien.points_forts.length > 0 && (
   <ul>
     {bien.points_forts.map((feature, index) => (
       <li key={index}>{feature}</li>
@@ -1012,14 +1012,11 @@ doc.text("Adresse : IMM17 N°9 Touzine, Complexe Bayt Laatik, Tanger 90000", 105
     {bien.proximite.map((item, index) => {
       const data = proximiteDescriptions[item];
       if (!data) return null;
-      return (
-        <li key={index}>
-          {data.label}
-        </li>
-      );
+      return <li key={index}>{data.label}</li>;
     })}
   </ul>
 )}
+
 
  {/* END MODIFICATION FOR PROXIMITÉ */}
 
