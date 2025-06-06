@@ -15,7 +15,7 @@ class JwtAuthController extends Controller
 {
     public function login(Request $request)
     {
-        dd('login ok');
+
 
         // ✅ Valider les champs
         $request->validate([
