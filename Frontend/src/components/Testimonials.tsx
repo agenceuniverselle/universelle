@@ -17,7 +17,7 @@ const Testimonials = () => {
   useEffect(() => {
     const fetchTestimonials = async () => {
       try {
-        const { data } = await axios.get('/api/testimonials');
+        const { data } = await axios.get('https://back-qhore.ondigitalocean.app/api/testimonials');
         setTestimonials(data);
       } catch (error) {
         console.error('Erreur chargement testimonials:', error);
@@ -80,7 +80,7 @@ const Testimonials = () => {
                     <div className="flex flex-col items-center">
                     {testimonial.image ? (
   <img
-    src={`http://localhost:8000/storage/${testimonial.image}`}
+    src={`https://back-qhore.ondigitalocean.app/storage/${testimonial.image}`}
     alt={testimonial.name}
     className="w-16 h-16 rounded-full object-cover mb-4"
   />
