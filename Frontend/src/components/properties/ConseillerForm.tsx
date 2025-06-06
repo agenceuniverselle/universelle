@@ -292,8 +292,8 @@ const ConseillerForm: React.FC<ConseillerFormProps> = ({
 
     try {
       const url = contactId
-        ? `/api/advisor-requests/${contactId}`
-        : '/api/advisor-requests';
+        ? `https://back-qhore.ondigitalocean.app/api/advisor-requests/${contactId}`
+        : 'https://back-qhore.ondigitalocean.app/api/advisor-requests';
 
       const method = contactId ? 'PUT' : 'POST';
 
