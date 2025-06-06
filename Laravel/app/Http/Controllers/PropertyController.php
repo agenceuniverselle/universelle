@@ -204,7 +204,9 @@ public function index(Request $request)
 
 
         ];
-        $property->createdAt = $property->created_at->format('d/m/Y ');
+$property->createdAt = $property->created_at
+    ? $property->created_at->format('d/m/Y')
+    : null;
 // Envoyer les images au frontend
 $property->images = $images;
 $property->documents = $documents;
