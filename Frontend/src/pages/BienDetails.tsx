@@ -128,60 +128,58 @@ const BienDetails = () => {
       consent: true,
     },
   });
-  useEffect(() => {
-    const detectCountryByIp = async () => {
-      try {
-        const response = await axios.get('https://ipwho.is');
-const { country_code, country } = response.data;
+useEffect(() => {
+  const detectCountryByIp = async () => {
+    try {
+      const response = await axios.get('https://ipwho.is');
+      const { country_code, success } = response.data;
 
-
-        if (data.status === 'success' && data.countryCode) {
-          const foundCountry = countryCodes.find(
-            c => c.iso2 === data.countryCode
-          );
-          if (foundCountry) {
-            setSelectedCountry(foundCountry);
-            contactForm.setValue('phone', `+${foundCountry.code} `);
-          } else {
-            console.warn(`Country code ${data.countryCode} from IP-API not found in your countryCodes list.`);
-            // Fallback if country code from IP-API is not in your list
-            const morocco = countryCodes.find(c => c.iso2 === 'MA');
-            if (morocco) {
-              setSelectedCountry(morocco);
-              contactForm.setValue('phone', `+${morocco.code} `);
-            }
-          }
+      if (success && country_code) {
+        const foundCountry = countryCodes.find(
+          (c) => c.iso2 === country_code
+        );
+        if (foundCountry) {
+          setSelectedCountry(foundCountry);
+          contactForm.setValue('phone', `+${foundCountry.code} `);
         } else {
-          // Fallback if IP detection fails or returns no country code
-          const morocco = countryCodes.find(c => c.iso2 === 'MA');
+          console.warn(`Code pays ${country_code} non trouvé dans la liste.`);
+          // Fallback vers le Maroc
+          const morocco = countryCodes.find((c) => c.iso2 === 'MA');
           if (morocco) {
             setSelectedCountry(morocco);
             contactForm.setValue('phone', `+${morocco.code} `);
           }
         }
-      } catch (error) {
-        console.error("Error detecting country by IP for BienDetails contact form:", error);
-        // Fallback in case of error
-        const morocco = countryCodes.find(c => c.iso2 === 'MA');
+      } else {
+        // Fallback si la détection échoue
+        const morocco = countryCodes.find((c) => c.iso2 === 'MA');
         if (morocco) {
           setSelectedCountry(morocco);
           contactForm.setValue('phone', `+${morocco.code} `);
         }
-      } finally {
-        setIsDetectingIp(false);
       }
-    };
+    } catch (error) {
+      console.error("Erreur lors de la détection IP :", error);
+      // Fallback en cas d'erreur
+      const morocco = countryCodes.find((c) => c.iso2 === 'MA');
+      if (morocco) {
+        setSelectedCountry(morocco);
+        contactForm.setValue('phone', `+${morocco.code} `);
+      }
+    } finally {
+      setIsDetectingIp(false);
+    }
+  };
 
-    
-    detectCountryByIp();
+  detectCountryByIp();
 
+  return () => {
+    contactForm.setValue('phone', '');
+    setSelectedCountry(null);
+    setIsDetectingIp(true);
+  };
+}, [contactForm]);
 
-    return () => {
-      contactForm.setValue('phone', '');
-      setSelectedCountry(null);
-      setIsDetectingIp(true); // Reset for next time
-    };
-  }, [contactForm]);
   const handleCountrySelectChange = (iso2Code: string, fieldOnChange: (value: string) => void) => {
     const selected = countryCodes.find(c => c.iso2 === iso2Code);
     if (selected) {
