@@ -164,7 +164,7 @@ setTestimonials(Array.isArray(response.data) ? response.data : response.data?.da
               controls
               poster="/path/to/your/thumbnail.jpg"
             >
-              <source src="/path/to/your/video.mp4" type="video/mp4" />
+              <source src="https://drive.google.com/file/d/1iJ7QK9Ph3QULtCRJENL5zIhTv4RXW7YA/view?pli=1" />
               Votre navigateur ne supporte pas la lecture vidéo.
             </video>
 
