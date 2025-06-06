@@ -520,11 +520,11 @@ doc.text("Adresse : IMM17 N°9 Touzine, Complexe Bayt Laatik, Tanger 90000", 105
     );
   }
   const firstImageUrl = bien.images && bien.images.length > 0
-  ? `https://back-qhore.ondigitalocean.app/${bien.images[0]}`
+  ? `https://back-qhore.ondigitalocean.app/storage/Biens/images/${bien.images[0]}`
   : undefined;
 
-  const mockImages = Array.isArray(bien.images)
-  ? bien.images.map(img => `https://back-qhore.ondigitalocean.app/${img}`)
+const mockImages = Array.isArray(bien.images)
+  ? bien.images.map(img => `https://back-qhore.ondigitalocean.app/storage/Biens/images/${img}`)
   : [];
 
   const proximiteDescriptions: Record<string, { icon: JSX.Element; label: string; description: string }> = {
