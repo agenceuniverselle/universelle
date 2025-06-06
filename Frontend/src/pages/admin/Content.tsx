@@ -177,12 +177,17 @@ const AdminContent = () => {
   
  useEffect(() => {
   if (activeView === 'temoignages') {
-    axios.get('/api/testimonials')
-      .then(res => {
-        console.log("[Testimonials API Response]", res.data);
-        setTestimonials(res.data);
-      })
-      .catch(err => console.error('Erreur chargement témoignages', err));
+  axios.get('/api/testimonials')
+  .then(res => {
+    console.log("[Testimonials API Response]", res.data);
+    if (Array.isArray(res.data)) {
+      setTestimonials(res.data);
+    } else {
+      console.error("❌ Donnée inattendue pour testimonials:", res.data);
+      setTestimonials([]); // Sécurité
+    }
+  })
+  .catch(err => console.error('Erreur chargement témoignages', err));
   }
 }, [activeView]);
 
@@ -383,7 +388,8 @@ const AdminContent = () => {
                 </TableCell>
               </TableRow>
             ) : (
-              testimonials.map((item) => (
+              Array.isArray(testimonials) &&
+    testimonials.map((item) => (
                 <TableRow key={item.id}>
                 <TableCell>{item.id}</TableCell>
 
