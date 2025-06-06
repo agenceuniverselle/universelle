@@ -1364,7 +1364,7 @@ doc.text("Adresse : IMM17 N°9 Touzine, Complexe Bayt Laatik, Tanger 90000", 105
   </div>
 </div>
 
-</div>
+
       
       {bien && (
         <MakeOfferDialog 
