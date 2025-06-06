@@ -332,7 +332,7 @@ const handleDownload = (bienId: number) => {
       setIsDownloading(false);
     });
 };
-console.log("mockImages:", mockImages);
+
 
   if (loading) {
     return (
@@ -559,6 +559,7 @@ doc.text("Adresse : IMM17 N°9 Touzine, Complexe Bayt Laatik, Tanger 90000", 105
   const rendement = (bien.monthly_rent && bien.price)
   ? ((parseFloat(bien.monthly_rent) * 12 / parseFloat(bien.price.replace(/\s/g, ''))) * 100).toFixed(2)
   : null;
+  console.log("mockImages:", mockImages);
   return (
     <MainLayout>
       <div className="relative h-[60vh] md:h-[70vh] lg:h-[80vh] w-full overflow-hidden">
