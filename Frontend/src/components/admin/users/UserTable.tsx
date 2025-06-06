@@ -69,7 +69,7 @@ export const UserTable: React.FC<UserTableProps> = ({
 
   try {
     const token = localStorage.getItem("access_token");
-    await axios.delete(`http://localhost:8000/api/admin/users/${selectedUserToDelete.id}`, {
+    await axios.delete(`https://back-qhore.ondigitalocean.app/api/admin/users/${selectedUserToDelete.id}`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -100,7 +100,7 @@ const [selectedUserToDelete, setSelectedUserToDelete] = useState<User | null>(nu
   const fetchUsers = async () => {
     try {
       const token = localStorage.getItem("access_token");
-      const response = await axios.get("http://localhost:8000/api/admin/users", {
+      const response = await axios.get("https://back-qhore.ondigitalocean.app/api/admin/users", {
         headers: {
           Authorization: `Bearer ${token}`,
         },
