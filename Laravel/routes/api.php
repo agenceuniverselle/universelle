@@ -34,7 +34,9 @@ use App\Http\Controllers\ProjectController;
 |
 */
 Route::get('/ping', fn () => response()->json(['pong' => true]));
-
+Route::options('{any}', function () {
+    return response()->json(['status' => 'OK'], 200);
+})->where('any', '.*');
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
