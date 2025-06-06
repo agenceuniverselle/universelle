@@ -175,13 +175,17 @@ const AdminContent = () => {
   };
   
   
-  useEffect(() => {
-    if (activeView === 'temoignages') {
-      axios.get('/api/testimonials')
-        .then(res => setTestimonials(res.data))
-        .catch(err => console.error('Erreur chargement témoignages', err));
-    }
-  }, [activeView]);
+ useEffect(() => {
+  if (activeView === 'temoignages') {
+    axios.get('/api/testimonials')
+      .then(res => {
+        console.log("[Testimonials API Response]", res.data);
+        setTestimonials(res.data);
+      })
+      .catch(err => console.error('Erreur chargement témoignages', err));
+  }
+}, [activeView]);
+
   
   const getStatusColor = (status: string) => {
     switch (status) {
