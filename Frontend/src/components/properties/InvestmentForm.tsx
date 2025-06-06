@@ -80,39 +80,18 @@ const InvestmentForm: React.FC<InvestmentFormProps> = ({
   const [isDetectingIp, setIsDetectingIp] = useState(true); // For initial IP detection
 
 useEffect(() => {
-        const detectCountryByIp = async () => {
-            try {
-                // Using a public IP geolocation API. Consider moving this to your backend
-                // in a production environment to avoid exposing client IPs directly
-                // or for more reliable IP detection.
-               const response = await axios.get('https://ipapi.co/json');
-const data = response.data;
-const countryCode = data.country_code; // e.g. 'FR'
-
-
-                if (data.status === 'success' && data.countryCode) {
-                    const foundCountry = countryCodes.find(
-                        c => c.iso2 === data.countryCode
-                    );
-                    if (foundCountry) {
-                        setSelectedCountry(foundCountry);
-                        // Optionally: Pre-fill the phone input with the country code
-                        // This makes it easier for users to start typing their number
-                        setFormData(prev => ({ ...prev, phone: `+${foundCountry.code} ` }));
-                    } else {
-                        console.warn(`Country code ${data.countryCode} from IP-API not found in your countryCodes list.`);
-                    }
-                }
-            } catch (error) {
-                console.error("Error detecting country by IP:", error);
-                // Not showing a destructive toast for this common error, just logging it.
-            } finally {
-                setIsDetectingIp(false); // IP detection is complete
-            }
-        };
-
-        detectCountryByIp();
-    }, []); // Empty dependency array means this runs once on component mount
+  // Fallback: définir une valeur par défaut si l'IP n'est pas détectable
+  const fallbackCountry = countryCodes.find(c => c.iso2 === 'MA'); // Maroc
+  if (fallbackCountry) {
+    setSelectedCountry(fallbackCountry);
+    setFormData(prev => ({
+      ...prev,
+      phone: `+${fallbackCountry.code} `,
+    }));
+  }
+  setIsDetectingIp(false);
+}, []);
+// Empty dependency array means this runs once on component mount
 
   const variants = {
     enter: (direction: number) => ({
