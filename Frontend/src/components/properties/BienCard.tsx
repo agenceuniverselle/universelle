@@ -66,7 +66,7 @@ const BienCard: React.FC<BienCardProps> = ({ bien }) => {
       <CardContent className="p-4">
         <div className="flex justify-between items-center mb-4">
           <div className="font-bold text-lg flex items-center">
-          {bien.price} MAD
+          {bien.price} MAD/m² 
           </div>
           <Badge variant="outline" className="font-normal">
             {bien.type}
