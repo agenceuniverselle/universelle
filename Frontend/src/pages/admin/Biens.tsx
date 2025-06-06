@@ -696,15 +696,16 @@ const AdminBiens = () => {
               <TableCell className="font-medium">{bien.id}</TableCell>
               <TableCell className="flex items-center gap-4">
   <div className="flex items-center space-x-3 w-[100px]"> {/* ✅ Largeur fixe pour "Bien" */}
-    {bien.images?.[0] ? (
-      <img
-        src={`https://back-qhore.ondigitalocean.app/${bien.images[0]}`}
-        alt={bien.title}
-        className="h-10 w-10 object-cover rounded-md"
-      />
-    ) : (
-      <Building className="h-5 w-5 text-gray-500 dark:text-gray-300" />
-    )}
+   {bien.images && bien.images.length > 0 ? (
+  <img
+    src={`https://back-qhore.ondigitalocean.app/${bien.images[0]}`}
+    alt={bien.title}
+    className="h-10 w-10 object-cover rounded-md"
+  />
+) : (
+  <Building className="h-5 w-5 text-gray-500 dark:text-gray-300" />
+)}
+
   <div className="whitespace-nowrap overflow-hidden text-ellipsis">
   {bien.title.length > 5 ? bien.title.slice(0, 5) + "..." : bien.title}
 </div>
