@@ -122,7 +122,7 @@ const formatPercent = (value: unknown): string => {
     if (!imagePath) return '';
    return imagePath.startsWith('http')
   ? imagePath
-  : `http://localhost:8000/${imagePath}`;
+  : `https://back-qhore.ondigitalocean.app/${imagePath}`;
     };
 
 
@@ -187,7 +187,7 @@ const formatPercent = (value: unknown): string => {
   useEffect(() => {
     const fetchOffers = async () => {
       try {
-        const { data } = await axios.get('/api/exclusive-offers');
+        const { data } = await axios.get('https://back-qhore.ondigitalocean.app/api/exclusive-offers');
         setOffers(data);
       } catch (error) {
         console.error('Erreur lors du chargement des offres exclusives', error);
