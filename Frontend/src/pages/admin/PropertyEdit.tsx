@@ -85,19 +85,19 @@ const [bien, setBien] = useState<Bien>({
     setIsDeleting(true);
 
     if (deleteTarget.type === 'image' && typeof deleteTarget.index === 'number') {
-      await axios.delete(`http://localhost:8000/api/biens/${bienId}/images/${deleteTarget.index}`);
+      await axios.delete(`https://back-qhore.ondigitalocean.app/api/biens/${bienId}/images/${deleteTarget.index}`);
       const updatedImages = [...bien.images];
       updatedImages.splice(deleteTarget.index, 1);
       setBien((prev) => ({ ...prev, images: updatedImages }));
     }
 
     if (deleteTarget.type === 'document') {
-      await axios.delete(`http://localhost:8000/api/biens/${bienId}/document`);
+      await axios.delete(`https://back-qhore.ondigitalocean.app/api/biens/${bienId}/document`);
       setBien((prev) => ({ ...prev, documents: [] }));
     }
 
     if (deleteTarget.type === 'ownerDoc' && typeof deleteTarget.index === 'number') {
-      await axios.delete(`http://localhost:8000/api/biens/${bienId}/owner-documents/${deleteTarget.index}`);
+      await axios.delete(`https://back-qhore.ondigitalocean.app/api/biens/${bienId}/owner-documents/${deleteTarget.index}`);
       const updatedDocs = [...bien.owner_documents];
       updatedDocs.splice(deleteTarget.index, 1);
       setBien((prev) => ({ ...prev, owner_documents: updatedDocs }));
@@ -133,7 +133,7 @@ useEffect(() => {
 
   const fetchBien = async () => {
     try {
-      const response = await axios.get(`http://localhost:8000/api/biens/${bienId}`);
+      const response = await axios.get(`https://back-qhore.ondigitalocean.app/api/biens/${bienId}`);
       const data = response.data;
 
       setBien(data);
@@ -293,7 +293,7 @@ if (bien.replacedImages) {
   
       // ✅ Requête avec Token
       const response = await axios.post(
-        `http://localhost:8000/api/biens/${bienId}?_method=PUT`, // simulate PUT via POST
+        `https://back-qhore.ondigitalocean.app/api/biens/${bienId}?_method=PUT`, // simulate PUT via POST
         formData,
         {
           headers: {
@@ -342,7 +342,7 @@ if (bien.replacedImages) {
   
   const handleDeleteDocument = async () => {
     try {
-      await axios.delete(`http://localhost:8000/api/biens/${bienId}/document`);
+      await axios.delete(`https://back-qhore.ondigitalocean.app/api/biens/${bienId}/document`);
       setBien(prev => ({
         ...prev,
         documents: [],
@@ -380,7 +380,7 @@ if (bien.replacedImages) {
 
   const handleDeleteImage = async (index: number) => {
     try {
-      await axios.delete(`http://localhost:8000/api/biens/${bienId}/images/${index}`);
+      await axios.delete(`https://back-qhore.ondigitalocean.app/api/biens/${bienId}/images/${index}`);
   
       setBien(prev => {
         const updatedImages = [...(prev.images || [])];
@@ -420,7 +420,7 @@ if (bien.replacedImages) {
     formData.append('bien_id', bienId!);
   
     try {
-      const response = await axios.post(`http://localhost:8000/api/biens/${bienId}/upload-image`, formData, {
+      const response = await axios.post(`https://back-qhore.ondigitalocean.app/api/biens/${bienId}/upload-image`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
@@ -1228,7 +1228,7 @@ className="
       const replacement = bien.replacedImages?.find(r => r.index === index);
       const src = replacement
         ? URL.createObjectURL(replacement.file)
-        : `http://localhost:8000/${img}`;
+        : `https://back-qhore.ondigitalocean.app/${img}`;
 
       return (
         <div key={index} className="relative group rounded-md overflow-hidden border">
@@ -1377,7 +1377,7 @@ className="
         className="flex items-center justify-between border rounded-md p-3 hover:bg-gray-50 transition"
       >
         <a
-          href={`http://localhost:8000/api/download/${bien.id}`}
+          href={`https://back-qhore.ondigitalocean.app/api/download/${bien.id}`}
           className="flex items-center text-sm text-blue-600 hover:underline"
           download
         >
@@ -1607,7 +1607,7 @@ className="
   bien.owner_documents.map((doc: string, index: number) => (
     <div key={index} className="flex items-center justify-between p-2 bg-gray-50 border rounded-md">
       <a
-        href={`http://localhost:8000/storage/${doc.replace('storage/', '')}`}
+        href={`https://back-qhore.ondigitalocean.app/storage/${doc.replace('storage/', '')}`}
         target="_blank"
         rel="noopener noreferrer"
         className="text-sm text-blue-600 hover:underline"
