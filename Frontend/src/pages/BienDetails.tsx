@@ -202,7 +202,7 @@ useEffect(() => {
   useEffect(() => {
     const fetchBien = async () => {
       try {
-        const response = await axios.get(`/api/biens/${id}`);
+        const response = await axios.get(`https://back-qhore.ondigitalocean.app/api/biens/${id}`);
         const data = response.data;
         setBien(data);
         contactForm.setValue(
@@ -210,7 +210,8 @@ useEffect(() => {
           `Bonjour, je suis intéressé par "${data.title}" (réf. ${data.id}) à ${data.location}. J'aimerais obtenir plus d'informations sur ce bien.`
         );
         // Fetch similar biens
-        const resSimilar = await axios.get(`/api/biens/similaires/${data.id}`);
+        const resSimilar = await axios.get(`https://back-qhore.ondigitalocean.app/api/biens/similaires/${data.id}`);
+        const biens = Array.isArray(res.data?.biens) ? res.data.biens : [];
         setSimilarBiens(resSimilar.data || []);
       } catch (err) {
         navigate('/not-found');
@@ -305,7 +306,7 @@ const handleDownload = (bienId: number) => {
     },
   });
  
-  fetch(`http://localhost:8000/api/download/${bienId}`)
+  fetch(`https://back-qhore.ondigitalocean.app/api/download/${bienId}`)
   .then((response) => {
       if (!response.ok) throw new Error("Erreur lors du téléchargement");
       return response.blob();
