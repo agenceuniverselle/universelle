@@ -172,7 +172,7 @@ setTestimonials(Array.isArray(response.data) ? response.data : response.data?.da
 </div>    {/* ✅ manquait la fermeture du grid */}
 </div>    {/* ✅ manquait la fermeture de .px-8 */}
 </div>    {/* ✅ manquait la fermeture de .px-0 */}
-       <div className="mt-10 flex flex-col sm:flex-row gap-4 justify-start sm:justify-end pr-4">
+       <div className="mt-10 flex flex-col sm:flex-row gap-4 justify-start sm:justify-end pr-2">
   <button
     onClick={() => setShowContactForm(true)}
     className="bg-white text-gold px-8 py-4 rounded-lg font-bold text-lg hover:bg-gray-100 transition-colors"
