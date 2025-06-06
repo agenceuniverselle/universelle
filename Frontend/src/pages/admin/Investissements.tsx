@@ -205,7 +205,8 @@ const AdminInvestissements = () => {
         return;
       }
 
-      await axios.delete(`http://localhost:8000/api/expert-contacts/${id}`, {
+      await axios.delete(`https://back-qhore.ondigitalocean.app
+/api/expert-contacts/${id}`, {
        
       });
 
@@ -242,7 +243,8 @@ const AdminInvestissements = () => {
         return;
       }
 
-      await axios.delete(`http://localhost:8000/api/advisor-requests/${id}`, {
+      await axios.delete(`https://back-qhore.ondigitalocean.app
+/api/advisor-requests/${id}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -290,7 +292,8 @@ const AdminInvestissements = () => {
       }
 
       // ✅ Requête de suppression avec le token
-      await axios.delete(`http://localhost:8000/api/exclusive-offers/${id}`, {
+      await axios.delete(`https://back-qhore.ondigitalocean.app
+/api/exclusive-offers/${id}`, {
         headers: {
           Authorization: `Bearer ${token}`, // ✅ Token ajouté dans les headers
         },
@@ -379,7 +382,8 @@ const AdminInvestissements = () => {
       }
 
       // ✅ Requête de suppression avec le token
-      await axios.delete(`http://localhost:8000/api/properties/${id}`, {
+      await axios.delete(`https://back-qhore.ondigitalocean.app
+/api/properties/${id}`, {
         headers: {
           Authorization: `Bearer ${token}`, // ✅ Ajout du token dans les headers
         },
@@ -456,7 +460,8 @@ const AdminInvestissements = () => {
     if (!window.confirm("Confirmer la suppression ?")) return;
 
     try {
-      await axios.delete(`http://localhost:8000/api/properties/${id}`);
+      await axios.delete(`https://back-qhore.ondigitalocean.app
+/api/properties/${id}`);
       toast({ title: "Supprimé", description: "Bien supprimé avec succès." });
       fetchProperties();
     } catch (error) {
@@ -619,7 +624,8 @@ const AdminInvestissements = () => {
                             <div className="flex items-center space-x-3 w-[100px]">
                               {property.images?.[0] ? (
                                 <img
-                                  src={`http://localhost:8000/${property.images[0]}`}
+                                  src={`https://back-qhore.ondigitalocean.app
+/${property.images[0]}`}
                                   alt={property.title}
                                   className="h-12 w-12 object-cover rounded-md"
                                 />
@@ -1199,7 +1205,8 @@ const AdminInvestissements = () => {
   onSave={async (updatedData) => {
     try {
       // Mise à jour via l'API
-      await axios.put(`http://localhost:8000/api/expert-contacts/${updatedData.id}`, updatedData);
+      await axios.put(`https://back-qhore.ondigitalocean.app
+/api/expert-contacts/${updatedData.id}`, updatedData);
       
       // Rafraîchir la liste
       fetchExpertRequests();
