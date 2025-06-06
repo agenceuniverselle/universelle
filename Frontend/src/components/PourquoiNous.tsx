@@ -162,7 +162,7 @@ setTestimonials(Array.isArray(response.data) ? response.data : response.data?.da
             <video 
               className="w-full h-full object-cover"
               controls
-              poster="/path/to/your/thumbnail.jpg"
+              poster="https://drive.google.com/file/d/13dGcHeOtZmiHOSNfczAWP5G3_f7GzrQo/view?usp=sharing"
             >
               <source src="https://drive.google.com/file/d/1iJ7QK9Ph3QULtCRJENL5zIhTv4RXW7YA/view?pli=1" />
               Votre navigateur ne supporte pas la lecture vidéo.
