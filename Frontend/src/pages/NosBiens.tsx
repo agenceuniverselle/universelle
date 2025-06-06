@@ -45,7 +45,7 @@ const NosBiens = () => {
         }
 
         setLoading(true);
-        const response = await axios.get('http://localhost:8000/api/biens');
+        const response = await axios.get('https://universelle-backend-4u6cw.ondigitalocean.app/api/biens');
         const data = response.data.data || [];
         
         // Mettre à jour le cache
