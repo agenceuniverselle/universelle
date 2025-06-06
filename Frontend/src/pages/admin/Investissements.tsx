@@ -177,7 +177,7 @@ const AdminInvestissements = () => {
 
   const fetchAdvisorRequests = async () => {
     try {
-      const res = await axios.get("http://localhost:8000/api/advisor-requests");
+      const res = await axios.get("https://back-qhore.ondigitalocean.app/api/advisor-requests");
       setAdvisorRequests(res.data || []);
     } catch (error) {
       console.error("Erreur de chargement des demandes de conseiller :", error);
