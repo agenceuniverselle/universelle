@@ -44,7 +44,7 @@ const AdminDashboard = () => {
 // ✅ Fonction pour récupérer les biens à investir
 const fetchInvestments = async () => {
   try {
-    const response = await axios.get("http://localhost:8000/api/properties");
+    const response = await axios.get("https://back-qhore.ondigitalocean.app/api/properties");
     const investments = response.data.data || [];
     setInvestmentCount(investments.length);
   } catch (error) {
@@ -62,7 +62,7 @@ useEffect(() => {
 
 const fetchExclusiveOffers = async () => {
   try {
-    const response = await axios.get("http://localhost:8000/api/exclusive-offers");
+    const response = await axios.get("https://back-qhore.ondigitalocean.app/api/exclusive-offers");
     const offers = response.data || [];
     setExclusiveOffersCount(offers.length);
   } catch (error) {
@@ -76,7 +76,7 @@ const fetchExclusiveOffers = async () => {
   const fetchLastThreeActivities = async () => {
     try {
       const token = localStorage.getItem("access_token");
-      const response = await axios.get("http://localhost:8000/api/activities/latest", {
+      const response = await axios.get("https://back-qhore.ondigitalocean.app/api/activities/latest", {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -180,7 +180,7 @@ const fetchExclusiveOffers = async () => {
   const fetchUsers = async () => {
     try {
       const token = localStorage.getItem("access_token");
-      const response = await axios.get("http://localhost:8000/api/admin/users", {
+      const response = await axios.get("https://back-qhore.ondigitalocean.app/api/admin/users", {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -199,7 +199,7 @@ const fetchExclusiveOffers = async () => {
   // ✅ Typage avec le type Bien
 const fetchBiens = async () => {
   try {
-    const response = await axios.get("http://localhost:8000/api/biens");
+    const response = await axios.get("https://back-qhore.ondigitalocean.app/api/biens");
     const biens: Bien[] = response.data.data || [];
     setBiensCount(biens.length);
 
@@ -233,7 +233,7 @@ useEffect(() => {
 // ✅ Typage avec le type Bien
 const fetchPropertyTypes = async () => {
   try {
-    const response = await axios.get("http://localhost:8000/api/biens");
+    const response = await axios.get("https://back-qhore.ondigitalocean.app/api/biens");
     const biens: Bien[] = response.data.data || [];
 
     // ✅ Calcul des types de biens dynamiquement
@@ -269,7 +269,7 @@ useEffect(() => {
 // ✅ Typage avec le type Property
 const fetchInvestmentTypes = async () => {
   try {
-    const response = await axios.get("http://localhost:8000/api/properties");
+    const response = await axios.get("https://back-qhore.ondigitalocean.app/api/properties");
     const properties: Property[] = response.data.data || [];
 
     // ✅ Calcul des types de biens d'investissement dynamiquement
