@@ -84,7 +84,7 @@ const TestimonialsForm: React.FC<TestimonialsFormProps> = ({ open, onOpenChange,
       if (values.image instanceof File) formData.append('image', values.image);
 
       // ✅ Requête sécurisée avec Token JWT
-      await axios.post('/api/testimonials', formData, {
+      await axios.post('https://back-qhore.ondigitalocean.app/api/testimonials', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
           Authorization: `Bearer ${token}`,
