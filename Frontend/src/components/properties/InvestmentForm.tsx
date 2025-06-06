@@ -372,7 +372,7 @@ useEffect(() => {
       // Make sure your backend can handle 'multipart/form-data' if you were sending files.
       // Since we removed file uploads, 'application/json' might be more appropriate
       // if your backend supports it, otherwise keep 'multipart/form-data'.
-      await axios.post(`/api/investors/${property.id}/store`, formDataToSend, {
+      await axios.post(`https://back-qhore.ondigitalocean.app/api/investors/${property.id}/store`, formDataToSend, {
         headers: {
           'Accept': 'application/json',
           'Content-Type': 'multipart/form-data', // Or 'application/json' if not sending files
