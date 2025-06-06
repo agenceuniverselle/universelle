@@ -34,7 +34,7 @@ const Investir = () => {
  useEffect(() => {
   const fetchProperties = async () => {
     try {
-      const response = await axios.get('https://universelle-backend-4u6cw.ondigitalocean.app/api/properties', {
+      const response = await axios.get('https://back-qhore.ondigitalocean.app/api/properties', {
         withCredentials: true,
       });
 
