@@ -46,7 +46,7 @@ const RolePermissionManager: React.FC = () => {
   const fetchRoles = async () => {
     try {
       const token = localStorage.getItem("access_token");
-      const response = await axios.get("http://localhost:8000/api/admin/roles", {
+      const response = await axios.get("https://back-qhore.ondigitalocean.app/api/admin/roles", {
         headers: { Authorization: `Bearer ${token}` },
       });
       setRoles(response.data.roles);
@@ -73,7 +73,7 @@ const RolePermissionManager: React.FC = () => {
     try {
       const token = localStorage.getItem("access_token");
       const response = await axios.post(
-        "http://localhost:8000/api/admin/roles",
+        "https://back-qhore.ondigitalocean.app/api/admin/roles",
         {
           name: newRoleName,
           description: newRoleDescription,
