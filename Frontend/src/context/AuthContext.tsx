@@ -3,7 +3,7 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 import axios from "axios";
 
 // Configuration de l'URL de l'API selon l'environnement
-const API_BASE_URL = 'https://universelle-backend-4u6cw.ondigitalocean.app';
+const API_BASE_URL = 'https://back-qhore.ondigitalocean.app/';
 
 
 type User = {
