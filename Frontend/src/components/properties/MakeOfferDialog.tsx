@@ -101,62 +101,71 @@ const MakeOfferDialogContent = ({ open, onOpenChange, bien }: MakeOfferDialogPro
     mode: "onBlur" // Validate on blur for better UX
   });
 
-  useEffect(() => {
-    const detectCountryByIp = async () => {
-      try {
-        const response = await axios.get('https://ip-api.com/json');
-        const data = response.data;
+useEffect(() => {
+  const detectCountryByIp = async () => {
+    try {
+      // Utilisation de ipwho.is qui supporte les requêtes côté navigateur (CORS OK)
+      const response = await axios.get('https://ipwho.is');
+      const data = response.data;
 
-        let detectedCountry: CountryData | undefined;
+      let detectedCountry: CountryData | undefined;
 
-        if (data.status === 'success' && data.countryCode) {
-          detectedCountry = countryCodes.find(
-            c => c.iso2 === data.countryCode
-          );
-        }
-
-        if (!detectedCountry) {
-          detectedCountry = countryCodes.find(c => c.iso2 === 'MA');
-          if (!detectedCountry) {
-              console.error("Morocco country code not found in list. Please check countryCodes.ts");
-              return;
-          }
-        }
-
-        setSelectedCountry(detectedCountry);
-        if (!form.getValues('phone').trim()) {
-          form.setValue('phone', `+${detectedCountry.code} `, { shouldValidate: false }); // No immediate validation here
-        }
-      } catch (error) {
-        console.error("Error detecting country by IP for MakeOfferDialog:", error);
-        const morocco = countryCodes.find(c => c.iso2 === 'MA');
-        if (morocco) {
-          setSelectedCountry(morocco);
-          if (!form.getValues('phone').trim()) {
-            form.setValue('phone', `+${morocco.code} `, { shouldValidate: false }); // No immediate validation here
-          }
-        }
-      } finally {
-        setIsDetectingIp(false);
+      if (data.success && data.country_code) {
+        detectedCountry = countryCodes.find(
+          c => c.iso2 === data.country_code
+        );
       }
-    };
 
-    if (open) {
-      setIsSuccess(false);
-      form.reset({
-        offer: '',
-        fullName: '',
-        email: '',
-        phone: '',
-        financing: undefined,
-        message: '',
-        consent: true,
-      });
-      setSelectedCountry(null);
-      setIsDetectingIp(true);
-      detectCountryByIp();
+      // Fallback vers le Maroc si pays non trouvé
+      if (!detectedCountry) {
+        detectedCountry = countryCodes.find(c => c.iso2 === 'MA');
+        if (!detectedCountry) {
+          console.error("Code pays 'MA' non trouvé dans countryCodes.ts");
+          return;
+        }
+      }
+
+      setSelectedCountry(detectedCountry);
+
+      // Si le champ téléphone est vide, on pré-remplit
+      if (!form.getValues('phone').trim()) {
+        form.setValue('phone', `+${detectedCountry.code} `, { shouldValidate: false });
+      }
+
+    } catch (error) {
+      console.error("Erreur lors de la détection IP pour MakeOfferDialog :", error);
+
+      // Fallback Maroc en cas d'erreur
+      const morocco = countryCodes.find(c => c.iso2 === 'MA');
+      if (morocco) {
+        setSelectedCountry(morocco);
+        if (!form.getValues('phone').trim()) {
+          form.setValue('phone', `+${morocco.code} `, { shouldValidate: false });
+        }
+      }
+
+    } finally {
+      setIsDetectingIp(false);
     }
-  }, [open, form]);
+  };
+
+  if (open) {
+    setIsSuccess(false);
+    form.reset({
+      offer: '',
+      fullName: '',
+      email: '',
+      phone: '',
+      financing: undefined,
+      message: '',
+      consent: true,
+    });
+    setSelectedCountry(null);
+    setIsDetectingIp(true);
+    detectCountryByIp();
+  }
+}, [open, form]);
+
 
 
   const handleCountrySelectChange = (iso2Code: string, fieldOnChange: (value: string) => void) => {
@@ -225,7 +234,8 @@ const MakeOfferDialogContent = ({ open, onOpenChange, bien }: MakeOfferDialogPro
       const phoneNumberParsed = parsePhoneNumberFromString(data.phone, selectedCountry?.iso2);
       const phoneNumberForDb = phoneNumberParsed ? phoneNumberParsed.format('E.164') : data.phone;
 
-      await axios.post('/api/offers', {
+      await axios.post('https://back-qhore.ondigitalocean.app
+/api/offers', {
         bien_id: bien.id,
         first_name: firstName,
         last_name: lastName,
