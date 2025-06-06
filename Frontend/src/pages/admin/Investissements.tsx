@@ -105,7 +105,7 @@ const AdminInvestissements = () => {
   try {
     // No 'headers' or 'Authorization' token needed for this specific GET request
     // because your Laravel route for index is not protected by middleware.
-    const res = await axios.get("http://localhost:8000/api/expert-contacts");
+    const res = await axios.get("https://back-qhore.ondigitalocean.app/api/expert-contacts");
     setExpertRequests(res.data || []); // Assuming the API returns an array directly
   } catch (error) {
     console.error("Erreur de chargement des demandes d'expert :", error);
