@@ -34,7 +34,7 @@ const [loading, setLoading] = useState(true);
   useEffect(() => {
     const fetchArticles = async () => {
       try {
-        const response = await axios.get('/api/blogs');
+        const response = await axios.get('https://back-qhore.ondigitalocean.app/api/blogs');
         const data: BlogPost[] = response.data;
         const formatted = data.map((item) => ({
           ...item,
