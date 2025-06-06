@@ -218,7 +218,7 @@ const form = useForm<PropertyFormValues>({
     const token = localStorage.getItem("access_token"); // ✅ Récupérer le token
   
     try {
-      const response = await axios.post("http://localhost:8000/api/biens", formDataToSend, {
+      const response = await axios.post("https://back-qhore.ondigitalocean.app/api/biens", formDataToSend, {
         headers: {
           "Content-Type": "multipart/form-data",
           "Authorization": `Bearer ${token}`, // ✅ Ajouter le token
