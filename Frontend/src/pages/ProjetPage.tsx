@@ -37,7 +37,7 @@ const ProjetPage = () => {
 
   const fetchProjects = async () => {
     try {
-      const response = await axios.get('http://localhost:8000/api/projects');
+      const response = await axios.get('https://back-qhore.ondigitalocean.app/api/projects');
       console.log('API Response data:', response.data); // Inspect the full data structure here
       setProjects(response.data || []);
     } catch (error) {
