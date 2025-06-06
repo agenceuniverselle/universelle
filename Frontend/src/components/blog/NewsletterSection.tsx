@@ -10,7 +10,7 @@ const NewsletterSection = () => {
 
   const handleSubscribe = async () => {
     try {
-      const res = await axios.post('/api/newsletter', { email });
+      const res = await axios.post('https://back-qhore.ondigitalocean.app/api/newsletter', { email });
       setSuccess(res.data.message);
       setError('');
       setEmail('');
