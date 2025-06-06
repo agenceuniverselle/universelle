@@ -199,28 +199,33 @@ useEffect(() => {
       contactForm.trigger('phone'); // Re-validate phone field after change
     }
   };
-  useEffect(() => {
-    const fetchBien = async () => {
-      try {
-        const response = await axios.get(`/api/biens/${id}`);
-        const data = response.data;
-        setBien(data);
-        contactForm.setValue(
-          "message",
-          `Bonjour, je suis intéressé par "${data.title}" (réf. ${data.id}) à ${data.location}. J'aimerais obtenir plus d'informations sur ce bien.`
-        );
-        // Fetch similar biens
-        const resSimilar = await axios.get(`/api/biens/similaires/${data.id}`);
-        setSimilarBiens(resSimilar.data || []);
-      } catch (err) {
-        navigate('/not-found');
-      } finally {
-        setLoading(false);
-      }
-    };
+ useEffect(() => {
+  const fetchBien = async () => {
+    try {
+      const response = await axios.get(`https://back-qhore.ondigitalocean.app/api/biens/${id}`);
+      const data = response.data;
+      setBien(data);
 
-    if (id) fetchBien();
-  }, [id, contactForm, navigate]);
+      contactForm.setValue(
+        "message",
+        `Bonjour, je suis intéressé par "${data.title}" (réf. ${data.id}) à ${data.location}. J'aimerais obtenir plus d'informations sur ce bien.`
+      );
+
+      // ✅ Correction ici
+      const resSimilar = await axios.get(`https://back-qhore.ondigitalocean.app/api/biens/similaires/${data.id}`);
+      const biens = Array.isArray(resSimilar.data) ? resSimilar.data : [];
+      setSimilarBiens(biens);
+
+    } catch (err) {
+      navigate('/not-found');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (id) fetchBien();
+}, [id, contactForm, navigate]);
+
 
 
   useEffect(() => {
