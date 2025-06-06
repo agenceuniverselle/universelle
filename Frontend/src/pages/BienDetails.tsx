@@ -332,6 +332,7 @@ const handleDownload = (bienId: number) => {
       setIsDownloading(false);
     });
 };
+console.log("mockImages:", mockImages);
 
   if (loading) {
     return (
