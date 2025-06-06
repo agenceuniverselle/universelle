@@ -62,7 +62,7 @@ const { isDarkMode } = useDarkMode();
 const fetchPropertyTypes = async () => {
   setLoading(true);
   try {
-    const response = await axios.get("http://localhost:8000/api/biens");
+    const response = await axios.get("https://back-qhore.ondigitalocean.app/api/biens");
     const biens = response.data.data || [];
 
     // ✅ Compter les types de biens
