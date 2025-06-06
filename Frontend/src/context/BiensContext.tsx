@@ -51,7 +51,7 @@ export const BiensProvider = ({ children }: { children: ReactNode }) => {
 
   // 🔁 Charger les biens depuis l'API
   useEffect(() => {
-    axios.get('https://universelle-backend-4u6cw.ondigitalocean.app/api/biens')
+    axios.get('https://back-qhore.ondigitalocean.app/api/biens')
       .then(response => {
         setBiens(response.data.data || []);
       })
