@@ -87,7 +87,7 @@ const scrollTestimonialsRight = () => {
 useEffect(() => {
     const fetchTestimonials = async () => {
       try {
-        const response = await axios.get('/api/testimonials');
+        const response = await axios.get('https://back-qhore.ondigitalocean.app/api/testimonials');
 setTestimonials(Array.isArray(response.data) ? response.data : response.data?.data || []);
       } catch (err) {
         setErrorTestimonials(err.message);
@@ -102,7 +102,7 @@ setTestimonials(Array.isArray(response.data) ? response.data : response.data?.da
  useEffect(() => {
   const fetchProjects = async () => {
     try {
-      const response = await axios.get('/api/projects');
+      const response = await axios.get('https://back-qhore.ondigitalocean.app/api/projects');
 
       const raw = response.data;
 
