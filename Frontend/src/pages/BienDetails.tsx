@@ -521,15 +521,13 @@ doc.text("Adresse : IMM17 N°9 Touzine, Complexe Bayt Laatik, Tanger 90000", 105
   }
 const BASE_URL = "https://back-qhore.ondigitalocean.app";
 
-const buildFullUrl = (img: string) => {
-  // ✅ Cas des images stockées via Laravel dans storage/app/public/
-  if (img.startsWith("storage/")) {
-    return `${BASE_URL}/${img}`;
-  }
+const buildFullUrl = (img: string) =>
+  img.startsWith('http')
+    ? img
+    : img.startsWith('storage/')
+      ? `${BASE_URL}/${img}`
+      : `${BASE_URL}/storage/${img}`;
 
-  // 🟡 Cas fallback (ancien système, si applicable)
-  return `${BASE_URL}/Biens/images/${img}`;
-};
 
 const firstImageUrl = bien.images?.length ? buildFullUrl(bien.images[0]) : undefined;
 
