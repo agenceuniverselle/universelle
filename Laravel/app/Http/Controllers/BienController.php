@@ -66,12 +66,10 @@ $imagePaths = [];
 if ($request->hasFile('images')) {
     foreach ($request->file('images') as $image) {
         $filename = time() . '_' . $image->getClientOriginalName();
-        $image->move(public_path('Biens/images'), $filename);
-        $imagePaths[] = 'Biens/images/' . $filename; // 🔗 Pas de "storage/"
+        $path = $image->storeAs('Biens/images', $filename, 'public');
+        $imagePaths[] = 'storage/' . $path; // ✅ chemin compatible frontend
     }
-}
-
-    
+}   
         // Handle documents
         $documentPaths = [];
         if ($request->hasFile('documents')) {
