@@ -524,9 +524,8 @@ const BASE_URL = "https://back-qhore.ondigitalocean.app";
 const buildFullUrl = (img: string) =>
   img.startsWith('http')
     ? img
-    : img.startsWith('storage')
-      ? `${BASE_URL}/${img}`
-      : `${BASE_URL}/storage/Biens/images/${img}`;
+    : `${BASE_URL}/${img}`;
+
 
 const firstImageUrl = bien.images?.length ? buildFullUrl(bien.images[0]) : undefined;
 
