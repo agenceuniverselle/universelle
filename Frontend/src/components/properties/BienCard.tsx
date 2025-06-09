@@ -37,7 +37,7 @@ const firstImageUrl = bien.images[0]
       <div className="relative h-48 overflow-hidden">
         
       {firstImageUrl ? (
-        <img src={firstImageUrl}
+        <img src={encodeURI(firstImageUrl)}
             alt={bien.title}
             className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
             />
