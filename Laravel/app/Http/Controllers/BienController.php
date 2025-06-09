@@ -61,13 +61,16 @@ class BienController extends Controller
         $bien = new Bien($validated);
     
         // Handle images
-        $imagePaths = [];
-        if ($request->hasFile('images')) {
-            foreach ($request->file('images') as $image) {
-                $path = $image->store('Biens/images', 'public');
-                $imagePaths[] = 'storage/' . $path;
-            }
-        }
+      // Handle images (stockage direct dans public/)
+$imagePaths = [];
+if ($request->hasFile('images')) {
+    foreach ($request->file('images') as $image) {
+        $filename = time() . '_' . $image->getClientOriginalName();
+        $image->move(public_path('Biens/images'), $filename);
+        $imagePaths[] = 'Biens/images/' . $filename; // 🔗 Pas de "storage/"
+    }
+}
+
     
         // Handle documents
         $documentPaths = [];
@@ -214,35 +217,40 @@ public function update(Request $request, $id)
     $bien->fill($validated);
 
     // 📷 Remplacer certaines images (par index)
-    if ($request->hasFile('replace_images')) {
-        foreach ($request->file('replace_images') as $index => $file) {
-            if (!$file || !$file->isValid()) continue;
+   if ($request->hasFile('replace_images')) {
+    foreach ($request->file('replace_images') as $index => $file) {
+        if (!$file || !$file->isValid()) continue;
 
-            // Supprimer ancienne si existe
-            if (isset($existingImages[$index])) {
-                $pathToDelete = str_replace('storage/', '', $existingImages[$index]);
-                Storage::disk('public')->delete($pathToDelete);
+        // Supprimer ancienne image
+        if (isset($existingImages[$index])) {
+            $oldPath = public_path($existingImages[$index]);
+            if (file_exists($oldPath)) {
+                unlink($oldPath);
             }
-
-            $newPath = $file->store('Biens/images', 'public');
-            $existingImages[$index] = 'storage/' . $newPath;
         }
+
+        $filename = time() . '_' . $file->getClientOriginalName();
+        $file->move(public_path('Biens/images'), $filename);
+        $existingImages[$index] = 'Biens/images/' . $filename;
     }
+}
 
     // 📷 Ajouter de nouvelles images (à la fin)
-    if ($request->hasFile('images')) {
-        $imagesToAdd = $request->file('images');
-        if (!is_array($imagesToAdd)) {
-            $imagesToAdd = [$imagesToAdd];
-        }
-
-        foreach ($imagesToAdd as $file) {
-            if (!$file || !$file->isValid()) continue;
-
-            $newPath = $file->store('Biens/images', 'public');
-            $existingImages[] = 'storage/' . $newPath;
-        }
+  if ($request->hasFile('images')) {
+    $imagesToAdd = $request->file('images');
+    if (!is_array($imagesToAdd)) {
+        $imagesToAdd = [$imagesToAdd];
     }
+
+    foreach ($imagesToAdd as $file) {
+        if (!$file || !$file->isValid()) continue;
+
+        $filename = time() . '_' . $file->getClientOriginalName();
+        $file->move(public_path('Biens/images'), $filename);
+        $existingImages[] = 'Biens/images/' . $filename;
+    }
+}
+
 
     // ✅ Réindex propre
     $bien->images = array_values($existingImages);
