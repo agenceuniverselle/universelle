@@ -18,10 +18,10 @@ interface BienCardProps {
 }
 
 const BienCard: React.FC<BienCardProps> = ({ bien }) => {
-const fileName = bien.images[0]?.split('/').pop();
-const firstImageUrl = fileName 
-  ? `https://back-qhore.ondigitalocean.app/Biens/images/${fileName}` 
+const firstImageUrl = bien.images[0]
+  ? `https://back-qhore.ondigitalocean.app/${bien.images[0]}`
   : undefined;
+
 
 
   console.log("Image URL:", firstImageUrl);
