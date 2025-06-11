@@ -219,6 +219,15 @@ const onSubmit = async (data: PropertyFormValues, publish = false) => {
     formDataToSend.append("images[]", image);
 
   });
+// Ajouter les documents
+documents.forEach((doc, index) => {
+  formDataToSend.append("documents[]", doc);
+});
+
+// Ajouter les documents du propriétaire
+ownerDocuments.forEach((doc, index) => {
+  formDataToSend.append("owner_documents[]", doc);
+});
 
   const token = localStorage.getItem("access_token");
 
