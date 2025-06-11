@@ -283,10 +283,9 @@ const handleSave = async () => {
       formData.append(`replace_images[${index}]`, file);
     });
 
- if (bien.replacedDocuments) {
-  bien.replacedDocuments.forEach(({ index, file }) => {
-    formData.append(`replace_documents[${index}]`, file); // ✅ CORRECT
-  });
+Object.entries(replacedDocuments).forEach(([index, file]) => {
+  formData.append(`replacedDocuments[${index}]`, file);
+});
    
 }
 
