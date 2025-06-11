@@ -23,29 +23,27 @@ const MentionsLegales = () => {
       <div className="prose max-w-none">
         <section id="editeur" className="mb-10">
           <h2 className="text-2xl font-playfair font-bold text-luxe-blue mb-4">1. Éditeur du site</h2>
-          <p>Le présent site web <strong>agenceuniverselle.com</strong> (ci-après le « Site ») est édité par :</p>
+          <p>Le présent site web <strong>https://universelle.ma/</strong> est édité par :</p>
           <div className="bg-gray-50 p-4 rounded-md mt-4">
             <p><strong>Agence Universelle d'Investissement Immobilier</strong></p>
             <p>Forme juridique : S.A.R.L.</p>
-            <p>Capital social : 1 000 000 MAD</p>
-            <p>Siège social : 123 Avenue Hassan II, 20000 Casablanca, Maroc</p>
+            <p>Capital social : 100 000 MAD</p>
+            <p>Siège social : IMM17 N°9 Touzine, Complexe Bayt Laatik, Tanger 90000, Maroc</p>
             <p>Immatriculation : R.C. Casablanca 123456</p>
             <p>N° d'identification fiscale : 1234567</p>
-            <p>Tél : +212 5 22 12 34 56</p>
-            <p>Email : contact@agenceuniverselle.com</p>
+            <p>Tél :  +212 808604195 / +212 665944626</p>
+            <p>Email : contact@universelle.ma</p>
           </div>
-          <p className="mt-4">Directeur de la publication : M. Ahmed BERRADA, en qualité de Gérant.</p>
+          <p className="mt-4">Directeur de l'agence : M. Mohamed Jaaouan, en qualité de Gérant.</p>
         </section>
 
         <section id="hebergement" className="mb-10">
           <h2 className="text-2xl font-playfair font-bold text-luxe-blue mb-4">2. Hébergement</h2>
           <p>Le Site est hébergé par :</p>
           <div className="bg-gray-50 p-4 rounded-md mt-4">
-            <p><strong>OVHcloud</strong></p>
+            <p><strong>DigitalOcean</strong></p>
             <p>Société par actions simplifiée</p>
-            <p>Siège social : 2 rue Kellermann, 59100 Roubaix, France</p>
-            <p>Tél : +33 9 72 10 10 10</p>
-            <p>Site web : www.ovhcloud.com</p>
+            <p>Site web : https://www.digitalocean.com/</p>
           </div>
         </section>
 
@@ -87,11 +85,11 @@ const MentionsLegales = () => {
         <section id="modification" className="mb-10">
           <h2 className="text-2xl font-playfair font-bold text-luxe-blue mb-4">8. Modifications des mentions légales</h2>
           <p>L'Agence Universelle d'Investissement Immobilier se réserve le droit de modifier les présentes mentions légales à tout moment. L'utilisateur est donc invité à les consulter régulièrement.</p>
-          <p>Dernière mise à jour : 15 juin 2023</p>
+          <p>Dernière mise à jour : 11 juin 2025</p>
         </section>
 
         <div className="mt-12 pt-8 border-t border-gray-200">
-          <p className="text-sm text-gray-600">Pour toute question relative à ces mentions légales, vous pouvez nous contacter à : <a href="mailto:juridique@agenceuniverselle.com" className="text-gold hover:underline">juridique@agenceuniverselle.com</a></p>
+          <p className="text-sm text-gray-600">Pour toute question relative à ces mentions légales, vous pouvez nous contacter à : <a href="mailto:contact@universelle.ma" className="text-gold hover:underline">juridique@agenceuniverselle.com</a></p>
         </div>
       </div>
     </LegalLayout>
