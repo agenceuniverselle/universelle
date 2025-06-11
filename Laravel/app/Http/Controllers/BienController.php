@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\JsonResponse;
 use App\Events\ActivityLogged;
 use Illuminate\Support\Facades\Auth;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 class BienController extends Controller
 {
     public function store(Request $request)
@@ -191,9 +192,14 @@ public function downloadDocument($BienId)
         return response()->json(['error' => 'Aucun document disponible'], 404);
     }
 
-    $cdnUrl = $documents[0];
+    $documentPath = $documents[0];
 
-    return redirect()->away($cdnUrl);
+    // On suppose que le document est stocké dans le disque S3 nommé "spaces"
+    if (!Storage::disk('spaces')->exists($documentPath)) {
+        return response()->json(['error' => 'Fichier introuvable sur Spaces'], 404);
+    }
+
+    return Storage::disk('spaces')->download($documentPath, 'Plan.pdf');
 }
 
 //edit bien 
