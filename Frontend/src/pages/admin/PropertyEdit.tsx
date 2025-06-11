@@ -91,7 +91,7 @@ const [bien, setBien] = useState<Bien>({
     }
 
     if (deleteTarget.type === 'document') {
-      await axios.delete(https://back-qhore.ondigitalocean.app/api/biens/${bienId}/document);
+      await axios.delete('https://back-qhore.ondigitalocean.app/api/biens/${bienId}/document');
       setBien((prev) => ({ ...prev, documents: [] }));
     }
 
@@ -345,7 +345,7 @@ Object.entries(replacedDocuments).forEach(([index, file]) => {
   
   const handleDeleteDocument = async () => {
     try {
-      await axios.delete(https://back-qhore.ondigitalocean.app/api/biens/${bienId}/document);
+      await axios.delete('https://back-qhore.ondigitalocean.app/api/biens/${bienId}/document');
       setBien(prev => ({
         ...prev,
         documents: [],
