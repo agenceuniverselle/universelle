@@ -216,7 +216,8 @@ const onSubmit = async (data: PropertyFormValues, publish = false) => {
 
   // ✅ Ajouter les images
   images.forEach((image, index) => {
-    formDataToSend.append(`images[${index}]`, image);
+    formDataToSend.append("images[]", image);
+
   });
 
   const token = localStorage.getItem("access_token");
