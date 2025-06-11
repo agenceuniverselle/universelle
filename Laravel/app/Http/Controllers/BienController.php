@@ -66,16 +66,21 @@ $imagePaths = [];
 
 if ($request->hasFile('images')) {
     foreach ($request->file('images') as $image) {
-        if (!$image->isValid()) continue; // Vérifie la validité
+        if (!$image || !$image->isValid()) continue;
 
         $extension = $image->getClientOriginalExtension();
         $filename = uniqid('img_', true) . '.' . $extension;
-        $path = $image->storeAs('Biens/images', $filename, 'spaces');
 
-        logger('📸 Image enregistrée dans Spaces : ' . $path);
+        // Utilisation de putFileAs pour avoir un retour booléen clair
+        $success = Storage::disk('spaces')->putFileAs('Biens/images', $image, $filename);
 
-        // ✅ Génère une URL propre vers le fichier
-        $imagePaths[] = Storage::disk('spaces')->url($path);
+        if ($success) {
+            $url = Storage::disk('spaces')->url("Biens/images/$filename");
+            logger('✅ Image enregistrée avec succès : ' . $url);
+            $imagePaths[] = $url;
+        } else {
+            logger('❌ Échec de l’enregistrement de l’image : ' . $filename);
+        }
     }
 }
 
