@@ -192,16 +192,19 @@ public function downloadDocument($id)
         return response()->json(['error' => 'Aucun document disponible'], 404);
     }
 
-    $url = $documents[0]; // URL complète depuis Spaces
-    $path = ltrim(parse_url($url, PHP_URL_PATH), '/'); // Extrait le chemin S3
-    
-    // Vérifie si le fichier existe dans Spaces
-    if (!Storage::disk('spaces')->exists($path)) {
-        return response()->json(['error' => 'Fichier introuvable'], 404);
+    $fullUrl = $documents[0];
+
+    // 🔥 Extraire seulement le chemin relatif à partir de l'URL
+    $parsedPath = parse_url($fullUrl, PHP_URL_PATH); // /Biens/documents/doc_xxx.pdf
+    $relativePath = ltrim($parsedPath, '/'); // Supprime le slash initial
+
+    if (!Storage::disk('spaces')->exists($relativePath)) {
+        return response()->json(['error' => 'Fichier introuvable sur Spaces'], 404);
     }
 
-    return Storage::disk('spaces')->download($path, 'Plan.pdf'); // force téléchargement
+    return Storage::disk('spaces')->download($relativePath, 'Plan.pdf');
 }
+
 
 //edit bien 
 
