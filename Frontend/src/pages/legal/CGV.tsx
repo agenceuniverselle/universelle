@@ -96,8 +96,8 @@ const CGV = () => {
           <div className="bg-gray-50 p-4 rounded-md mt-4">
             <p>Agence Universelle d'Investissement Immobilier</p>
             <p>Service Rétractation</p>
-            <p>123 Avenue Hassan II</p>
-            <p>20000 Casablanca, Maroc</p>
+            <p>IMM17 N°9 Touzine, Complexe Bayt Laatik</p>
+            <p>90000 Tanger, Maroc</p>
           </div>
         </section>
 
