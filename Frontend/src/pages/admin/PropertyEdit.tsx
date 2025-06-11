@@ -286,7 +286,7 @@ Object.entries(replacedDocuments).forEach(([index, file]) => {
   formData.append(replacedDocuments[${index}], file);
 });
    
-}
+
 
 
     replacedOwnerDocuments?.forEach(({ index, file }: { index: number; file: File }) => {
