@@ -298,39 +298,20 @@ useEffect(() => {
     setMakeOfferOpen(true);
   };
 
-const handleDownload = (bienId: number) => {
-  if (isDownloading) return;
+const handleDownload = (bien: BienType) => {
+  if (!bien.documents?.length) {
+    toast("Aucun document disponible");
+    return;
+  }
 
-  setIsDownloading(true);
+  const fileUrl = bien.documents[0]; // ex: https://universelle-images.lon1.cdn.digitaloceanspaces.com/Biens/documents/...
 
-  toast("Téléchargement démarré", {
-    description: "Le plan est en cours de téléchargement.",
-    action: {
-      label: "Fermer",
-      onClick: () => {},
-    },
-  });
- 
-  fetch(`https://back-qhore.ondigitalocean.app/api/download/${bienId}`)
-  .then((response) => {
-      if (!response.ok) throw new Error("Erreur lors du téléchargement");
-      return response.blob();
-    })
-    .then((blob) => {
-      const link = document.createElement("a");
-      link.href = URL.createObjectURL(blob);
-      link.download = "Plan.pdf"; // ton nom personnalisé ici
-      link.click();
-    })
-    .catch((error) => {
-      console.error("Erreur de téléchargement", error);
-      toast("Échec du téléchargement", {
-        description: "Une erreur s'est produite.",
-      });
-    })
-    .finally(() => {
-      setIsDownloading(false);
-    });
+  const link = document.createElement("a");
+  link.href = fileUrl;
+  link.download = "Plan.pdf"; // nom visible pour l'utilisateur
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
 };
 
 
