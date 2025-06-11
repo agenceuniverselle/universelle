@@ -84,19 +84,19 @@ const [bien, setBien] = useState<Bien>({
     setIsDeleting(true);
 
     if (deleteTarget.type === 'image' && typeof deleteTarget.index === 'number') {
-      await axios.delete(`https://back-qhore.ondigitalocean.app/api/biens/${bienId}/images/${deleteTarget.index}`);
+      await axios.delete(https://back-qhore.ondigitalocean.app/api/biens/${bienId}/images/${deleteTarget.index});
       const updatedImages = [...bien.images];
       updatedImages.splice(deleteTarget.index, 1);
       setBien((prev) => ({ ...prev, images: updatedImages }));
     }
 
     if (deleteTarget.type === 'document') {
-      await axios.delete(`https://back-qhore.ondigitalocean.app/api/biens/${bienId}/document`);
+      await axios.delete(https://back-qhore.ondigitalocean.app/api/biens/${bienId}/document);
       setBien((prev) => ({ ...prev, documents: [] }));
     }
 
     if (deleteTarget.type === 'ownerDoc' && typeof deleteTarget.index === 'number') {
-      await axios.delete(`https://back-qhore.ondigitalocean.app/api/biens/${bienId}/owner-documents/${deleteTarget.index}`);
+      await axios.delete(https://back-qhore.ondigitalocean.app/api/biens/${bienId}/owner-documents/${deleteTarget.index});
       const updatedDocs = [...bien.owner_documents];
       updatedDocs.splice(deleteTarget.index, 1);
       setBien((prev) => ({ ...prev, owner_documents: updatedDocs }));
@@ -117,7 +117,6 @@ const [bien, setBien] = useState<Bien>({
 };
 
 
-
   const form = useForm({
     defaultValues: {
       points_forts: [],
@@ -133,8 +132,7 @@ useEffect(() => {
 
   const fetchBien = async () => {
     try {
-     
-                                       const response = await axios.get(`https://back-qhore.ondigitalocean.app/api/biens/${bienId}`);
+      const response = await axios.get(https://back-qhore.ondigitalocean.app/api/biens/${bienId});
       const data = response.data;
 
       setBien(data);
@@ -288,7 +286,7 @@ Object.entries(replacedDocuments).forEach(([index, file]) => {
   formData.append(replacedDocuments[${index}], file);
 });
    
-
+}
 
 
     replacedOwnerDocuments?.forEach(({ index, file }: { index: number; file: File }) => {
