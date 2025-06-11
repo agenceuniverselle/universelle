@@ -190,6 +190,24 @@ useEffect(() => {
     setFormErrors(errors);
     return errors.length === 0;
   };
+const handleReplaceDocument = (indexToReplace: number, file: File) => {
+  setBien((prev) => {
+    const updated = { ...prev };
+    const replaced = [...(prev.replacedDocuments || [])];
+
+    // Vérifie si un document est déjà remplacé à cet index
+    const existing = replaced.find((item) => item.index === indexToReplace);
+
+    if (existing) {
+      existing.file = file;
+    } else {
+      replaced.push({ index: indexToReplace, file });
+    }
+
+    updated.replacedDocuments = replaced;
+    return updated;
+  });
+};
 
 const handleSave = async () => {
   if (!validateForm()) {
@@ -1417,20 +1435,17 @@ className="
   )}
 
   {/* Input fichier pour remplacement ou ajout */}
-  <input
-    type="file"
-    id="replaceDocUpload"
-    accept=".pdf,.doc,.docx,.xls,.xlsx"
-    onChange={(e) => {
-      const files = Array.from(e.target.files || []);
-      setBien(prev => ({
-        ...prev,
-        newDocuments: files.slice(0, 1), // Toujours max 1
-      }));
+<input
+  type="file"
+  accept=".pdf,.doc,.docx,.xls,.xlsx"
+  onChange={(e) => {
+    if (e.target.files?.[0]) {
+      handleReplaceDocument(index, e.target.files[0]); // ici tu dois passer l'index du doc à remplacer
       setHasChanges(true);
-    }}
-    hidden
-  />
+    }
+  }}
+/>
+
 
   <input
     type="file"
