@@ -1417,6 +1417,22 @@ className="
 </Button>
 
         </div>
+         <input
+      type="file"
+      id={`replaceDocUpload-${index}`}
+      hidden
+      accept=".pdf,.doc,.docx"
+      onChange={(e) => {
+        const file = e.target.files?.[0];
+        if (file) {
+          setReplacedDocuments((prev) => ({
+            ...prev,
+            [index]: file,
+          }));
+          setHasChanges(true);
+        }
+      }}
+    />
       </div>
     ))
   ) : (
@@ -1451,22 +1467,7 @@ className="
     </div>
   )}
 
-  {/* Input fichier pour remplacement ou ajout */}
-   <input
-      type="file"
-      id={`replaceDocUpload-${index}`}
-      hidden
-      accept=".pdf,.doc,.docx"
-      onChange={(e) => {
-        const file = e.target.files?.[0];
-        if (file) {
-          setReplacedDocuments(prev => ({
-            ...prev,
-            [index]: file,
-          }));
-        }
-      }}
-    />
+ 
  
 
 
