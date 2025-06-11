@@ -66,28 +66,28 @@ $imagePaths = [];
 if ($request->hasFile('images')) {
     foreach ($request->file('images') as $image) {
         $filename = time() . '_' . $image->getClientOriginalName();
-        $path = $image->storeAs('Biens/images', $filename, 'public');
-        $imagePaths[] = 'storage/' . $path; // ✅ chemin compatible frontend
+        $path = $image->storeAs('Biens/images', $filename, 'spaces');
+        $imagePaths[] = Storage::disk('spaces')->url($path);
     }
-}   
+}
         // Handle documents
-        $documentPaths = [];
-        if ($request->hasFile('documents')) {
-            foreach ($request->file('documents') as $doc) {
-                $path = $doc->store('Biens/documents', 'public');
-                $documentPaths[] = 'storage/' . $path;
-            }
-        }
-        $ownerDocumentPaths = [];
+       $documentPaths = [];
+if ($request->hasFile('documents')) {
+    foreach ($request->file('documents') as $doc) {
+        $path = $doc->store('Biens/documents', 'spaces');
+        $documentPaths[] = Storage::disk('spaces')->url($path);
+    }
+}
 
-        if ($request->hasFile('owner_documents')) {
-            foreach ($request->file('owner_documents') as $doc) {
-                $originalName = $doc->getClientOriginalName();
-                $filename = time() . '_' . $originalName;
-                $path = $doc->storeAs('Biens/owners', $filename, 'public');
-                $ownerDocumentPaths[] = 'storage/' . $path;
-            }
-        }
+       $ownerDocumentPaths = [];
+if ($request->hasFile('owner_documents')) {
+    foreach ($request->file('owner_documents') as $doc) {
+        $filename = time() . '_' . $doc->getClientOriginalName();
+        $path = $doc->storeAs('Biens/owners', $filename, 'spaces');
+        $ownerDocumentPaths[] = Storage::disk('spaces')->url($path);
+    }
+}
+
         
         // Enregistrer dans la base (ex. si tu as une colonne JSON 'owner_documents')
         $bien->owner_documents = $ownerDocumentPaths;
@@ -227,9 +227,10 @@ public function update(Request $request, $id)
             }
         }
 
-        $filename = time() . '_' . $file->getClientOriginalName();
-     $path = $file->storeAs('Biens/images', $filename, 'public');
-$existingImages[$index] = 'storage/' . $path;
+       $filename = time() . '_' . $file->getClientOriginalName();
+$path = $file->storeAs('Biens/images', $filename, 'spaces');
+$existingImages[$index] = Storage::disk('spaces')->url($path);
+
     }
 }
 
@@ -244,8 +245,9 @@ $existingImages[$index] = 'storage/' . $path;
         if (!$file || !$file->isValid()) continue;
 
         $filename = time() . '_' . $file->getClientOriginalName();
-     $path = $file->storeAs('Biens/images', $filename, 'public');
-$existingImages[] = 'storage/' . $path;
+$path = $file->storeAs('Biens/images', $filename, 'spaces');
+$existingImages[] = Storage::disk('spaces')->url($path);
+
 
     }
 }
@@ -281,22 +283,23 @@ if ($request->hasFile('replace_owner_documents')) {
     foreach ($replacedDocs as $index => $file) {
         if (!$file || !$file->isValid()) continue;
 
-        // Supprimer ancien fichier si présent
+        // Supprimer l'ancien fichier depuis Spaces
         if (isset($existingOwnerDocs[$index])) {
-            Storage::disk('public')->delete(str_replace('storage/', '', $existingOwnerDocs[$index]));
+            $urlPath = parse_url($existingOwnerDocs[$index], PHP_URL_PATH);
+            $path = ltrim($urlPath, '/');
+            Storage::disk('spaces')->delete($path);
         }
 
-        // Enregistrer le nouveau fichier avec nom unique
         $originalName = $file->getClientOriginalName();
         $sanitizedName = preg_replace('/[^a-zA-Z0-9._-]/', '_', $originalName);
-        
-        $path = $file->storeAs('Biens/owners', $sanitizedName, 'public');
-        
-        $existingOwnerDocs[$index] = 'storage/' . $path;
+        $path = $file->storeAs('Biens/owners', $sanitizedName, 'spaces');
+
+        $existingOwnerDocs[$index] = Storage::disk('spaces')->url($path);
     }
 
     $bien->owner_documents = array_values($existingOwnerDocs);
 }
+
 
 // 📄 Ajouter de nouveaux documents propriétaires
 if ($request->hasFile('owner_documents')) {
@@ -308,13 +311,14 @@ if ($request->hasFile('owner_documents')) {
 
         $originalName = $file->getClientOriginalName();
         $sanitizedName = preg_replace('/[^a-zA-Z0-9._-]/', '_', $originalName);
+        $path = $file->storeAs('Biens/owners', $sanitizedName, 'spaces');
 
-        $path = $file->storeAs('Biens/owners', $sanitizedName, 'public');
-        $existingOwnerDocs[] = 'storage/' . $path;
+        $existingOwnerDocs[] = Storage::disk('spaces')->url($path);
     }
 
     $bien->owner_documents = array_values($existingOwnerDocs);
 }
+
 
 
 
@@ -346,8 +350,10 @@ public function deleteImage($id, $index): JsonResponse
     }
 
     // Supprimer physiquement le fichier
-    $pathToDelete = str_replace('storage/', '', $images[$index]);
-    Storage::disk('public')->delete($pathToDelete);
+    $pathToDelete = parse_url($images[$index], PHP_URL_PATH);
+$pathToDelete = ltrim(str_replace('/' . env('DO_SPACES_BUCKET') . '/', '', $pathToDelete), '/');
+Storage::disk('spaces')->delete($pathToDelete);
+
 
     // Supprimer l'entrée du tableau
     unset($images[$index]);
@@ -366,11 +372,14 @@ public function deleteDocument($id)
 {
     $bien = Bien::findOrFail($id);
 
-    if (!empty($bien->documents) && is_array($bien->documents)) {
-        foreach ($bien->documents as $path) {
-            Storage::disk('public')->delete(str_replace('storage/', '', $path));
-        }
+   if (!empty($bien->documents) && is_array($bien->documents)) {
+    foreach ($bien->documents as $url) {
+        $urlPath = parse_url($url, PHP_URL_PATH);
+        $path = ltrim($urlPath, '/');
+        Storage::disk('spaces')->delete($path);
     }
+}
+
 
     $bien->documents = [];
     $bien->save();
@@ -425,8 +434,10 @@ public function deleteOwnerDocumentByIndex($id, $index)
         return response()->json(['error' => 'Document non trouvé.'], 404);
     }
 
-    Storage::disk('public')->delete(str_replace('storage/', '', $docs[$index]));
-    unset($docs[$index]);
+   $path = parse_url($docs[$index], PHP_URL_PATH);
+$relativePath = ltrim($path, '/');
+Storage::disk('spaces')->delete($relativePath);
+
 
     $bien->owner_documents = array_values($docs);
     $bien->save();
