@@ -228,8 +228,8 @@ public function update(Request $request, $id)
         }
 
         $filename = time() . '_' . $file->getClientOriginalName();
-        $file->move(public_path('Biens/images'), $filename);
-        $existingImages[$index] = 'Biens/images/' . $filename;
+     $path = $file->storeAs('Biens/images', $filename, 'public');
+$existingImages[$index] = 'storage/' . $path;
     }
 }
 
@@ -244,8 +244,9 @@ public function update(Request $request, $id)
         if (!$file || !$file->isValid()) continue;
 
         $filename = time() . '_' . $file->getClientOriginalName();
-        $file->move(public_path('Biens/images'), $filename);
-        $existingImages[] = 'Biens/images/' . $filename;
+     $path = $file->storeAs('Biens/images', $filename, 'public');
+$existingImages[] = 'storage/' . $path;
+
     }
 }
 
