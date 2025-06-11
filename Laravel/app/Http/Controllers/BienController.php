@@ -10,6 +10,8 @@ use Illuminate\Http\JsonResponse;
 use App\Events\ActivityLogged;
 use Illuminate\Support\Facades\Auth;
 use Symfony\Component\HttpFoundation\StreamedResponse;
+use Illuminate\Support\Str;
+
 class BienController extends Controller
 {
     public function store(Request $request)
@@ -299,19 +301,24 @@ public function update(Request $request, $id)
     }
 
     // 📄 Remplacement de documents par index
-    if ($request->hasFile('replace_documents')) {
-        foreach ($request->file('replace_documents') as $index => $file) {
-            if (!$file || !$file->isValid()) continue;
+foreach ($request->allFiles() as $key => $file) {
+    if (Str::startsWith($key, 'replace_documents')) {
+        preg_match('/replace_documents\[(\d+)\]/', $key, $matches);
+        $index = $matches[1] ?? null;
+
+        if ($index !== null && $file && $file->isValid()) {
             if (isset($docPaths[$index])) {
                 $oldPath = ltrim(parse_url($docPaths[$index], PHP_URL_PATH), '/');
                 Storage::disk('spaces')->delete($oldPath);
             }
+
             $filename = uniqid('doc_', true) . '.' . $file->getClientOriginalExtension();
             $path = "Biens/documents/$filename";
             Storage::disk('spaces')->put($path, file_get_contents($file), 'public');
             $docPaths[$index] = Storage::disk('spaces')->url($path);
         }
     }
+}
 
     $bien->documents = array_values($docPaths);
 
