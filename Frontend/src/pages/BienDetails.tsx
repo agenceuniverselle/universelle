@@ -298,33 +298,28 @@ useEffect(() => {
     setMakeOfferOpen(true);
   };
 
-const handleDownload = async (bien: BienType) => {
-  if (!bien.documents?.length) {
-    toast("Aucun document disponible");
-    return;
-  }
-
-  const fileUrl = bien.documents[0];
+const handleDownload = async (bienId: number) => {
   try {
-    const response = await fetch(fileUrl);
-    if (!response.ok) throw new Error("Erreur lors du téléchargement");
+    const response = await fetch(`https://back-qhore.ondigitalocean.app/api/download/${bienId}`, {
+      method: 'GET',
+    });
+
+    if (!response.ok) throw new Error("Échec du téléchargement");
 
     const blob = await response.blob();
     const url = window.URL.createObjectURL(blob);
-
-    const link = document.createElement("a");
-    link.href = url;
-    link.setAttribute("download", "Plan.pdf"); // ✅ force le téléchargement
-    document.body.appendChild(link);
-    link.click();
-
-    link.remove();
+    
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'Plan.pdf';
+    a.click();
     window.URL.revokeObjectURL(url);
   } catch (err) {
+    toast("Téléchargement échoué");
     console.error(err);
-    toast("Échec du téléchargement du document.");
   }
 };
+
 
 
 
