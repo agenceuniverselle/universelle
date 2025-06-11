@@ -299,6 +299,7 @@ useEffect(() => {
   };
 
 const handleDownload = (bien: BienType) => {
+  console.log("Documents:", bien.documents);
   if (!bien.documents?.length) {
     toast("Aucun document disponible");
     return;
