@@ -191,150 +191,131 @@ useEffect(() => {
     return errors.length === 0;
   };
 
-  const handleSave = async () => {
-    if (!validateForm()) {
-      setActiveTab('main');
-      toast({
-        title: "Erreur de validation",
-        description: "Veuillez corriger les erreurs avant de sauvegarder",
-        variant: "destructive",
-      });
-      return;
+const handleSave = async () => {
+  if (!validateForm()) {
+    setActiveTab('main');
+    toast({
+      title: "Erreur de validation",
+      description: "Veuillez corriger les erreurs avant de sauvegarder",
+      variant: "destructive",
+    });
+    return;
+  }
+
+  setIsSaving(true);
+
+  const token = localStorage.getItem("access_token");
+
+  if (!token) {
+    toast({
+      title: "Erreur d'authentification",
+      description: "Votre session a expiré. Veuillez vous reconnecter.",
+      variant: "destructive",
+    });
+    navigate("/login");
+    return;
+  }
+
+  try {
+    const formData = new FormData();
+
+    // Champs standards
+    for (const key in bien) {
+      if (
+        ['newImages', 'newDocuments', 'newOwnerDocuments', 'images', 'documents', 'owner_documents', 'replacedImages', 'replacedDocuments'].includes(key)
+      ) continue;
+
+      const value = bien[key];
+
+      if (value === null || value === undefined) continue;
+
+      if (typeof value === 'boolean') {
+        formData.append(key, value ? '1' : '0');
+      } else if (Array.isArray(value)) {
+        value.forEach((item, i) => {
+          formData.append(`${key}[${i}]`, item);
+        });
+      } else {
+        formData.append(key, value);
+      }
     }
-  
-    setIsSaving(true);
-  
-    // ✅ Gestion du token
-    const token = localStorage.getItem("access_token");
-  
-    if (!token) {
+
+    // ✅ Dates
+    if (available_date) {
+      formData.append("available_date", available_date.toISOString().split("T")[0]);
+    }
+
+    // ✅ Ajout nouveaux fichiers
+    bien.newImages?.forEach((file: File) => {
+      formData.append("images[]", file);
+    });
+
+    bien.newDocuments?.forEach((file: File) => {
+      formData.append("documents[]", file);
+    });
+
+    bien.newOwnerDocuments?.forEach((file: File) => {
+      formData.append("owner_documents[]", file);
+    });
+
+    // ✅ Remplacement de fichiers spécifiques
+    bien.replacedImages?.forEach(({ index, file }: { index: number; file: File }) => {
+      formData.append(`replace_images[${index}]`, file);
+    });
+
+    bien.replacedDocuments?.forEach(({ index, file }: { index: number; file: File }) => {
+      formData.append(`replace_documents[${index}]`, file); // ✅ BACKEND le prend maintenant en charge
+    });
+
+    replacedOwnerDocuments?.forEach(({ index, file }: { index: number; file: File }) => {
+      formData.append(`replace_owner_documents[${index}]`, file);
+    });
+
+    // Debug log
+    console.log([...formData.entries()]);
+
+    const response = await axios.post(
+      `https://back-qhore.ondigitalocean.app/api/biens/${bienId}?_method=PUT`,
+      formData,
+      {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+          'Authorization': `Bearer ${token}`,
+        },
+      }
+    );
+
+    setBien(response.data.data);
+    setHasChanges(false);
+    setReplacedOwnerDocuments([]);
+    toast({
+      title: "Modifications enregistrées",
+      description: "Les informations du bien ont été mises à jour avec succès",
+      variant: "default",
+    });
+
+  } catch (error: any) {
+    console.error('Erreur lors de la sauvegarde du bien :', error);
+
+    if (error.response?.status === 401) {
       toast({
         title: "Erreur d'authentification",
         description: "Votre session a expiré. Veuillez vous reconnecter.",
         variant: "destructive",
       });
       navigate("/login");
-      return;
-    }
-  
-    try {
-      const formData = new FormData();
-  
-      // Champs texte
-      for (const key in bien) {
-        if (
-          key !== 'newImages' &&
-          key !== 'newDocuments' &&
-          key !== 'images' &&         // ⬅️ ne pas envoyer les chemins d'images
-          key !== 'documents' &&      // ⬅️ ne pas envoyer les chemins de documents
-          bien[key] !== null &&
-          bien[key] !== undefined
-        ) {
-          let value = bien[key];
-  
-          if (typeof value === 'boolean') {
-            value = value ? '1' : '0';
-          }
-  
-          if (Array.isArray(value)) {
-            value.forEach((item, i) => {
-              formData.append(`${key}[${i}]`, item);
-            });
-          } else {
-            formData.append(key, value);
-          }
-        }
-      }
-  
-      if (bien.newDocuments?.length > 0) {
-        bien.newDocuments.forEach((file: File) => {
-          formData.append("documents[]", file);
-        });
-      }
-  
-      if (bien.newOwnerDocuments?.length > 0) {
-        bien.newOwnerDocuments.forEach((file: File) => {
-          formData.append("owner_documents[]", file);
-        });
-      }
-  
-      if (bien.newImages?.length > 0) {
-        bien.newImages.forEach((file: File) => {
-          formData.append("images[]", file); // 👈 correspond à ton backend
-        });
-      }
-  
-      form.getValues("proximite")?.forEach((item, i) => {
-        formData.append(`proximite[${i}]`, item);
-      });
-  
-      if (available_date) {
-        formData.append("available_date", available_date.toISOString().split("T")[0]);
-      }
-  
-      // Images remplacées
-if (bien.replacedImages) {
-  bien.replacedImages.forEach(({ index, file }) => {
-    formData.append(`replace_images[${index}]`, file);
-  });
-}
-
-
-
-
-  
-      if (replacedOwnerDocuments.length > 0) {
-        replacedOwnerDocuments.forEach(({ index, file }) => {
-          formData.append(`replace_owner_documents[${index}]`, file);
-        });
-      }
-  
-      console.log([...formData.entries()]); // Debug
-  
-      // ✅ Requête avec Token
-      const response = await axios.post(
-        `https://back-qhore.ondigitalocean.app/api/biens/${bienId}?_method=PUT`, // simulate PUT via POST
-        formData,
-        {
-          headers: {
-            'Content-Type': 'multipart/form-data',
-            'Authorization': `Bearer ${token}`, // ✅ Utilisation du token
-          },
-        }
-      );
-  
-      setBien(response.data.data);
-      setHasChanges(false);
-      setReplacedOwnerDocuments([]); 
-  
+    } else {
       toast({
-        title: "Modifications enregistrées",
-        description: "Les informations du bien ont été mises à jour avec succès",
-        variant: "default",
+        title: "Erreur lors de la sauvegarde",
+        description: error.response?.data?.message || "Une erreur s'est produite. Veuillez réessayer.",
+        variant: "destructive",
       });
-  
-    } catch (error) {
-      console.error('Erreur lors de la sauvegarde du bien :', error);
-  
-      if (error.response?.status === 401) {
-        toast({
-          title: "Erreur d'authentification",
-          description: "Votre session a expiré. Veuillez vous reconnecter.",
-          variant: "destructive",
-        });
-        navigate("/login");
-      } else {
-        toast({
-          title: "Erreur lors de la sauvegarde",
-          description: error.response?.data?.message || "Une erreur s'est produite. Veuillez réessayer.",
-          variant: "destructive",
-        });
-      }
-    } finally {
-      setIsSaving(false);
     }
-  };
-  
+  } finally {
+    setIsSaving(false);
+  }
+};
+
   
   
   
