@@ -84,7 +84,7 @@ const [bien, setBien] = useState<Bien>({
     setIsDeleting(true);
 
     if (deleteTarget.type === 'image' && typeof deleteTarget.index === 'number') {
-      await axios.delete(https://back-qhore.ondigitalocean.app/api/biens/${bienId}/images/${deleteTarget.index});
+      await axios.delete(`https://back-qhore.ondigitalocean.app/api/biens/${bienId}/images/${deleteTarget.index}`);
       const updatedImages = [...bien.images];
       updatedImages.splice(deleteTarget.index, 1);
       setBien((prev) => ({ ...prev, images: updatedImages }));
