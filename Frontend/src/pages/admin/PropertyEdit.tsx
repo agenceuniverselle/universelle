@@ -1460,13 +1460,15 @@ className="
   onChange={(e) => {
     const file = e.target.files?.[0];
     if (file) {
-      setReplacedDocuments(prev => ({
+      setReplacedDocuments((prev) => ({
         ...prev,
         [index]: file,
       }));
+      setHasChanges(true);
     }
   }}
 />
+
 
 
 
