@@ -1,7 +1,7 @@
 [build]
   base = "Frontend"
   publish = "dist"
-  command = "npm run build"
+  command = "cd Frontend && npm install && npm run build"
 
 [[redirects]]
   from = "/*"
