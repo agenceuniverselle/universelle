@@ -132,7 +132,7 @@ useEffect(() => {
 
   const fetchBien = async () => {
     try {
-      const response = await axios.get(https://back-qhore.ondigitalocean.app/api/biens/${bienId});
+      const response = await axios.get(`https://back-qhore.ondigitalocean.app/api/biens/${bienId}`);
       const data = response.data;
 
       setBien(data);
@@ -369,10 +369,12 @@ const handleSave = async () => {
   const handleCancel = () => {
     if (hasChanges) {
       if (window.confirm('Vous avez des modifications non enregistrées. Êtes-vous sûr de vouloir quitter ?')) {
-        navigate(/admin/biens/${bienId});
+      navigate(`/admin/biens/${bienId}`);
+
       }
     } else {
-      navigate(/admin/biens/${bienId});
+      navigate(`/admin/biens/${bienId}`);
+
     }
   };
 
@@ -382,7 +384,7 @@ const handleSave = async () => {
 
   const handleDeleteImage = async (index: number) => {
     try {
-      await axios.delete(https://back-qhore.ondigitalocean.app/api/biens/${bienId}/images/${index});
+      await axios.delete(`https://back-qhore.ondigitalocean.app/api/biens/${bienId}/images/${index}`);
   
       setBien(prev => {
         const updatedImages = [...(prev.images || [])];
@@ -422,11 +424,16 @@ const handleSave = async () => {
     formData.append('bien_id', bienId!);
   
     try {
-      const response = await axios.post(https://back-qhore.ondigitalocean.app/api/biens/${bienId}/upload-image, formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      });
+      const response = await axios.post(
+  `https://back-qhore.ondigitalocean.app/api/biens/${bienId}/upload-image`,
+  formData,
+  {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  }
+);
+
   
       setBien(prev => ({
         ...prev,
@@ -444,12 +451,13 @@ const handleSave = async () => {
   };
   
   return (
-    <AdminLayout title={Modifier le bien - ${bien.title}}>
+    <AdminLayout title={`Modifier le bien - ${bien.title}`}>
+
       <div className="mb-6">
         <div className="flex items-center justify-between mb-6">
           <Button 
             variant="outline" 
-            onClick={() => navigate(/admin/biens/${bienId})}
+           onClick={() => navigate(`/admin/biens/${bienId}`)}
             className="transition-all duration-200 hover:bg-gray-100 hover:scale-105 active:scale-95 dark:text-black"
           >
             <ChevronLeft className="h-4 w-4 mr-2" />
@@ -1234,11 +1242,12 @@ className="
 
       return (
         <div key={index} className="relative group rounded-md overflow-hidden border">
-          <img
-            src={src}
-            alt={Image ${index + 1}}
-            className="w-full h-40 object-cover"
-          />
+         <img
+  src={src}
+  alt={`Image ${index + 1}`}
+  className="w-full h-40 object-cover"
+/>
+
           <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-40 transition-all duration-200 flex items-center justify-center space-x-2">
             <Button
               variant="outline"
@@ -1276,10 +1285,11 @@ className="
       return (
         <div key={index} className="relative w-32 h-32 rounded-md overflow-hidden border border-gray-300 dark:border-gray-700 group">
           <img
-            src={src}
-            alt={Nouvelle image ${i + 1}}
-            className="w-full h-40 object-cover"
-          />
+  src={src}
+  alt={`Nouvelle image ${i + 1}`}
+  className="w-full h-40 object-cover"
+/>
+
           <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-40 transition-all duration-200 flex items-center justify-center space-x-2">
             <Button variant="outline" size="icon" disabled>
               ✏️
@@ -1374,17 +1384,20 @@ className="
         className="flex items-center justify-between border rounded-md p-3 hover:bg-gray-50 transition"
       >
         <a
-          href={https://back-qhore.ondigitalocean.app/api/download/${bien.id}}
-          className="flex items-center text-sm text-blue-600 hover:underline"
-          download
-        >
-          📄 {Plan_${bien.title.replace(/\s/g, '_')}.pdf}
+  href={`https://back-qhore.ondigitalocean.app/api/download/${bien.id}`}
+  className="flex items-center text-sm text-blue-600 hover:underline"
+  download
+>
+
+        📄 {`Plan_${bien.title.replace(/\s/g, '_')}.pdf`}
+
         </a>
         <div className="flex space-x-2">
           <Button
             variant="outline"
             size="icon"
-            onClick={() => document.getElementById(replaceDocUpload-${index})?.click()}
+           onClick={() => document.getElementById(`replaceDocUpload-${index}`)?.click()}
+
 
           >
             ✏️
@@ -1438,7 +1451,7 @@ className="
   {/* Input fichier pour remplacement ou ajout */}
 <input
   type="file"
-  id={replaceDocUpload-${index}}
+  id={`replaceDocUpload-${index}`}
   hidden
   accept=".pdf,.doc,.docx"
   onChange={(e) => {
@@ -1451,6 +1464,7 @@ className="
     }
   }}
 />
+
 
 
   <input
@@ -1606,14 +1620,15 @@ className="
   {Array.isArray(bien.owner_documents) && bien.owner_documents.length > 0 ? (
   bien.owner_documents.map((doc: string, index: number) => (
     <div key={index} className="flex items-center justify-between p-2 bg-gray-50 border rounded-md">
-      <a
-        href={https://back-qhore.ondigitalocean.app/storage/${doc.replace('storage/', '')}}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="text-sm text-blue-600 hover:underline"
-      >
-        📄 {doc.split('/').pop()}
-      </a>
+    <a
+  href={`https://back-qhore.ondigitalocean.app/storage/${doc.replace('storage/', '')}`}
+  target="_blank"
+  rel="noopener noreferrer"
+  className="text-sm text-blue-600 hover:underline"
+>
+  📄 {doc.split('/').pop()}
+</a>
+
       <div className="flex gap-2">
         <Button
           variant="outline"
@@ -1743,11 +1758,14 @@ className="
         </Tabs>
         
         <div className="flex justify-end mt-6">
-          <Button
-            onClick={handleSave}
-            disabled={isSaving || !hasChanges}
-            className={bg-luxe-blue hover:bg-luxe-blue/90 transition-all duration-200 ${hasChanges ? 'hover:scale-105 active:scale-95' : 'opacity-70'}}
-          >
+        <Button
+  onClick={handleSave}
+  disabled={isSaving || !hasChanges}
+  className={`bg-luxe-blue hover:bg-luxe-blue/90 transition-all duration-200 ${
+    hasChanges ? 'hover:scale-105 active:scale-95' : 'opacity-70'
+  }`}
+>
+
             {isSaving ? (
               <>
                 <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
