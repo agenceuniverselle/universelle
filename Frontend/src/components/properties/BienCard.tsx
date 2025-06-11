@@ -73,7 +73,7 @@ const firstImageUrl = bien.images?.[0]
       <CardContent className="p-4">
         <div className="flex justify-between items-center mb-4">
           <div className="font-bold text-lg flex items-center">
-          {bien.price} MAD/m² 
+          {bien.price} MAD
           </div>
           <Badge variant="outline" className="font-normal">
             {bien.type}
