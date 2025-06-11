@@ -183,26 +183,24 @@ public function similaires($id)
     return response()->json($similaires);
 }
 //download doc
-public function downloadDocument($BienId)
+public function downloadDocument($id)
 {
-    $bien = Bien::findOrFail($BienId);
+    $bien = Bien::findOrFail($id);
     $documents = $bien->documents;
 
     if (empty($documents) || !isset($documents[0])) {
         return response()->json(['error' => 'Aucun document disponible'], 404);
     }
 
-    // ✅ Récupérer seulement le chemin relatif depuis l’URL complète
-    $url = $documents[0];
-    $parsed = parse_url($url, PHP_URL_PATH);
-    $documentPath = ltrim($parsed, '/'); // Supprime le slash initial
-
-    // Vérifier si le fichier existe bien sur Spaces
-    if (!Storage::disk('spaces')->exists($documentPath)) {
-        return response()->json(['error' => 'Fichier introuvable sur Spaces'], 404);
+    $url = $documents[0]; // URL complète depuis Spaces
+    $path = ltrim(parse_url($url, PHP_URL_PATH), '/'); // Extrait le chemin S3
+    
+    // Vérifie si le fichier existe dans Spaces
+    if (!Storage::disk('spaces')->exists($path)) {
+        return response()->json(['error' => 'Fichier introuvable'], 404);
     }
 
-    return Storage::disk('spaces')->download($documentPath, 'Plan.pdf');
+    return Storage::disk('spaces')->download($path, 'Plan.pdf'); // force téléchargement
 }
 
 //edit bien 
