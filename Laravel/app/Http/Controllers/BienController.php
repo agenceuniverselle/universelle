@@ -192,9 +192,12 @@ public function downloadDocument($BienId)
         return response()->json(['error' => 'Aucun document disponible'], 404);
     }
 
-    $documentPath = $documents[0];
+    // ✅ Récupérer seulement le chemin relatif depuis l’URL complète
+    $url = $documents[0];
+    $parsed = parse_url($url, PHP_URL_PATH);
+    $documentPath = ltrim($parsed, '/'); // Supprime le slash initial
 
-    // On suppose que le document est stocké dans le disque S3 nommé "spaces"
+    // Vérifier si le fichier existe bien sur Spaces
     if (!Storage::disk('spaces')->exists($documentPath)) {
         return response()->json(['error' => 'Fichier introuvable sur Spaces'], 404);
     }
