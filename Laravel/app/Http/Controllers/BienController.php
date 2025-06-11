@@ -212,9 +212,6 @@ public function update(Request $request, $id)
 {
     $bien = Bien::findOrFail($id);
 
-    // 🔒 Récupérer les images actuelles AVANT toute modification
-    $existingImages = is_array($bien->images) ? $bien->images : [];
-
     $validated = $request->validate([
         'title' => 'required|string|min:3',
         'type' => 'required|string',
@@ -250,135 +247,92 @@ public function update(Request $request, $id)
         'owner_phone' => 'nullable|string|max:30',
         'owner_nationality' => 'nullable|string|max:100',
         'images.*' => 'image|mimes:jpg,jpeg,png,webp|max:2048',
-        'replace_images.*' => 'image|mimes:jpg,jpeg,png,webp|max:2048',
         'documents.*' => 'mimes:pdf,doc,docx,xls,xlsx|max:4096',
+        'owner_documents.*' => 'mimes:pdf,doc,docx,xls,xlsx|max:4096',
     ]);
 
-    // Ensuite on peut modifier le bien avec les autres champs
     $bien->fill($validated);
 
-    // 📷 Remplacer certaines images (par index)
-   if ($request->hasFile('replace_images')) {
-    foreach ($request->file('replace_images') as $index => $file) {
-        if (!$file || !$file->isValid()) continue;
+    // 🔄 Remplacer toutes les images si envoyées
+    if ($request->hasFile('images')) {
+        // Supprimer anciennes images (de Spaces)
+        foreach ($bien->images ?? [] as $oldImageUrl) {
+            $oldPath = ltrim(parse_url($oldImageUrl, PHP_URL_PATH), '/');
+            Storage::disk('spaces')->delete($oldPath);
+        }
 
-        // Supprimer ancienne image
-        if (isset($existingImages[$index])) {
-            $oldPath = public_path($existingImages[$index]);
-            if (file_exists($oldPath)) {
-                unlink($oldPath);
+        $imagePaths = [];
+        foreach ($request->file('images') as $image) {
+            if (!$image || !$image->isValid()) continue;
+
+            $filename = uniqid('img_', true) . '.' . $image->getClientOriginalExtension();
+            $path = "Biens/images/$filename";
+
+            if (Storage::disk('spaces')->put($path, file_get_contents($image), 'public')) {
+                $imagePaths[] = Storage::disk('spaces')->url($path);
             }
         }
-
-       $filename = time() . '_' . $file->getClientOriginalName();
-$path = $file->storeAs('Biens/images', $filename, 'spaces');
-$existingImages[$index] = Storage::disk('spaces')->url($path);
-
-    }
-}
-
-    // 📷 Ajouter de nouvelles images (à la fin)
-  if ($request->hasFile('images')) {
-    $imagesToAdd = $request->file('images');
-    if (!is_array($imagesToAdd)) {
-        $imagesToAdd = [$imagesToAdd];
+        $bien->images = $imagePaths;
     }
 
-    foreach ($imagesToAdd as $file) {
-        if (!$file || !$file->isValid()) continue;
-
-        $filename = time() . '_' . $file->getClientOriginalName();
-$path = $file->storeAs('Biens/images', $filename, 'spaces');
-$existingImages[] = Storage::disk('spaces')->url($path);
-
-
-    }
-}
-
-
-    // ✅ Réindex propre
-    $bien->images = array_values($existingImages);
-
-    // 📄 Gestion des documents (1 seul autorisé)
-if ($request->hasFile('documents')) {
-    // Supprimer l'ancien s'il existe
-    if (!empty($bien->documents) && is_array($bien->documents)) {
-        foreach ($bien->documents as $oldPath) {
-            $path = str_replace('storage/', '', $oldPath);
-            Storage::disk('public')->delete($path);
-        }
-    }
-
-    // Stocker le nouveau (1 seul max)
-    $newDoc = $request->file('documents')[0] ?? null;
-    if ($newDoc && $newDoc->isValid()) {
-        $docPath = $newDoc->store('Biens/documents', 'public');
-        $bien->documents = ['storage/' . $docPath];
-    }
-}
-
-// Remplacement de documents propriétaires (optionnel, à adapter selon ton front)
-// 📄 Remplacer documents propriétaires individuellement
-if ($request->hasFile('replace_owner_documents')) {
-    $replacedDocs = $request->file('replace_owner_documents');
-    $existingOwnerDocs = is_array($bien->owner_documents) ? $bien->owner_documents : [];
-
-    foreach ($replacedDocs as $index => $file) {
-        if (!$file || !$file->isValid()) continue;
-
-        // Supprimer l'ancien fichier depuis Spaces
-        if (isset($existingOwnerDocs[$index])) {
-            $urlPath = parse_url($existingOwnerDocs[$index], PHP_URL_PATH);
-            $path = ltrim($urlPath, '/');
-            Storage::disk('spaces')->delete($path);
+    // 🔄 Remplacer documents si envoyés
+    if ($request->hasFile('documents')) {
+        // Supprimer anciens
+        foreach ($bien->documents ?? [] as $oldDoc) {
+            $oldPath = ltrim(parse_url($oldDoc, PHP_URL_PATH), '/');
+            Storage::disk('spaces')->delete($oldPath);
         }
 
-        $originalName = $file->getClientOriginalName();
-        $sanitizedName = preg_replace('/[^a-zA-Z0-9._-]/', '_', $originalName);
-        $path = $file->storeAs('Biens/owners', $sanitizedName, 'spaces');
+        $docPaths = [];
+        foreach ($request->file('documents') as $doc) {
+            if (!$doc || !$doc->isValid()) continue;
 
-        $existingOwnerDocs[$index] = Storage::disk('spaces')->url($path);
+            $filename = uniqid('doc_', true) . '.' . $doc->getClientOriginalExtension();
+            $path = "Biens/documents/$filename";
+
+            if (Storage::disk('spaces')->put($path, file_get_contents($doc), 'public')) {
+                $docPaths[] = Storage::disk('spaces')->url($path);
+            }
+        }
+        $bien->documents = $docPaths;
     }
 
-    $bien->owner_documents = array_values($existingOwnerDocs);
-}
+    // 🔄 Remplacer ou ajouter owner_documents
+    if ($request->hasFile('owner_documents')) {
+        // Supprimer anciens
+        foreach ($bien->owner_documents ?? [] as $oldDoc) {
+            $oldPath = ltrim(parse_url($oldDoc, PHP_URL_PATH), '/');
+            Storage::disk('spaces')->delete($oldPath);
+        }
 
+        $ownerDocPaths = [];
+        foreach ($request->file('owner_documents') as $doc) {
+            if (!$doc || !$doc->isValid()) continue;
 
-// 📄 Ajouter de nouveaux documents propriétaires
-if ($request->hasFile('owner_documents')) {
-    $ownerDocs = $request->file('owner_documents');
-    $existingOwnerDocs = is_array($bien->owner_documents) ? $bien->owner_documents : [];
+            $filename = uniqid('owner_', true) . '.' . $doc->getClientOriginalExtension();
+            $path = "Biens/owners/$filename";
 
-    foreach ($ownerDocs as $file) {
-        if (!$file || !$file->isValid()) continue;
-
-        $originalName = $file->getClientOriginalName();
-        $sanitizedName = preg_replace('/[^a-zA-Z0-9._-]/', '_', $originalName);
-        $path = $file->storeAs('Biens/owners', $sanitizedName, 'spaces');
-
-        $existingOwnerDocs[] = Storage::disk('spaces')->url($path);
+            if (Storage::disk('spaces')->put($path, file_get_contents($doc), 'public')) {
+                $ownerDocPaths[] = Storage::disk('spaces')->url($path);
+            }
+        }
+        $bien->owner_documents = $ownerDocPaths;
     }
 
-    $bien->owner_documents = array_values($existingOwnerDocs);
-}
-
-
-
-
-    // 💾 Sauvegarde finale
     $bien->save();
-// ✅ Journalisation de l'activité
-event(new ActivityLogged(
-    'update_bien',
-    "Le bien immobilier {$bien->title} a été mis à jour.",
-    Auth::check() ? Auth::id() : null
-));
+
+    event(new ActivityLogged(
+        'update_bien',
+        "Le bien immobilier {$bien->title} a été mis à jour.",
+        Auth::check() ? Auth::id() : null
+    ));
 
     return response()->json([
         'message' => 'Bien mis à jour avec succès',
         'data' => $bien->fresh()
     ]);
 }
+
 //delete image 
 public function deleteImage($id, $index): JsonResponse
 {
