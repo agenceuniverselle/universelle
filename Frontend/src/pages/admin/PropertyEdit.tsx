@@ -283,16 +283,18 @@ const handleSave = async () => {
       formData.append(`replace_images[${index}]`, file);
     });
 
-Object.entries(replacedDocuments).forEach(([index, file]) => {
-  formData.append(`replacedDocuments[${index}]`, file);
-});
-   
+if (replacedDocuments && Object.keys(replacedDocuments).length > 0) {
+  Object.entries(replacedDocuments).forEach(([index, file]) => {
+    formData.append(`replace_documents[${index}]`, file as File);
+  });
 }
 
-
-    replacedOwnerDocuments?.forEach(({ index, file }: { index: number; file: File }) => {
-      formData.append(`replace_owner_documents[${index}]`, file);
-    });
+// 👤 Remplacement de documents propriétaires
+if (replacedOwnerDocuments && replacedOwnerDocuments.length > 0) {
+  replacedOwnerDocuments.forEach(({ index, file }: { index: number; file: File }) => {
+    formData.append(`replace_owner_documents[${index}]`, file);
+  });
+}
 
     // Debug log
     console.log([...formData.entries()]);
