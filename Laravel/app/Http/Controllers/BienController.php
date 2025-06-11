@@ -67,7 +67,7 @@ if ($request->hasFile('images')) {
     foreach ($request->file('images') as $image) {
     $filename = time() . '_' . $image->getClientOriginalName();
     $path = $image->storeAs('Biens/images', $filename, 'spaces');
-
+logger('Chemin réel : ' . $path);
     // ✅ Vérifie que $path contient bien "Biens/images/nom.jpg"
     $imagePaths[] = Storage::disk('spaces')->url($path); // OK ici
 }
