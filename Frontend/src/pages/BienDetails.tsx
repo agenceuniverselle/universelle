@@ -751,16 +751,16 @@ const mockImages = Array.isArray(bien.images)
             
           {bien.documents?.length > 0 && (
   <Button
-    variant="outline"
-    size="sm"
-    className="flex gap-1.5 text-sm"
-    onClick={() => handleDownload(bien.id)}
-  >
-    <div className="flex items-center">
-      <Download className="h-4 w-4" />
-      Le plan
-    </div>
-  </Button>
+  variant="outline"
+  size="sm"
+  className="flex gap-1.5 text-sm"
+  onClick={() => handleDownload(bien)} // ici on passe tout le bien
+>
+  <div className="flex items-center">
+    <Download className="h-4 w-4" />
+    Le plan
+  </div>
+</Button>
 )}
 
             
