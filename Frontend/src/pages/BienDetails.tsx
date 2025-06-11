@@ -761,8 +761,7 @@ const mockImages = Array.isArray(bien.images)
   variant="outline"
   size="sm"
   className="flex gap-1.5 text-sm"
-  onClick={() => handleDownload(bien)} // ici on passe tout le bien
->
+onClick={() => handleDownload(bien.id)}>
   <div className="flex items-center">
     <Download className="h-4 w-4" />
     Le plan
