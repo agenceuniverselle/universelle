@@ -63,15 +63,22 @@ class BienController extends Controller
         // Handle images
       // Handle images (stockage direct dans public/)
 $imagePaths = [];
+
 if ($request->hasFile('images')) {
     foreach ($request->file('images') as $image) {
-    $filename = time() . '_' . $image->getClientOriginalName();
-    $path = $image->storeAs('Biens/images', $filename, 'spaces');
-logger('Chemin réel : ' . $path);
-    // ✅ Vérifie que $path contient bien "Biens/images/nom.jpg"
-    $imagePaths[] = Storage::disk('spaces')->url($path); // OK ici
+        if (!$image->isValid()) continue; // Vérifie la validité
+
+        $extension = $image->getClientOriginalExtension();
+        $filename = uniqid('img_', true) . '.' . $extension;
+        $path = $image->storeAs('Biens/images', $filename, 'spaces');
+
+        logger('📸 Image enregistrée dans Spaces : ' . $path);
+
+        // ✅ Génère une URL propre vers le fichier
+        $imagePaths[] = Storage::disk('spaces')->url($path);
+    }
 }
-}
+
         // Handle documents
        $documentPaths = [];
 if ($request->hasFile('documents')) {
