@@ -275,25 +275,32 @@ public function update(Request $request, $id)
     }
 
     // 🔁 Remplacer documents
-    if ($request->hasFile('documents')) {
-        foreach ($bien->documents ?? [] as $oldDoc) {
-            $oldPath = ltrim(parse_url($oldDoc, PHP_URL_PATH), '/');
-            Storage::disk('spaces')->delete($oldPath);
+  // 📄 Remplacer certains documents existants (par index)
+if ($request->hasFile('replace_documents')) {
+    $existingDocs = is_array($bien->documents) ? $bien->documents : [];
+
+    foreach ($request->file('replace_documents') as $index => $file) {
+        if (!$file || !$file->isValid()) continue;
+
+        // Supprimer l'ancien document à l'index donné
+        if (isset($existingDocs[$index])) {
+            $urlPath = parse_url($existingDocs[$index], PHP_URL_PATH);
+            $path = ltrim($urlPath, '/');
+            Storage::disk('spaces')->delete($path);
         }
 
-        $docPaths = [];
-        foreach ($request->file('documents') as $doc) {
-            if (!$doc || !$doc->isValid()) continue;
-
-            $filename = uniqid('doc_', true) . '.' . $doc->getClientOriginalExtension();
-            $path = "Biens/documents/$filename";
-
-            if (Storage::disk('spaces')->put($path, file_get_contents($doc), 'public')) {
-                $docPaths[] = Storage::disk('spaces')->url($path);
-            }
+        // Uploader le nouveau document
+        $filename = uniqid('doc_', true) . '.' . $file->getClientOriginalExtension();
+        $path = "Biens/documents/$filename";
+        if (Storage::disk('spaces')->put($path, file_get_contents($file), 'public')) {
+            $existingDocs[$index] = Storage::disk('spaces')->url($path);
         }
-        $bien->documents = $docPaths;
     }
+
+    // Réindexation propre
+    $bien->documents = array_values($existingDocs);
+}
+
 
     // 🔁 Remplacer owner_documents
     if ($request->hasFile('owner_documents')) {
