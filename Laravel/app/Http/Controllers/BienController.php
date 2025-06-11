@@ -253,9 +253,8 @@ public function update(Request $request, $id)
 
     $bien->fill($validated);
 
-    // 🔄 Remplacer toutes les images si envoyées
+    // 🔁 Remplacer toutes les images
     if ($request->hasFile('images')) {
-        // Supprimer anciennes images (de Spaces)
         foreach ($bien->images ?? [] as $oldImageUrl) {
             $oldPath = ltrim(parse_url($oldImageUrl, PHP_URL_PATH), '/');
             Storage::disk('spaces')->delete($oldPath);
@@ -275,9 +274,8 @@ public function update(Request $request, $id)
         $bien->images = $imagePaths;
     }
 
-    // 🔄 Remplacer documents si envoyés
+    // 🔁 Remplacer documents
     if ($request->hasFile('documents')) {
-        // Supprimer anciens
         foreach ($bien->documents ?? [] as $oldDoc) {
             $oldPath = ltrim(parse_url($oldDoc, PHP_URL_PATH), '/');
             Storage::disk('spaces')->delete($oldPath);
@@ -297,9 +295,8 @@ public function update(Request $request, $id)
         $bien->documents = $docPaths;
     }
 
-    // 🔄 Remplacer ou ajouter owner_documents
+    // 🔁 Remplacer owner_documents
     if ($request->hasFile('owner_documents')) {
-        // Supprimer anciens
         foreach ($bien->owner_documents ?? [] as $oldDoc) {
             $oldPath = ltrim(parse_url($oldDoc, PHP_URL_PATH), '/');
             Storage::disk('spaces')->delete($oldPath);
@@ -332,6 +329,7 @@ public function update(Request $request, $id)
         'data' => $bien->fresh()
     ]);
 }
+
 
 //delete image 
 public function deleteImage($id, $index): JsonResponse
