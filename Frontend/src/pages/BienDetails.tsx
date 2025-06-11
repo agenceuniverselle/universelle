@@ -298,22 +298,34 @@ useEffect(() => {
     setMakeOfferOpen(true);
   };
 
-const handleDownload = (bien: BienType) => {
-  console.log("Documents:", bien.documents);
+const handleDownload = async (bien: BienType) => {
   if (!bien.documents?.length) {
     toast("Aucun document disponible");
     return;
   }
 
-  const fileUrl = bien.documents[0]; // ex: https://universelle-images.lon1.cdn.digitaloceanspaces.com/Biens/documents/...
+  const fileUrl = bien.documents[0];
+  try {
+    const response = await fetch(fileUrl);
+    if (!response.ok) throw new Error("Erreur lors du téléchargement");
 
-  const link = document.createElement("a");
-  link.href = fileUrl;
-  link.download = "Plan.pdf"; // nom visible pour l'utilisateur
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
+    const blob = await response.blob();
+    const url = window.URL.createObjectURL(blob);
+
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute("download", "Plan.pdf"); // ✅ force le téléchargement
+    document.body.appendChild(link);
+    link.click();
+
+    link.remove();
+    window.URL.revokeObjectURL(url);
+  } catch (err) {
+    console.error(err);
+    toast("Échec du téléchargement du document.");
+  }
 };
+
 
 
   if (loading) {
