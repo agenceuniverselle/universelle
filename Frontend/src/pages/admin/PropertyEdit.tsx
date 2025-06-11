@@ -96,7 +96,7 @@ const [bien, setBien] = useState<Bien>({
     }
 
     if (deleteTarget.type === 'ownerDoc' && typeof deleteTarget.index === 'number') {
-      await axios.delete(https://back-qhore.ondigitalocean.app/api/biens/${bienId}/owner-documents/${deleteTarget.index});
+      await axios.delete(`https://back-qhore.ondigitalocean.app/api/biens/${bienId}/owner-documents/${deleteTarget.index}`);
       const updatedDocs = [...bien.owner_documents];
       updatedDocs.splice(deleteTarget.index, 1);
       setBien((prev) => ({ ...prev, owner_documents: updatedDocs }));
