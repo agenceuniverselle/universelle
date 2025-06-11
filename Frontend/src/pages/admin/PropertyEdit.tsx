@@ -476,7 +476,10 @@ const handleSave = async () => {
             <Button 
               onClick={handleSave}
               disabled={isSaving || !hasChanges}
-              className={bg-luxe-blue hover:bg-luxe-blue/90 transition-all duration-200 ${hasChanges ? 'hover:scale-105 active:scale-95' : 'opacity-70'}}
+              className={`bg-luxe-blue hover:bg-luxe-blue/90 transition-all duration-200 ${
+  hasChanges ? 'hover:scale-105 active:scale-95' : 'opacity-70'
+}`}
+
             >
               {isSaving ? (
                 <>
