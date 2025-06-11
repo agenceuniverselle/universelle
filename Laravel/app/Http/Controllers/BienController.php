@@ -84,23 +84,47 @@ if ($request->hasFile('images')) {
     }
 }
 
-        // Handle documents
-       $documentPaths = [];
-if ($request->hasFile('documents')) {
-    foreach ($request->file('documents') as $doc) {
-        $path = $doc->store('Biens/documents', 'spaces');
-        $documentPaths[] = Storage::disk('spaces')->url($path);
-    }
-}
+      // Handle documents
+    $documentPaths = [];
 
-       $ownerDocumentPaths = [];
-if ($request->hasFile('owner_documents')) {
-    foreach ($request->file('owner_documents') as $doc) {
-        $filename = time() . '_' . $doc->getClientOriginalName();
-        $path = $doc->storeAs('Biens/owners', $filename, 'spaces');
-        $ownerDocumentPaths[] = Storage::disk('spaces')->url($path);
+    if ($request->hasFile('documents')) {
+        foreach ($request->file('documents') as $doc) {
+            $extension = $doc->getClientOriginalExtension();
+            $filename = uniqid('doc_', true) . '.' . $extension;
+            $path = 'Biens/documents/' . $filename;
+
+            $success = Storage::disk('spaces')->put($path, file_get_contents($doc), 'public');
+
+            if ($success) {
+                $url = Storage::disk('spaces')->url($path);
+                logger('✅ Document enregistré : ' . $url);
+                $documentPaths[] = $url;
+            } else {
+                logger('❌ Échec du document : ' . $filename);
+            }
+        }
     }
-}
+
+    // Handle owner documents
+    $ownerDocumentPaths = [];
+
+    if ($request->hasFile('owner_documents')) {
+        foreach ($request->file('owner_documents') as $doc) {
+            $extension = $doc->getClientOriginalExtension();
+            $filename = uniqid('owner_', true) . '.' . $extension;
+            $path = 'Biens/owners/' . $filename;
+
+            $success = Storage::disk('spaces')->put($path, file_get_contents($doc), 'public');
+
+            if ($success) {
+                $url = Storage::disk('spaces')->url($path);
+                logger('✅ Doc propriétaire enregistré : ' . $url);
+                $ownerDocumentPaths[] = $url;
+            } else {
+                logger('❌ Échec doc propriétaire : ' . $filename);
+            }
+        }
+    }
 
         
         // Enregistrer dans la base (ex. si tu as une colonne JSON 'owner_documents')
