@@ -1218,7 +1218,7 @@ className="
                 <CardTitle>Photos et médias</CardTitle>
                 <CardDescription>Gérez les photos et autres médias associés à ce bien</CardDescription>
               </CardHeader>
-              <CardContent>
+             <CardContent>
   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
     <div className="col-span-full">
       <h4 className="text-sm font-medium mb-2">Images existantes :</h4>
@@ -1228,7 +1228,7 @@ className="
       const replacement = bien.replacedImages?.find(r => r.index === index);
       const src = replacement
         ? URL.createObjectURL(replacement.file)
-        : `https://back-qhore.ondigitalocean.app/${img}`;
+        : img; // ✅ Corrigé ici
 
       return (
         <div key={index} className="relative group rounded-md overflow-hidden border">
@@ -1249,16 +1249,15 @@ className="
               ✏️
             </Button>
             <Button
-  variant="destructive"
-  size="icon"
-  onClick={() => {
-    setDeleteTarget({ type: 'image', index });
-    setDeleteConfirmOpen(true);
-  }}
->
-  <Trash className="h-4 w-4" />
-</Button>
-
+              variant="destructive"
+              size="icon"
+              onClick={() => {
+                setDeleteTarget({ type: 'image', index });
+                setDeleteConfirmOpen(true);
+              }}
+            >
+              <Trash className="h-4 w-4" />
+            </Button>
           </div>
         </div>
       );
@@ -1273,19 +1272,14 @@ className="
       const index = (bien.images?.length || 0) + i;
 
       return (
-        <div key={index} className="relative w-32 h-32 rounded-md overflow-hidden border border-gray-300 dark:border-gray-700"
->
+        <div key={index} className="relative w-32 h-32 rounded-md overflow-hidden border border-gray-300 dark:border-gray-700 group">
           <img
             src={src}
             alt={`Nouvelle image ${i + 1}`}
             className="w-full h-40 object-cover"
           />
           <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-40 transition-all duration-200 flex items-center justify-center space-x-2">
-            <Button
-              variant="outline"
-              size="icon"
-              disabled
-            >
+            <Button variant="outline" size="icon" disabled>
               ✏️
             </Button>
             <Button
@@ -1350,15 +1344,16 @@ className="
   {/* Add new image button */}
   <label htmlFor="newImageUpload" className="w-full block mt-4">
     <div className="w-full py-8 border-2 border-dashed rounded-md text-center transition-all duration-200
-    bg-gray-50 hover:bg-gray-100 text-gray-600
-    dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-300
-    dark:border-gray-600
-  ">
+      bg-gray-50 hover:bg-gray-100 text-gray-600
+      dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-300
+      dark:border-gray-600
+    ">
       <Upload className="h-5 w-5 inline-block mr-2" />
       Ajouter une image
     </div>
   </label>
 </CardContent>
+
 
 
 
