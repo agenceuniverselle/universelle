@@ -694,24 +694,24 @@ const AdminBiens = () => {
           filteredProperties.map((bien) => (
             <TableRow key={bien.id} id={`bien-row-${bien.id}`}className="dark:hover:bg-gray-700">
               <TableCell className="font-medium">{bien.id}</TableCell>
-              <TableCell className="flex items-center gap-4">
+             <TableCell className="flex items-center gap-4">
   <div className="flex items-center space-x-3 w-[100px]"> {/* ✅ Largeur fixe pour "Bien" */}
-   {bien.images && bien.images.length > 0 ? (
-  <img
-    src={`https://back-qhore.ondigitalocean.app/${bien.images[0]}`}
-    alt={bien.title}
-    className="h-10 w-10 object-cover rounded-md"
-  />
-) : (
-  <Building className="h-5 w-5 text-gray-500 dark:text-gray-300" />
-)}
+    {bien.images && bien.images.length > 0 ? (
+      <img
+        src={bien.images[0]}
+        alt={bien.title}
+        className="h-10 w-10 object-cover rounded-md"
+      />
+    ) : (
+      <Building className="h-5 w-5 text-gray-500 dark:text-gray-300" />
+    )}
 
-  <div className="whitespace-nowrap overflow-hidden text-ellipsis">
-  {bien.title.length > 5 ? bien.title.slice(0, 5) + "..." : bien.title}
-</div>
-
+    <div className="whitespace-nowrap overflow-hidden text-ellipsis">
+      {bien.title.length > 5 ? bien.title.slice(0, 5) + "..." : bien.title}
+    </div>
   </div>
 </TableCell>
+
 
 <TableCell className="pl-0">{bien.type}</TableCell> {/* ✅ Espace entre "Bien" et "Type" */}
 
