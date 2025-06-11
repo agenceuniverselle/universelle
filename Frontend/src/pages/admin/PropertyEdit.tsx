@@ -133,7 +133,8 @@ useEffect(() => {
 
   const fetchBien = async () => {
     try {
-      const response = await axios.get(https://back-qhore.ondigitalocean.app/api/biens/${bienId});
+     
+                                       const response = await axios.get(`https://back-qhore.ondigitalocean.app/api/biens/${bienId}`);
       const data = response.data;
 
       setBien(data);
