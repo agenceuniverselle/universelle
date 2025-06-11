@@ -263,9 +263,12 @@ const handleSave = async () => {
       formData.append(`replace_images[${index}]`, file);
     });
 
-    bien.replacedDocuments?.forEach(({ index, file }: { index: number; file: File }) => {
-      formData.append(`replace_documents[${index}]`, file); // ✅ BACKEND le prend maintenant en charge
-    });
+ if (bien.replacedDocuments) {
+  bien.replacedDocuments.forEach(({ index, file }) => {
+    formData.append(`replace_documents[${index}]`, file); // ✅ CORRECT
+  });
+}
+
 
     replacedOwnerDocuments?.forEach(({ index, file }: { index: number; file: File }) => {
       formData.append(`replace_owner_documents[${index}]`, file);
