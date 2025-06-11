@@ -65,10 +65,12 @@ class BienController extends Controller
 $imagePaths = [];
 if ($request->hasFile('images')) {
     foreach ($request->file('images') as $image) {
-        $filename = time() . '_' . $image->getClientOriginalName();
-        $path = $image->storeAs('Biens/images', $filename, 'spaces');
-        $imagePaths[] = Storage::disk('spaces')->url($path);
-    }
+    $filename = time() . '_' . $image->getClientOriginalName();
+    $path = $image->storeAs('Biens/images', $filename, 'spaces');
+
+    // ✅ Vérifie que $path contient bien "Biens/images/nom.jpg"
+    $imagePaths[] = Storage::disk('spaces')->url($path); // OK ici
+}
 }
         // Handle documents
        $documentPaths = [];
