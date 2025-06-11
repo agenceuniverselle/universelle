@@ -244,7 +244,7 @@ const handleSave = async () => {
         ['newImages', 'newDocuments', 'newOwnerDocuments', 'images', 'documents', 'owner_documents', 'replacedImages', 'replacedDocuments'].includes(key)
       ) continue;
 
-      const value = bien[key];
+      const value = bien[key as keyof typeof bien];
 
       if (value === null || value === undefined) continue;
 
@@ -252,19 +252,18 @@ const handleSave = async () => {
         formData.append(key, value ? '1' : '0');
       } else if (Array.isArray(value)) {
         value.forEach((item, i) => {
-          formData.append(${key}[${i}], item);
+          formData.append(`${key}[${i}]`, item);
         });
       } else {
-        formData.append(key, value);
+        formData.append(key, value as any);
       }
     }
 
-    // ✅ Dates
     if (available_date) {
       formData.append("available_date", available_date.toISOString().split("T")[0]);
     }
 
-    // ✅ Ajout nouveaux fichiers
+    // Nouveaux fichiers
     bien.newImages?.forEach((file: File) => {
       formData.append("images[]", file);
     });
@@ -277,32 +276,30 @@ const handleSave = async () => {
       formData.append("owner_documents[]", file);
     });
 
-    // ✅ Remplacement de fichiers spécifiques
+    // Remplacement d'images
     bien.replacedImages?.forEach(({ index, file }: { index: number; file: File }) => {
-      formData.append(replace_images[${index}], file);
+      formData.append(`replace_images[${index}]`, file);
     });
 
-Object.entries(replacedDocuments).forEach(([index, file]) => {
-  formData.append(replacedDocuments[${index}], file);
-});
-   
-}
+    // Remplacement de documents
+    Object.entries(replacedDocuments).forEach(([index, file]) => {
+      formData.append(`replacedDocuments[${index}]`, file);
+    });
 
-
+    // Remplacement de documents propriétaires
     replacedOwnerDocuments?.forEach(({ index, file }: { index: number; file: File }) => {
-      formData.append(replace_owner_documents[${index}], file);
+      formData.append(`replace_owner_documents[${index}]`, file);
     });
 
-    // Debug log
     console.log([...formData.entries()]);
 
     const response = await axios.post(
-      https://back-qhore.ondigitalocean.app/api/biens/${bienId}?_method=PUT,
+      `https://back-qhore.ondigitalocean.app/api/biens/${bienId}?_method=PUT`,
       formData,
       {
         headers: {
           'Content-Type': 'multipart/form-data',
-          'Authorization': Bearer ${token},
+          'Authorization': `Bearer ${token}`,
         },
       }
     );
@@ -310,6 +307,7 @@ Object.entries(replacedDocuments).forEach(([index, file]) => {
     setBien(response.data.data);
     setHasChanges(false);
     setReplacedOwnerDocuments([]);
+
     toast({
       title: "Modifications enregistrées",
       description: "Les informations du bien ont été mises à jour avec succès",
@@ -337,6 +335,7 @@ Object.entries(replacedDocuments).forEach(([index, file]) => {
     setIsSaving(false);
   }
 };
+
 
   
   
