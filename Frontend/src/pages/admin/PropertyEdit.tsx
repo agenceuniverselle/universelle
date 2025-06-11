@@ -1452,22 +1452,27 @@ className="
   )}
 
   {/* Input fichier pour remplacement ou ajout */}
-<input
-  type="file"
-  id={`replaceDocUpload-${index}`}
-  hidden
-  accept=".pdf,.doc,.docx"
-  onChange={(e) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setReplacedDocuments((prev) => ({
-        ...prev,
-        [index]: file,
-      }));
-      setHasChanges(true);
-    }
-  }}
-/>
+bien.documents.map((doc: string, index: number) => (
+  <div key={index} className="...">
+    {/* ... */}
+    <input
+      type="file"
+      id={`replaceDocUpload-${index}`}
+      hidden
+      accept=".pdf,.doc,.docx"
+      onChange={(e) => {
+        const file = e.target.files?.[0];
+        if (file) {
+          setReplacedDocuments(prev => ({
+            ...prev,
+            [index]: file,
+          }));
+        }
+      }}
+    />
+  </div>
+))
+
 
 
 
