@@ -617,32 +617,29 @@ const AdminInvestissements = () => {
                           className="dark:hover:bg-gray-700"
                         >
                           {/* ✅ Colonne "Bien" avec Image + Titre aligné */}
-                          <TableCell className="font-medium">
-                            {property.id}
-                          </TableCell>
-                          <TableCell className="flex items-center gap-4">
-                            <div className="flex items-center space-x-3 w-[100px]">
-                              {property.images?.[0] ? (
-                                <img
-                                  src={`https://back-qhore.ondigitalocean.app
-/${property.images[0]}`}
-                                  alt={property.title}
-                                  className="h-12 w-12 object-cover rounded-md"
-                                />
-                              ) : (
-                                <div className="h-12 w-12 bg-gray-200 rounded-md flex items-center justify-center">
-                                  —
-                                </div>
-                              )}
-                              <div className="flex flex-col">
-                                <span className="font-medium">
-                                  {property.title.length > 5
-                                    ? property.title.slice(0, 5) + "..."
-                                    : property.title}
-                                </span>
-                              </div>
-                            </div>
-                          </TableCell>
+                       <TableCell className="flex items-center gap-4">
+  <div className="flex items-center space-x-3 w-[100px]">
+    {property.images?.[0] ? (
+      <img
+        src={property.images[0]}
+        alt={property.title}
+        className="h-12 w-12 object-cover rounded-md"
+      />
+    ) : (
+      <div className="h-12 w-12 bg-gray-200 rounded-md flex items-center justify-center">
+        —
+      </div>
+    )}
+    <div className="flex flex-col">
+      <span className="font-medium">
+        {property.title.length > 5
+          ? property.title.slice(0, 5) + "..."
+          : property.title}
+      </span>
+    </div>
+  </div>
+</TableCell>
+
 
                           {/* ✅ Colonne Ville avec Espacement */}
                           <TableCell className="pl-12">
