@@ -185,22 +185,17 @@ public function similaires($id)
 public function downloadDocument($BienId)
 {
     $bien = Bien::findOrFail($BienId);
-    $documents = $bien->documents; // PAS de json_decode ici
+    $documents = $bien->documents;
 
     if (empty($documents) || !isset($documents[0])) {
         return response()->json(['error' => 'Aucun document disponible'], 404);
     }
 
-    $documentPath = $documents[0];
-    $relativePath = str_replace('storage/', '', $documentPath);
-    $absolutePath = storage_path('app/public/' . $relativePath);
+    $cdnUrl = $documents[0];
 
-    if (!file_exists($absolutePath)) {
-        return response()->json(['error' => 'Fichier introuvable'], 404);
-    }
-
-    return response()->download($absolutePath, 'Plan.pdf');
+    return redirect()->away($cdnUrl);
 }
+
 //edit bien 
 
 public function update(Request $request, $id)
