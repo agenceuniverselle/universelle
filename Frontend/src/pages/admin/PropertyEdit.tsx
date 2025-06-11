@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
@@ -85,19 +84,19 @@ const [bien, setBien] = useState<Bien>({
     setIsDeleting(true);
 
     if (deleteTarget.type === 'image' && typeof deleteTarget.index === 'number') {
-      await axios.delete(`https://back-qhore.ondigitalocean.app/api/biens/${bienId}/images/${deleteTarget.index}`);
+      await axios.delete(https://back-qhore.ondigitalocean.app/api/biens/${bienId}/images/${deleteTarget.index});
       const updatedImages = [...bien.images];
       updatedImages.splice(deleteTarget.index, 1);
       setBien((prev) => ({ ...prev, images: updatedImages }));
     }
 
     if (deleteTarget.type === 'document') {
-      await axios.delete(`https://back-qhore.ondigitalocean.app/api/biens/${bienId}/document`);
+      await axios.delete(https://back-qhore.ondigitalocean.app/api/biens/${bienId}/document);
       setBien((prev) => ({ ...prev, documents: [] }));
     }
 
     if (deleteTarget.type === 'ownerDoc' && typeof deleteTarget.index === 'number') {
-      await axios.delete(`https://back-qhore.ondigitalocean.app/api/biens/${bienId}/owner-documents/${deleteTarget.index}`);
+      await axios.delete(https://back-qhore.ondigitalocean.app/api/biens/${bienId}/owner-documents/${deleteTarget.index});
       const updatedDocs = [...bien.owner_documents];
       updatedDocs.splice(deleteTarget.index, 1);
       setBien((prev) => ({ ...prev, owner_documents: updatedDocs }));
@@ -133,7 +132,7 @@ useEffect(() => {
 
   const fetchBien = async () => {
     try {
-      const response = await axios.get(`https://back-qhore.ondigitalocean.app/api/biens/${bienId}`);
+      const response = await axios.get(https://back-qhore.ondigitalocean.app/api/biens/${bienId});
       const data = response.data;
 
       setBien(data);
@@ -253,7 +252,7 @@ const handleSave = async () => {
         formData.append(key, value ? '1' : '0');
       } else if (Array.isArray(value)) {
         value.forEach((item, i) => {
-          formData.append(`${key}[${i}]`, item);
+          formData.append(${key}[${i}], item);
         });
       } else {
         formData.append(key, value);
@@ -280,32 +279,30 @@ const handleSave = async () => {
 
     // ✅ Remplacement de fichiers spécifiques
     bien.replacedImages?.forEach(({ index, file }: { index: number; file: File }) => {
-      formData.append(`replace_images[${index}]`, file);
+      formData.append(replace_images[${index}], file);
     });
 
-if (replacedDocuments && Object.keys(replacedDocuments).length > 0) {
-  Object.entries(replacedDocuments).forEach(([index, file]) => {
-    formData.append(`replace_documents[${index}]`, file as File);
-  });
+Object.entries(replacedDocuments).forEach(([index, file]) => {
+  formData.append(replacedDocuments[${index}], file);
+});
+   
 }
 
-// 👤 Remplacement de documents propriétaires
-if (replacedOwnerDocuments && replacedOwnerDocuments.length > 0) {
-  replacedOwnerDocuments.forEach(({ index, file }: { index: number; file: File }) => {
-    formData.append(`replace_owner_documents[${index}]`, file);
-  });
-}
+
+    replacedOwnerDocuments?.forEach(({ index, file }: { index: number; file: File }) => {
+      formData.append(replace_owner_documents[${index}], file);
+    });
 
     // Debug log
     console.log([...formData.entries()]);
 
     const response = await axios.post(
-      `https://back-qhore.ondigitalocean.app/api/biens/${bienId}?_method=PUT`,
+      https://back-qhore.ondigitalocean.app/api/biens/${bienId}?_method=PUT,
       formData,
       {
         headers: {
           'Content-Type': 'multipart/form-data',
-          'Authorization': `Bearer ${token}`,
+          'Authorization': Bearer ${token},
         },
       }
     );
@@ -348,7 +345,7 @@ if (replacedOwnerDocuments && replacedOwnerDocuments.length > 0) {
   
   const handleDeleteDocument = async () => {
     try {
-      await axios.delete(`https://back-qhore.ondigitalocean.app/api/biens/${bienId}/document`);
+      await axios.delete(https://back-qhore.ondigitalocean.app/api/biens/${bienId}/document);
       setBien(prev => ({
         ...prev,
         documents: [],
@@ -373,10 +370,10 @@ if (replacedOwnerDocuments && replacedOwnerDocuments.length > 0) {
   const handleCancel = () => {
     if (hasChanges) {
       if (window.confirm('Vous avez des modifications non enregistrées. Êtes-vous sûr de vouloir quitter ?')) {
-        navigate(`/admin/biens/${bienId}`);
+        navigate(/admin/biens/${bienId});
       }
     } else {
-      navigate(`/admin/biens/${bienId}`);
+      navigate(/admin/biens/${bienId});
     }
   };
 
@@ -386,7 +383,7 @@ if (replacedOwnerDocuments && replacedOwnerDocuments.length > 0) {
 
   const handleDeleteImage = async (index: number) => {
     try {
-      await axios.delete(`https://back-qhore.ondigitalocean.app/api/biens/${bienId}/images/${index}`);
+      await axios.delete(https://back-qhore.ondigitalocean.app/api/biens/${bienId}/images/${index});
   
       setBien(prev => {
         const updatedImages = [...(prev.images || [])];
@@ -426,7 +423,7 @@ if (replacedOwnerDocuments && replacedOwnerDocuments.length > 0) {
     formData.append('bien_id', bienId!);
   
     try {
-      const response = await axios.post(`https://back-qhore.ondigitalocean.app/api/biens/${bienId}/upload-image`, formData, {
+      const response = await axios.post(https://back-qhore.ondigitalocean.app/api/biens/${bienId}/upload-image, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
@@ -448,12 +445,12 @@ if (replacedOwnerDocuments && replacedOwnerDocuments.length > 0) {
   };
   
   return (
-    <AdminLayout title={`Modifier le bien - ${bien.title}`}>
+    <AdminLayout title={Modifier le bien - ${bien.title}}>
       <div className="mb-6">
         <div className="flex items-center justify-between mb-6">
           <Button 
             variant="outline" 
-            onClick={() => navigate(`/admin/biens/${bienId}`)}
+            onClick={() => navigate(/admin/biens/${bienId})}
             className="transition-all duration-200 hover:bg-gray-100 hover:scale-105 active:scale-95 dark:text-black"
           >
             <ChevronLeft className="h-4 w-4 mr-2" />
@@ -472,7 +469,7 @@ if (replacedOwnerDocuments && replacedOwnerDocuments.length > 0) {
             <Button 
               onClick={handleSave}
               disabled={isSaving || !hasChanges}
-              className={`bg-luxe-blue hover:bg-luxe-blue/90 transition-all duration-200 ${hasChanges ? 'hover:scale-105 active:scale-95' : 'opacity-70'}`}
+              className={bg-luxe-blue hover:bg-luxe-blue/90 transition-all duration-200 ${hasChanges ? 'hover:scale-105 active:scale-95' : 'opacity-70'}}
             >
               {isSaving ? (
                 <>
@@ -1240,7 +1237,7 @@ className="
         <div key={index} className="relative group rounded-md overflow-hidden border">
           <img
             src={src}
-            alt={`Image ${index + 1}`}
+            alt={Image ${index + 1}}
             className="w-full h-40 object-cover"
           />
           <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-40 transition-all duration-200 flex items-center justify-center space-x-2">
@@ -1281,7 +1278,7 @@ className="
         <div key={index} className="relative w-32 h-32 rounded-md overflow-hidden border border-gray-300 dark:border-gray-700 group">
           <img
             src={src}
-            alt={`Nouvelle image ${i + 1}`}
+            alt={Nouvelle image ${i + 1}}
             className="w-full h-40 object-cover"
           />
           <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-40 transition-all duration-200 flex items-center justify-center space-x-2">
@@ -1378,17 +1375,17 @@ className="
         className="flex items-center justify-between border rounded-md p-3 hover:bg-gray-50 transition"
       >
         <a
-          href={`https://back-qhore.ondigitalocean.app/api/download/${bien.id}`}
+          href={https://back-qhore.ondigitalocean.app/api/download/${bien.id}}
           className="flex items-center text-sm text-blue-600 hover:underline"
           download
         >
-          📄 {`Plan_${bien.title.replace(/\s/g, '_')}.pdf`}
+          📄 {Plan_${bien.title.replace(/\s/g, '_')}.pdf}
         </a>
         <div className="flex space-x-2">
           <Button
             variant="outline"
             size="icon"
-            onClick={() => document.getElementById(`replaceDocUpload-${index}`)?.click()}
+            onClick={() => document.getElementById(replaceDocUpload-${index})?.click()}
 
           >
             ✏️
@@ -1442,7 +1439,7 @@ className="
   {/* Input fichier pour remplacement ou ajout */}
 <input
   type="file"
-  id={`replaceDocUpload-${index}`}
+  id={replaceDocUpload-${index}}
   hidden
   accept=".pdf,.doc,.docx"
   onChange={(e) => {
@@ -1611,7 +1608,7 @@ className="
   bien.owner_documents.map((doc: string, index: number) => (
     <div key={index} className="flex items-center justify-between p-2 bg-gray-50 border rounded-md">
       <a
-        href={`https://back-qhore.ondigitalocean.app/storage/${doc.replace('storage/', '')}`}
+        href={https://back-qhore.ondigitalocean.app/storage/${doc.replace('storage/', '')}}
         target="_blank"
         rel="noopener noreferrer"
         className="text-sm text-blue-600 hover:underline"
@@ -1750,7 +1747,7 @@ className="
           <Button
             onClick={handleSave}
             disabled={isSaving || !hasChanges}
-            className={`bg-luxe-blue hover:bg-luxe-blue/90 transition-all duration-200 ${hasChanges ? 'hover:scale-105 active:scale-95' : 'opacity-70'}`}
+            className={bg-luxe-blue hover:bg-luxe-blue/90 transition-all duration-200 ${hasChanges ? 'hover:scale-105 active:scale-95' : 'opacity-70'}}
           >
             {isSaving ? (
               <>
