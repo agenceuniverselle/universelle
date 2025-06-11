@@ -190,6 +190,8 @@ useEffect(() => {
     setFormErrors(errors);
     return errors.length === 0;
   };
+  const [replacedDocuments, setReplacedDocuments] = useState<Record<number, File>>({});
+
 const handleReplaceDocument = (indexToReplace: number, file: File) => {
   setBien((prev) => {
     const updated = { ...prev };
@@ -285,6 +287,7 @@ const handleSave = async () => {
   bien.replacedDocuments.forEach(({ index, file }) => {
     formData.append(`replace_documents[${index}]`, file); // ✅ CORRECT
   });
+   
 }
 
 
@@ -1384,7 +1387,8 @@ className="
           <Button
             variant="outline"
             size="icon"
-            onClick={() => document.getElementById("replaceDocUpload")?.click()}
+            onClick={() => document.getElementById(`replaceDocUpload-${index}`)?.click()}
+
           >
             ✏️
           </Button>
@@ -1437,11 +1441,16 @@ className="
   {/* Input fichier pour remplacement ou ajout */}
 <input
   type="file"
-  accept=".pdf,.doc,.docx,.xls,.xlsx"
+  id={`replaceDocUpload-${index}`}
+  hidden
+  accept=".pdf,.doc,.docx"
   onChange={(e) => {
-    if (e.target.files?.[0]) {
-      handleReplaceDocument(index, e.target.files[0]); // ici tu dois passer l'index du doc à remplacer
-      setHasChanges(true);
+    const file = e.target.files?.[0];
+    if (file) {
+      setReplacedDocuments(prev => ({
+        ...prev,
+        [index]: file,
+      }));
     }
   }}
 />
