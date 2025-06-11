@@ -1452,10 +1452,7 @@ className="
   )}
 
   {/* Input fichier pour remplacement ou ajout */}
-bien.documents.map((doc: string, index: number) => (
-  <div key={index} className="...">
-    {/* ... */}
-    <input
+   <input
       type="file"
       id={`replaceDocUpload-${index}`}
       hidden
@@ -1470,8 +1467,7 @@ bien.documents.map((doc: string, index: number) => (
         }
       }}
     />
-  </div>
-))
+ 
 
 
 
