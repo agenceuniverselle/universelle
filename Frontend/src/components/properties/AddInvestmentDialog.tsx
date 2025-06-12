@@ -217,7 +217,7 @@ const AddInvestmentDialog: React.FC<AddInvestmentDialogProps> = ({
       });
   
       // ✅ Envoi de la requête
-      const response = await axios.post('http://localhost:8000/api/admin/properties', formData, {
+      const response = await axios.post('https://back-qhore.ondigitalocean.app/api/admin/properties', formData, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'multipart/form-data',
