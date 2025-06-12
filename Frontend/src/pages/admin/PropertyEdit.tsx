@@ -350,27 +350,28 @@ const handleSave = async () => {
   
   
   const handleDeleteDocument = async () => {
-    try {
-      await axios.delete('https://back-qhore.ondigitalocean.app/api/biens/${bienId}/document');
-      setBien(prev => ({
-        ...prev,
-        documents: [],
-      }));
-      setHasChanges(true);
-      toast({
-        title: "Document supprimé",
-        description: "Le document a été supprimé avec succès.",
-        variant: "default",
-      });
-    } catch (error) {
-      console.error("Erreur suppression document :", error);
-      toast({
-        title: "Erreur",
-        description: "Impossible de supprimer le document.",
-        variant: "destructive",
-      });
-    }
-  };
+  try {
+    await axios.delete(`https://back-qhore.ondigitalocean.app/api/biens/${bienId}/document`);
+    setBien(prev => ({
+      ...prev,
+      documents: [],
+    }));
+    setHasChanges(true);
+    toast({
+      title: "Document supprimé",
+      description: "Le document a été supprimé avec succès.",
+      variant: "default",
+    });
+  } catch (error) {
+    console.error("Erreur suppression document :", error);
+    toast({
+      title: "Erreur",
+      description: "Impossible de supprimer le document.",
+      variant: "destructive",
+    });
+  }
+};
+
   
   
   const handleCancel = () => {
