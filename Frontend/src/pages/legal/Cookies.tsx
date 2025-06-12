@@ -129,14 +129,14 @@ const Cookies = () => {
             Si vous avez des questions concernant notre utilisation des cookies ou d'autres technologies, veuillez nous contacter à :
           </p>
           <p className="mt-2 font-medium">
-            Email : privacy@agenceuniverselle.com<br />
-            Téléphone : +212 522 123 456<br />
-            Adresse : 123 Avenue Hassan II, Casablanca, Maroc
+            Email : contact@universelle.ma<br />
+            Téléphone : +212 808604195<br />
+            IMM17 N°9 Touzine, Complexe Bayt Laatik, Tanger 90000
           </p>
         </section>
         
         <div className="text-sm text-gray-500 mt-8">
-          Dernière mise à jour : 14 mars 2024
+          Dernière mise à jour : 11 juin 2025
         </div>
       </div>
     </LegalLayout>
