@@ -60,7 +60,7 @@ class ProjectController extends Controller
         'details'  => 'nullable|string',
         'surface'  => 'nullable|string',
         'status'   => 'nullable|string',
-        'images.*' => 'nullable|mimes:jpeg,jpg,png,webp|max:2048',
+        'images.*' => 'nullable|mimes:jpeg,jpg,png,webp|max:5120',
 
     ]);
 
