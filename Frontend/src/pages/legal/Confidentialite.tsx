@@ -84,7 +84,7 @@ const Confidentialite = () => {
             <li><strong>Droit d'opposition :</strong> vous pouvez vous opposer au traitement de vos données, notamment à des fins de marketing direct.</li>
           </ul>
           <p className="mt-4">
-            Pour exercer ces droits, veuillez nous contacter à <a href="mailto:dpo@agenceuniverselle.com" className="text-gold hover:underline">dpo@agenceuniverselle.com</a>.
+            Pour exercer ces droits, veuillez nous contacter à <a href="mailto:contact@universelle.ma" className="text-gold hover:underline">contact@universelle.ma</a>.
           </p>
         </section>
 
@@ -100,7 +100,7 @@ const Confidentialite = () => {
           <p>
             Nous nous réservons le droit de modifier cette politique de confidentialité à tout moment. Toute modification sera publiée sur cette page avec une date de révision mise à jour. Nous vous encourageons à consulter régulièrement cette politique pour rester informé de nos pratiques en matière de protection des données.
           </p>
-          <p>Dernière mise à jour : 15 mars 2024</p>
+          <p>Dernière mise à jour : 11 juin 2025</p>
         </section>
 
         <section id="contact" className="mb-10">
@@ -111,9 +111,9 @@ const Confidentialite = () => {
           <div className="bg-gray-50 p-4 rounded-md mt-4">
             <p><strong>Délégué à la Protection des Données</strong></p>
             <p>Agence Universelle d'Investissement Immobilier</p>
-            <p>123 Avenue Hassan II, 20000 Casablanca, Maroc</p>
-            <p>Email : <a href="mailto:dpo@agenceuniverselle.com" className="text-gold hover:underline">dpo@agenceuniverselle.com</a></p>
-            <p>Tél : +212 5 22 12 34 56</p>
+            <p>IMM17 N°9 Touzine, Complexe Bayt Laatik, Tanger 90000</p>
+            <p>Email : <a href="mailto:contact@universelle.ma" className="text-gold hover:underline">contact@universelle.ma</a></p>
+            <p>Tél : +212 808604195</p>
           </div>
         </section>
 
