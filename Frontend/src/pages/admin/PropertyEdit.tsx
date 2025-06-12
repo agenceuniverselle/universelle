@@ -1440,6 +1440,11 @@ className="
         }
       }}
     />
+        {replacedDocuments[index] && (
+  <div className="mt-2 text-sm text-green-600">
+    📎 Document sélectionné : <strong>{replacedDocuments[index].name}</strong>
+  </div>
+)}
       </div>
     ))
   ) : (
