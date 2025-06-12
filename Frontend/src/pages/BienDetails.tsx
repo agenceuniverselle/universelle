@@ -731,32 +731,31 @@ const mockImages = Array.isArray(bien.images)
     ))}
 
               
-              <CarouselItem className="md:basis-1/2 lg:basis-1/3">
-                <div className="relative h-60 md:h-72 overflow-hidden rounded-lg">
-                  <img
-                    src="https://images.unsplash.com/photo-1600566753376-12c8ab7fb75b?q=80&w=2070&auto=format&fit=crop"
-                    alt="Vidéo de présentation"
-                    className="w-full h-full object-cover"
-                    loading="lazy"
-                  />
-               {videoUrl && (
-  <>
-    <div className="absolute inset-0 flex items-center justify-center bg-black/30">
-      <Button 
-        variant="outline" 
-        className="rounded-full bg-white/80 hover:bg-white w-16 h-16 flex items-center justify-center"
-        onClick={() => window.open(videoUrl, "_blank")} // ou ouvrir dans un modal
-      >
-        <Video className="h-8 w-8 text-luxe-blue" />
-      </Button>
+              {videoUrl && (
+  <CarouselItem className="md:basis-1/2 lg:basis-1/3">
+    <div className="relative h-60 md:h-72 overflow-hidden rounded-lg">
+      <img
+        src="https://images.unsplash.com/photo-1600566753376-12c8ab7fb75b?q=80&w=2070&auto=format&fit=crop"
+        alt="Vidéo de présentation"
+        className="w-full h-full object-cover"
+        loading="lazy"
+      />
+      <div className="absolute inset-0 flex items-center justify-center bg-black/30">
+        <Button 
+          variant="outline" 
+          className="rounded-full bg-white/80 hover:bg-white w-16 h-16 flex items-center justify-center"
+          onClick={() => window.open(videoUrl, "_blank")}
+        >
+          <Video className="h-8 w-8 text-luxe-blue" />
+        </Button>
+      </div>
+      <div className="absolute bottom-2 left-2 bg-black/70 text-white text-sm px-3 py-1 rounded-full">
+        Visite vidéo
+      </div>
     </div>
-    <div className="absolute bottom-2 left-2 bg-black/70 text-white text-sm px-3 py-1 rounded-full">
-      Visite vidéo
-    </div>
-  </>
+  </CarouselItem>
 )}
 
-              </CarouselItem>
             </CarouselContent>
             <CarouselPrevious className="hidden md:flex absolute -left-4" />
             <CarouselNext className="hidden md:flex absolute -right-4" />
