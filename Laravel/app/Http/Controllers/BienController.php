@@ -88,25 +88,25 @@ if ($request->hasFile('images')) {
 }
 
       // Handle documents
-    $documentPaths = [];
+  $documentPaths = [];
 
-    if ($request->hasFile('documents')) {
-        foreach ($request->file('documents') as $doc) {
-            $extension = $doc->getClientOriginalExtension();
-            $filename = uniqid('doc_', true) . '.' . $extension;
-            $path = 'Biens/documents/' . $filename;
+if ($request->hasFile('documents')) {
+    foreach ($request->file('documents') as $doc) {
+        if (!$doc || !$doc->isValid()) continue;
 
-            $success = Storage::disk('spaces')->put($path, file_get_contents($doc), 'public');
+        $filename = uniqid('doc_', true) . '.' . $doc->getClientOriginalExtension();
+        $path = 'Biens/documents/' . $filename;
 
-            if ($success) {
-                $url = Storage::disk('spaces')->url($path);
-                logger('✅ Document enregistré : ' . $url);
-                $documentPaths[] = $url;
-            } else {
-                logger('❌ Échec du document : ' . $filename);
-            }
+        $success = Storage::disk('spaces')->put($path, file_get_contents($doc), 'public');
+
+        if ($success) {
+            $documentPaths[] = Storage::disk('spaces')->url($path);
         }
     }
+}
+
+$bien->documents = array_values($documentPaths); // <-- utilise array_values ici aussi
+
 
     // Handle owner documents
     $ownerDocumentPaths = [];
@@ -301,22 +301,36 @@ public function update(Request $request, $id)
     }
 
     // 📄 Remplacement de documents par index
+// 📄 Remplacement de documents par index
 if ($request->hasFile('replace_documents')) {
-    foreach ($request->file('replace_documents') as $index => $file) {
+    $files = $request->file('replace_documents');
+
+    foreach ($files as $index => $file) {
         if (!$file || !$file->isValid()) continue;
 
-        if (isset($docPaths[$index])) {
+        // Assurez-vous que $index est un entier
+        $index = is_numeric($index) ? (int)$index : null;
+        if ($index === null) continue;
+
+        // Supprimer l'ancien document s'il existe
+        if (isset($docPaths[$index]) && is_string($docPaths[$index])) {
             $oldPath = ltrim(parse_url($docPaths[$index], PHP_URL_PATH), '/');
             Storage::disk('spaces')->delete($oldPath);
         }
 
+        // Upload du nouveau document
         $filename = uniqid('doc_', true) . '.' . $file->getClientOriginalExtension();
         $path = "Biens/documents/$filename";
         Storage::disk('spaces')->put($path, file_get_contents($file), 'public');
 
+        // Remplacer proprement
         $docPaths[$index] = Storage::disk('spaces')->url($path);
     }
 }
+
+// Nettoyage final : suppression des entrées vides éventuelles
+$bien->documents = array_values(array_filter($docPaths, fn($item) => is_string($item) && !empty($item)));
+
 
     $bien->documents = array_values($docPaths);
 
@@ -401,20 +415,30 @@ public function deleteDocument($id)
 {
     $bien = Bien::findOrFail($id);
 
-   if (!empty($bien->documents) && is_array($bien->documents)) {
-    foreach ($bien->documents as $url) {
-        $urlPath = parse_url($url, PHP_URL_PATH);
-        $path = ltrim($urlPath, '/');
-        Storage::disk('spaces')->delete($path);
+    try {
+        $documents = is_array($bien->documents) ? $bien->documents : [];
+
+        foreach ($documents as $url) {
+            if (empty($url) || !is_string($url)) continue;
+
+            $path = ltrim(parse_url($url, PHP_URL_PATH), '/');
+
+            if (Storage::disk('spaces')->exists($path)) {
+                Storage::disk('spaces')->delete($path);
+            }
+        }
+
+        // Vide correctement le champ documents
+        $bien->documents = [];
+        $bien->save();
+
+        return response()->json(['message' => 'Document supprimé avec succès']);
+    } catch (\Throwable $e) {
+        \Log::error("Erreur suppression documents : " . $e->getMessage());
+        return response()->json(['message' => 'Erreur serveur'], 500);
     }
 }
 
-
-    $bien->documents = [];
-    $bien->save();
-
-    return response()->json(['message' => 'Document supprimé avec succès']);
-}
 //supprimer bien 
 public function destroy($id)
 {
