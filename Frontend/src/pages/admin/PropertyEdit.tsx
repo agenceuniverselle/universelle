@@ -76,6 +76,8 @@ const [bien, setBien] = useState<Bien>({
   const [deleteTarget, setDeleteTarget] = useState<{ type: 'image' | 'document' | 'ownerDoc';index?: number;}>({ type: 'image' });
   const [isDeleting, setIsDeleting] = useState(false);
   const newOwnerDocInputRef = useRef<HTMLInputElement | null>(null);
+  const [documentWasDeleted, setDocumentWasDeleted] = useState(false);
+
 
   const handleConfirmedDelete = async () => {
   if (!bienId) return;
@@ -93,6 +95,7 @@ const [bien, setBien] = useState<Bien>({
     if (deleteTarget.type === 'document') {
 await axios.delete(`https://back-qhore.ondigitalocean.app/api/biens/${bienId}/document`);
       setBien((prev) => ({ ...prev, documents: [] }));
+       setDocumentWasDeleted(true);
     }
 
     if (deleteTarget.type === 'ownerDoc' && typeof deleteTarget.index === 'number') {
@@ -301,6 +304,11 @@ const handleSave = async () => {
     for (let [key, value] of formData.entries()) {
       console.log(key, value);
     }
+if (documentWasDeleted) {
+  formData.append('documents[]', ''); // ← Forcer champ vide
+  formData.append('delete_document', '1');
+}
+
 
     const response = await axios.post(
       `https://back-qhore.ondigitalocean.app/api/biens/${bienId}?_method=PUT`,
