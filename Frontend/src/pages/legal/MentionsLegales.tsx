@@ -28,9 +28,9 @@ const MentionsLegales = () => {
             <p><strong>Agence Universelle d'Investissement Immobilier</strong></p>
             <p>Forme juridique : S.A.R.L.</p>
             <p>Capital social : 100 000 MAD</p>
-            <p>Siège social : IMM17 N°9 Touzine, Complexe Bayt Laatik, Tanger 90000, Maroc</p>
-            <p>Immatriculation : R.C. Casablanca 123456</p>
-            <p>N° d'identification fiscale : 1234567</p>
+            <p>Siège social : AV MLY ISMAIL 14 RESIDENCE MLY ISMAIL  3EME ETG N° 09 , Tanger</p>
+            <p>Immatriculation : 142747</p>
+            <p>N° d'identification fiscale :57227292</p>
             <p>Tél :  +212 808604195 / +212 665944626</p>
             <p>Email : contact@universelle.ma</p>
           </div>
@@ -89,7 +89,7 @@ const MentionsLegales = () => {
         </section>
 
         <div className="mt-12 pt-8 border-t border-gray-200">
-          <p className="text-sm text-gray-600">Pour toute question relative à ces mentions légales, vous pouvez nous contacter à : <a href="mailto:contact@universelle.ma" className="text-gold hover:underline">juridique@agenceuniverselle.com</a></p>
+          <p className="text-sm text-gray-600">Pour toute question relative à ces mentions légales, vous pouvez nous contacter à : <a href="mailto:contact@universelle.ma" className="text-gold hover:underline">contact@universelle.ma</a></p>
         </div>
       </div>
     </LegalLayout>
