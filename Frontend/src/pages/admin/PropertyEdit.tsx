@@ -305,7 +305,7 @@ const handleSave = async () => {
       console.log(key, value);
     }
 if (documentWasDeleted) {
-  formData.append('documents[]', ''); // ← Forcer champ vide
+ 
   formData.append('delete_document', '1');
 }
 
