@@ -25,8 +25,8 @@ const CGV = () => {
       <div className="prose max-w-none">
         <section id="preambule" className="mb-10">
           <h2 className="text-2xl font-playfair font-bold text-luxe-blue mb-4">1. Préambule</h2>
-          <p>Les présentes Conditions Générales de Vente (ci-après "CGV") définissent les modalités dans lesquelles l'Agence Universelle d'Investissement Immobilier (ci-après "l'Agence") propose la vente de biens immobiliers et de services associés à sa clientèle.</p>
-          <p>Ces CGV s'appliquent à l'ensemble des contrats conclus entre l'Agence et ses clients, qu'ils soient particuliers ou professionnels (ci-après "le Client").</p>
+          <p>Les présentes Conditions Générales de Vente définissent les modalités dans lesquelles l'Agence Universelle d'Investissement Immobilier propose la vente de biens immobiliers et de services associés à sa clientèle.</p>
+          <p>Ces CGV s'appliquent à l'ensemble des contrats conclus entre l'Agence et ses clients, qu'ils soient particuliers ou professionnels .</p>
           <p>Toute réservation ou achat auprès de l'Agence implique l'acceptation préalable et sans réserve des présentes CGV par le Client. L'Agence se réserve le droit de modifier à tout moment les présentes CGV. Les CGV applicables sont celles en vigueur au jour de la signature du contrat.</p>
         </section>
 
@@ -34,7 +34,7 @@ const CGV = () => {
         <section id="definitions" className="mb-10">
           <h2 className="text-2xl font-playfair font-bold text-luxe-blue mb-4">2. Définitions</h2>
           <ul className="list-disc pl-6 mt-2 space-y-2">
-            <li><strong>Agence :</strong> désigne l'Agence Universelle d'Investissement Immobilier, SARL au capital de 1 000 000 MAD.</li>
+            <li><strong>Agence :</strong> désigne l'Agence Universelle d'Investissement Immobilier, SARL au capital de 100 000 MAD.</li>
             <li><strong>Client :</strong> désigne toute personne physique ou morale qui achète ou réserve un bien immobilier ou un service proposé par l'Agence.</li>
             <li><strong>Bien Immobilier :</strong> désigne tout bien immobilier proposé à la vente par l'Agence.</li>
             <li><strong>Services :</strong> désigne l'ensemble des prestations proposées par l'Agence (conseil, accompagnement, etc.).</li>
@@ -49,8 +49,6 @@ const CGV = () => {
             <li>Vente de biens immobiliers</li>
             <li>Conseil en investissement immobilier</li>
             <li>Accompagnement dans les démarches administratives</li>
-            <li>Gestion locative</li>
-            <li>Services de conciergerie</li>
           </ul>
           <p className="mt-4">La description détaillée de chaque service est disponible sur demande auprès de l'Agence.</p>
         </section>
@@ -95,7 +93,6 @@ const CGV = () => {
           <p>Pour exercer ce droit, le Client doit notifier sa décision de rétractation par lettre recommandée avec accusé de réception à l'adresse suivante :</p>
           <div className="bg-gray-50 p-4 rounded-md mt-4">
             <p>Agence Universelle d'Investissement Immobilier</p>
-            <p>Service Rétractation</p>
             <p>IMM17 N°9 Touzine, Complexe Bayt Laatik</p>
             <p>90000 Tanger, Maroc</p>
           </div>
@@ -140,8 +137,8 @@ const CGV = () => {
         </section>
 
         <div className="mt-12 pt-8 border-t border-gray-200">
-          <p className="text-sm text-gray-600">Les présentes CGV sont régies par le droit marocain. Pour toute question relative à ces CGV, vous pouvez contacter notre service juridique à : <a href="mailto:juridique@agenceuniverselle.com" className="text-gold hover:underline">juridique@agenceuniverselle.com</a></p>
-          <p className="text-sm text-gray-600 mt-2">Date de dernière mise à jour : 15 mars 2024</p>
+          <p className="text-sm text-gray-600">Les présentes CGV sont régies par le droit marocain. Pour toute question relative à ces CGV, vous pouvez contacter notre service juridique à : <a href="mailto:contact@universelle.ma" className="text-gold hover:underline">contact@universelle.ma</a></p>
+          <p className="text-sm text-gray-600 mt-2">Date de dernière mise à jour : 11 juin 2025</p>
         </div>
       </div>
     </LegalLayout>
