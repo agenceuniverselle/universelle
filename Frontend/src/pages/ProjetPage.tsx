@@ -91,7 +91,7 @@ const handleDeleteConfirm = async () => {
         description: "Votre session a expiré. Veuillez vous reconnecter.",
         variant: "destructive",
       });
-      navigate("/admin");
+      navigate("/univ-2025");
       return;
     }
 
