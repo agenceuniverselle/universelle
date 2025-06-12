@@ -238,14 +238,23 @@ const handleSave = async () => {
   try {
     const formData = new FormData();
 
-    // Champs standards
+    // 🧼 Champs à ignorer car gérés manuellement plus bas
+    const excludedKeys = [
+      'newImages',
+      'newDocuments',
+      'newOwnerDocuments',
+      'images',
+      'documents',
+      'owner_documents',
+      'replacedImages',
+      'replacedDocuments'
+    ];
+
+    // 🔁 Ajouter les autres champs "standards" du bien
     for (const key in bien) {
-      if (
-        ['newImages', 'newDocuments', 'newOwnerDocuments', 'images', 'documents', 'owner_documents', 'replacedImages', 'replacedDocuments'].includes(key)
-      ) continue;
+      if (excludedKeys.includes(key)) continue;
 
       const value = bien[key as keyof typeof bien];
-
       if (value === null || value === undefined) continue;
 
       if (typeof value === 'boolean') {
@@ -259,11 +268,12 @@ const handleSave = async () => {
       }
     }
 
+    // 📆 Date disponible
     if (available_date) {
       formData.append("available_date", available_date.toISOString().split("T")[0]);
     }
 
-    // Nouveaux fichiers
+    // 📎 Ajouter les nouveaux fichiers (images, documents, etc.)
     bien.newImages?.forEach((file: File) => {
       formData.append("images[]", file);
     });
@@ -276,23 +286,25 @@ const handleSave = async () => {
       formData.append("owner_documents[]", file);
     });
 
-    // Remplacement d'images
+    // ♻️ Images remplacées
     bien.replacedImages?.forEach(({ index, file }: { index: number; file: File }) => {
       formData.append(`replace_images[${index}]`, file);
     });
 
-    // Remplacement de documents
+    // ♻️ Documents remplacés (plan, etc.)
     Object.entries(replacedDocuments).forEach(([index, file]) => {
-      formData.append(`replacedDocuments[${index}]`, file);
+      formData.append(`replace_documents[${index}]`, file);
     });
 
-    // Remplacement de documents propriétaires
+    // ♻️ Documents propriétaires remplacés
     replacedOwnerDocuments?.forEach(({ index, file }: { index: number; file: File }) => {
       formData.append(`replace_owner_documents[${index}]`, file);
     });
 
-    console.log([...formData.entries()]);
+    // 🐞 Debug
+    console.log('FormData entries:', [...formData.entries()]);
 
+    // 📡 Envoi au backend
     const response = await axios.post(
       `https://back-qhore.ondigitalocean.app/api/biens/${bienId}?_method=PUT`,
       formData,
@@ -335,7 +347,6 @@ const handleSave = async () => {
     setIsSaving(false);
   }
 };
-
 
   
   
