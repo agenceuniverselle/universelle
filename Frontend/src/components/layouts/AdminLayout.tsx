@@ -53,7 +53,7 @@ const AdminLayout = ({ children, title }: AdminLayoutProps) => {
 
   useEffect(() => {
     if (!isAuthenticated) {
-      navigate("/admin", { replace: true });
+      navigate("/univ-2025", { replace: true });
     }
   }, [isAuthenticated, navigate]);
 
@@ -63,7 +63,7 @@ const AdminLayout = ({ children, title }: AdminLayoutProps) => {
       title: "Déconnexion réussie",
       description: "Vous avez été déconnecté avec succès.",
     });
-    navigate("/admin", { replace: true });
+    navigate("/univ-2025", { replace: true });
   };
 
   const getInitials = (name: string) => {
