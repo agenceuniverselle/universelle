@@ -51,11 +51,7 @@ const AdminLayout = ({ children, title }: AdminLayoutProps) => {
 
   const { toast } = useToast();
 
-  useEffect(() => {
-    if (!isAuthenticated) {
-      navigate("/univ-2025", { replace: true });
-    }
-  }, [isAuthenticated, navigate]);
+ 
 
   const handleLogout = () => {
     logout(); 
@@ -65,7 +61,9 @@ const AdminLayout = ({ children, title }: AdminLayoutProps) => {
     });
     navigate("/univ-2025", { replace: true });
   };
-
+if (!isAuthenticated) {
+    return null;
+  }
   const getInitials = (name: string) => {
     if (!name) return "AA";
     const initials = name
