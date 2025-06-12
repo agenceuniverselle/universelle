@@ -230,7 +230,7 @@ useEffect(() => {
 const isVideo = (url: string) => {
   return /\.(mp4|webm|ogg|mov)$/i.test(url);
 };
-  const videoUrl = bien.images?.find((img) => isVideo(img));
+  
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 300);
@@ -344,7 +344,7 @@ const handleDownload = async (bienId: number) => {
       </MainLayout>
     );
   }
-  
+  const videoUrl = bien.images?.find((img) => isVideo(img));
   const getBase64FromUrl = async (url: string): Promise<string> => {
     const response = await fetch(url);
     const blob = await response.blob();
