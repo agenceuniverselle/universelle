@@ -82,8 +82,9 @@ class PropertyController extends Controller
  $imagePaths = [];
  if ($request->hasFile('images')) {
      foreach ($request->file('images') as $image) {
-        $path = $image->store('properties/images', 'public');
-$imagePaths[] = 'storage/' . $path;
+        $path = $image->store('properties/images', 'spaces');
+$imagePaths[] = Storage::disk('spaces')->url($path); // URL complète depuis le bucket
+
  // Utiliser storage/public pour l'accès public
      }
  }
@@ -92,8 +93,9 @@ $imagePaths[] = 'storage/' . $path;
  $documentPaths = [];
  if ($request->hasFile('documents')) {
      foreach ($request->file('documents') as $doc) {
-        $path = $doc->store('properties/documents', 'public');
-$documentPaths[] = 'storage/' . $path;
+       $path = $doc->store('properties/documents', 'spaces');
+$documentPaths[] = Storage::disk('spaces')->url($path);
+
  // Utiliser storage/public pour l'accès public
      }
  }
@@ -392,8 +394,9 @@ public function update(Request $request, $id)
     // ➕ 2. Add new images
     if ($request->hasFile('images')) {
         foreach ($request->file('images') as $file) {
-            $storedPath = $file->store('properties/images', 'public');
-            $existingImages[] = 'storage/' . $storedPath;
+           $storedPath = $file->store('properties/images', 'spaces');
+$existingImages[$index] = Storage::disk('spaces')->url($storedPath);
+
         }
     }
 
@@ -408,8 +411,9 @@ public function update(Request $request, $id)
                 $pathToDelete = str_replace('storage/', '', $existingDocuments[$index]);
                 Storage::disk('public')->delete($pathToDelete);
             }
-            $storedPath = $file->store('properties/documents', 'public');
-            $existingDocuments[$index] = 'storage/' . $storedPath;
+           $storedPath = $file->store('properties/documents', 'spaces');
+$existingDocuments[] = Storage::disk('spaces')->url($storedPath);
+
         }
     }
 
