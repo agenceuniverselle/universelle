@@ -122,7 +122,10 @@ public function update(Request $request, $id)
         }
     }
 
-    $finalImages = $keep;
+    $finalImages = array_map(function ($path) {
+    return Storage::disk('spaces')->url($path);
+}, $keep);
+
 
     // 📤 Ajouter les nouvelles
     if ($request->hasFile('images')) {
