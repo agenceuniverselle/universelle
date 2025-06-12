@@ -53,14 +53,24 @@ const AdminLayout = ({ children, title }: AdminLayoutProps) => {
 
  
 
-  const handleLogout = () => {
-    logout(); 
+  const handleLogout = async () => {
+  try {
+    await logout(); // 🔄 Attendre que le logout finisse
     toast({
       title: "Déconnexion réussie",
       description: "Vous avez été déconnecté avec succès.",
     });
-    navigate("/univ-2025", { replace: true });
-  };
+
+    navigate("/univ-2025", { replace: true }); // ✅ Navigation forcée
+  } catch (error) {
+    toast({
+      title: "Erreur de déconnexion",
+      description: "Veuillez réessayer.",
+      variant: "destructive",
+    });
+  }
+};
+
 if (!isAuthenticated) {
     return null;
   }
