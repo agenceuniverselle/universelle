@@ -79,51 +79,54 @@ const ProjetPage = () => {
     setConfirmDeleteOpen(true);
   };
 
-  const handleDeleteConfirm = async () => {
-    if (!selectedProjectId) return;
+const handleDeleteConfirm = async () => {
+  if (!selectedProjectId) return;
 
-    try {
-        setIsDeleting(true);
-        const token = localStorage.getItem("access_token");
-        if (!token) {
-            toast({
-                title: "Erreur d'authentification",
-                description: "Votre session a expiré. Veuillez vous reconnecter.",
-                variant: "destructive",
-            });
-            navigate("/admin");
-            return;
-        }
-
-        const url = `http://localhost:8000/api/projects/${selectedProjectId}`;
-        const response = await axios.delete(url, {
-            headers: {
-                Authorization: `Bearer ${token}`,
-            },
-        });
-
-        if (response.status === 200) {
-            toast({
-                title: "Supprimé",
-                description: "Projet supprimé avec succès.",
-            });
-            fetchProjects(); // Rafraîchir la liste
-        } else {
-            throw new Error("La suppression a échoué");
-        }
-    } catch (error) {
-        console.error("Erreur lors de la suppression :", error);
-        toast({
-            title: "Erreur",
-            description: "La suppression du projet a échoué. Veuillez réessayer.",
-            variant: "destructive",
-        });
-    } finally {
-        setIsDeleting(false);
-        setConfirmDeleteOpen(false);
-        setSelectedProjectId(null);
+  try {
+    setIsDeleting(true);
+    const token = localStorage.getItem("access_token");
+    if (!token) {
+      toast({
+        title: "Erreur d'authentification",
+        description: "Votre session a expiré. Veuillez vous reconnecter.",
+        variant: "destructive",
+      });
+      navigate("/admin");
+      return;
     }
+
+    const BASE_API_URL = 'https://back-qhore.ondigitalocean.app/api';
+    const url = `${BASE_API_URL}/projects/${selectedProjectId}`;
+
+    const response = await axios.delete(url, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (response.status === 200) {
+      toast({
+        title: "Supprimé",
+        description: "Projet supprimé avec succès.",
+      });
+      fetchProjects();
+    } else {
+      throw new Error("La suppression a échoué");
+    }
+  } catch (error) {
+    console.error("Erreur lors de la suppression :", error);
+    toast({
+      title: "Erreur",
+      description: "La suppression du projet a échoué. Veuillez réessayer.",
+      variant: "destructive",
+    });
+  } finally {
+    setIsDeleting(false);
+    setConfirmDeleteOpen(false);
+    setSelectedProjectId(null);
+  }
 };
+
 
   const filteredProjects = projects.filter(project => {
     const name = project.name?.toLowerCase() || '';
