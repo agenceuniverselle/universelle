@@ -35,10 +35,7 @@ class ProjectController extends Controller
                 'type' => $project->type,
                 'surface' => $project->surface,
                 'status' => $project->status,
-                'images' => array_map(
-                    fn($image) => asset('storage/' . str_replace('\\', '/', $image)), 
-                    $images
-                ),
+               'images' => $images,
                 'created_at' => $project->created_at,
                 'updated_at' => $project->updated_at,
             ];
@@ -54,38 +51,45 @@ class ProjectController extends Controller
     }
 }
     // Création d’un nouveau projet
-    public function store(Request $request)
-    {
-        $validated = $request->validate([
-            'name'     => 'required|string|max:255',
-            'location' => 'required|string|max:255',
-            'type'     => 'nullable|string|max:255',
-            'details'  => 'nullable|string',
-            'surface'  => 'nullable|string',
-            'status'   => 'nullable|string',
-            'images.*' => 'nullable|image|max:2048',
-        ]);
+  public function store(Request $request)
+{
+    $validated = $request->validate([
+        'name'     => 'required|string|max:255',
+        'location' => 'required|string|max:255',
+        'type'     => 'nullable|string|max:255',
+        'details'  => 'nullable|string',
+        'surface'  => 'nullable|string',
+        'status'   => 'nullable|string',
+        'images.*' => 'nullable|image|max:2048',
+    ]);
 
-        $images = [];
+    $imageUrls = [];
 
-        if ($request->hasFile('images')) {
-            foreach ($request->file('images') as $file) {
-                $images[] = $file->store('projects', 'public');
+    if ($request->hasFile('images')) {
+        foreach ($request->file('images') as $image) {
+            $filename = uniqid('proj_', true) . '.' . $image->getClientOriginalExtension();
+            $path = "Projects/images/$filename";
+
+            $success = Storage::disk('spaces')->put($path, file_get_contents($image), 'public');
+
+            if ($success) {
+                $imageUrls[] = Storage::disk('spaces')->url($path);
             }
         }
-
-        $project = Project::create([
-            ...$validated,
-            'images' => json_encode($images),
-        ]);
-
-        return response()->json(['message' => 'Projet créé', 'project' => $project], 201);
     }
 
-  public function update(Request $request, $id)
+    $project = Project::create([
+        ...$validated,
+        'images' => json_encode($imageUrls),
+    ]);
+
+    return response()->json(['message' => 'Projet créé', 'project' => $project], 201);
+}
+
+
+public function update(Request $request, $id)
 {
     $project = Project::find($id);
-    
     if (!$project) {
         return response()->json(['message' => 'Projet non trouvé'], 404);
     }
@@ -101,65 +105,46 @@ class ProjectController extends Controller
         'existing_images' => 'nullable|array',
     ]);
 
-    // Normaliser les chemins d'accès existants
-    $existingImages = json_decode($project->images, true) ?? [];
-    $existingImages = array_map(function($path) {
-        return str_replace('\\', '/', $path);
-    }, $existingImages);
+    $existing = json_decode($project->images, true) ?? [];
 
-    // Gérer les images existantes
-    $imagesToKeep = $request->existing_images ?? $existingImages;
-    $imagesToKeep = array_map(function($path) {
-        // Supprimer l'URL asset() si présent
-        if (strpos($path, 'storage/') !== false) {
-            $parts = explode('storage/', $path);
-            return 'projects/'.basename(end($parts));
-        }
-        return str_replace('\\', '/', $path);
-    }, $imagesToKeep);
+    // 🧹 Nettoyer les images à conserver
+    $keep = array_map(function ($path) {
+        $parsed = parse_url($path, PHP_URL_PATH);
+        return ltrim($parsed, '/'); // clean URL to path
+    }, $request->input('existing_images', []));
 
-    // Ajouter les nouvelles images
-    $newImages = [];
-    if ($request->hasFile('images')) {
-        foreach ($request->file('images') as $file) {
-            $newImages[] = $file->store('projects', 'public');
+    // Supprimer celles à enlever
+    foreach ($existing as $oldUrl) {
+        $parsed = parse_url($oldUrl, PHP_URL_PATH);
+        $rel = ltrim($parsed, '/');
+        if (!in_array($rel, $keep)) {
+            Storage::disk('spaces')->delete($rel);
         }
     }
 
-    // Fusionner et normaliser tous les chemins
-    $allImages = array_merge($imagesToKeep, $newImages);
-    $allImages = array_map(function($path) {
-        return str_replace('\\', '/', $path);
-    }, $allImages);
+    $finalImages = $keep;
+
+    // 📤 Ajouter les nouvelles
+    if ($request->hasFile('images')) {
+        foreach ($request->file('images') as $image) {
+            if (!$image->isValid()) continue;
+            $filename = uniqid('proj_', true) . '.' . $image->getClientOriginalExtension();
+            $path = "Projects/images/$filename";
+            $success = Storage::disk('spaces')->put($path, file_get_contents($image), 'public');
+            if ($success) {
+                $finalImages[] = Storage::disk('spaces')->url($path);
+            }
+        }
+    }
 
     $project->update([
         ...$validated,
-        'images' => json_encode($allImages),
+        'images' => json_encode($finalImages),
     ]);
 
-    // Formater la réponse
-    $updatedProject = Project::find($project->id);
-    $formattedImages = array_map(
-        fn($image) => asset('storage/'.str_replace('\\', '/', $image)), 
-        json_decode($updatedProject->images, true) ?? []
-    );
-
-    return response()->json([
-        'message' => 'Projet mis à jour avec succès',
-        'project' => [
-            'id' => $updatedProject->id,
-            'name' => $updatedProject->name,
-            'details' => $updatedProject->details,
-            'location' => $updatedProject->location,
-            'type' => $updatedProject->type,
-            'surface' => $updatedProject->surface,
-            'status' => $updatedProject->status,
-            'images' => $formattedImages,
-            'created_at' => $updatedProject->created_at,
-            'updated_at' => $updatedProject->updated_at,
-        ]
-    ], 200);
+    return response()->json(['message' => 'Projet mis à jour avec succès', 'project' => $project]);
 }
+
     // Affichage d’un seul projet
     public function show(Project $project): JsonResponse
     {
