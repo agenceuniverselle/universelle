@@ -227,7 +227,10 @@ useEffect(() => {
 }, [id, contactForm, navigate]);
 
 
-
+const isVideo = (url: string) => {
+  return /\.(mp4|webm|ogg|mov)$/i.test(url);
+};
+  const videoUrl = bien.images?.find((img) => isVideo(img));
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 300);
@@ -736,13 +739,13 @@ const mockImages = Array.isArray(bien.images)
                     className="w-full h-full object-cover"
                     loading="lazy"
                   />
-                 {bien.video && (
+               {videoUrl && (
   <>
     <div className="absolute inset-0 flex items-center justify-center bg-black/30">
       <Button 
         variant="outline" 
         className="rounded-full bg-white/80 hover:bg-white w-16 h-16 flex items-center justify-center"
-        onClick={() => window.open(bien.video, "_blank")} // optionnel
+        onClick={() => window.open(videoUrl, "_blank")} // ou ouvrir dans un modal
       >
         <Video className="h-8 w-8 text-luxe-blue" />
       </Button>
