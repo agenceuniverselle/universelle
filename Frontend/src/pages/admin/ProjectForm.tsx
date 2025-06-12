@@ -252,9 +252,12 @@ export function ProjectForm({
         },
       };
 
-      const url = isEditing && initialData?.id 
-        ? `/api/projects/${initialData.id}`
-        : '/api/projects';
+  const BASE_API_URL = 'https://back-qhore.ondigitalocean.app/api';
+
+const url = isEditing && initialData?.id
+  ? `${BASE_API_URL}/projects/${initialData.id}`
+  : `${BASE_API_URL}/projects`;
+
       
       // Vérification de sécurité pour l'édition
       if (isEditing && !initialData?.id) {
