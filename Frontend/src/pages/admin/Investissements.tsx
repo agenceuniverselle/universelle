@@ -617,6 +617,8 @@ const AdminInvestissements = () => {
                           className="dark:hover:bg-gray-700"
                         >
                           {/* ✅ Colonne "Bien" avec Image + Titre aligné */}
+                          <TableCell>{property.id}</TableCell>
+
                       <TableCell>
   <div className="flex items-center gap-3">
     {property.images?.[0] ? (
