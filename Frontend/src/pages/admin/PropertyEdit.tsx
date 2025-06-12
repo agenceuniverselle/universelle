@@ -364,6 +364,9 @@ if (documentWasDeleted) {
       ...prev,
       documents: [],
     }));
+
+    setDocumentWasDeleted(true); // ← 🔥 AJOUTER CETTE LIGNE
+
     setHasChanges(true);
     toast({
       title: "Document supprimé",
@@ -379,6 +382,7 @@ if (documentWasDeleted) {
     });
   }
 };
+
 
   
   
