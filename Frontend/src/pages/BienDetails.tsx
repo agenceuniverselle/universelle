@@ -736,18 +736,23 @@ const mockImages = Array.isArray(bien.images)
                     className="w-full h-full object-cover"
                     loading="lazy"
                   />
-                  <div className="absolute inset-0 flex items-center justify-center bg-black/30">
-                    <Button 
-                      variant="outline" 
-                      className="rounded-full bg-white/80 hover:bg-white w-16 h-16 flex items-center justify-center"
-                    >
-                      <Video className="h-8 w-8 text-luxe-blue" />
-                    </Button>
-                  </div>
-                  <div className="absolute bottom-2 left-2 bg-black/70 text-white text-sm px-3 py-1 rounded-full">
-                    Visite vidéo
-                  </div>
-                </div>
+                 {bien.video && (
+  <>
+    <div className="absolute inset-0 flex items-center justify-center bg-black/30">
+      <Button 
+        variant="outline" 
+        className="rounded-full bg-white/80 hover:bg-white w-16 h-16 flex items-center justify-center"
+        onClick={() => window.open(bien.video, "_blank")} // optionnel
+      >
+        <Video className="h-8 w-8 text-luxe-blue" />
+      </Button>
+    </div>
+    <div className="absolute bottom-2 left-2 bg-black/70 text-white text-sm px-3 py-1 rounded-full">
+      Visite vidéo
+    </div>
+  </>
+)}
+
               </CarouselItem>
             </CarouselContent>
             <CarouselPrevious className="hidden md:flex absolute -left-4" />
