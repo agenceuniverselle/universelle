@@ -587,11 +587,8 @@ const handleEditImage = (index: number, isNew: boolean) => {
           exit={{ opacity: 0, scale: 0.9 }}
           className="relative group border rounded-md overflow-hidden bg-gray-100 h-20"
         >
-          <img
-            src={`/storage/${image}`}
-            alt={`Project ${index}`}
-            className="object-cover w-full h-full"
-          />
+          <img src={image} alt={`Image ${index}`} className="object-cover w-full h-full" />
+
           <div className="absolute top-1 right-1 flex gap-1 opacity-0 group-hover:opacity-100">
             <Button
               type="button"
