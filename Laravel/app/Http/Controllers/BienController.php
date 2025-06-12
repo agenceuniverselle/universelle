@@ -332,7 +332,10 @@ if ($request->hasFile('replace_documents')) {
 $bien->documents = array_values(array_filter($docPaths, fn($item) => is_string($item) && !empty($item)));
 
 
-    $bien->documents = array_values($docPaths);
+    $bien->documents = array_values(array_filter($docPaths, function ($val) {
+    return is_string($val) && !empty($val);
+}));
+
 
     // 👤 Documents propriétaire
     $ownerDocPaths = is_array($bien->owner_documents) ? $bien->owner_documents : [];
