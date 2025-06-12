@@ -209,7 +209,6 @@ const handleReplaceDocument = (indexToReplace: number, file: File) => {
     return updated;
   });
 };
-
 const handleSave = async () => {
   if (!validateForm()) {
     setActiveTab('main');
@@ -238,7 +237,6 @@ const handleSave = async () => {
   try {
     const formData = new FormData();
 
-    // 🧼 Champs à ignorer car gérés manuellement plus bas
     const excludedKeys = [
       'newImages',
       'newDocuments',
@@ -250,7 +248,6 @@ const handleSave = async () => {
       'replacedDocuments'
     ];
 
-    // 🔁 Ajouter les autres champs "standards" du bien
     for (const key in bien) {
       if (excludedKeys.includes(key)) continue;
 
@@ -268,12 +265,11 @@ const handleSave = async () => {
       }
     }
 
-    // 📆 Date disponible
     if (available_date) {
       formData.append("available_date", available_date.toISOString().split("T")[0]);
     }
 
-    // 📎 Ajouter les nouveaux fichiers (images, documents, etc.)
+    // Ajout de nouveaux fichiers
     bien.newImages?.forEach((file: File) => {
       formData.append("images[]", file);
     });
@@ -286,25 +282,26 @@ const handleSave = async () => {
       formData.append("owner_documents[]", file);
     });
 
-    // ♻️ Images remplacées
-    bien.replacedImages?.forEach(({ index, file }: { index: number; file: File }) => {
+    // Remplacement images
+    bien.replacedImages?.forEach(({ index, file }) => {
       formData.append(`replace_images[${index}]`, file);
     });
 
-    // ♻️ Documents remplacés (plan, etc.)
+    // ✅ Remplacement de documents (très important pour ton cas)
     Object.entries(replacedDocuments).forEach(([index, file]) => {
       formData.append(`replace_documents[${index}]`, file);
     });
 
-    // ♻️ Documents propriétaires remplacés
-    replacedOwnerDocuments?.forEach(({ index, file }: { index: number; file: File }) => {
+    // Remplacement documents propriétaires
+    replacedOwnerDocuments?.forEach(({ index, file }) => {
       formData.append(`replace_owner_documents[${index}]`, file);
     });
 
-    // 🐞 Debug
-    console.log('FormData entries:', [...formData.entries()]);
+    // 🔍 Debug facultatif
+    for (let [key, value] of formData.entries()) {
+      console.log(key, value);
+    }
 
-    // 📡 Envoi au backend
     const response = await axios.post(
       `https://back-qhore.ondigitalocean.app/api/biens/${bienId}?_method=PUT`,
       formData,
@@ -347,8 +344,7 @@ const handleSave = async () => {
     setIsSaving(false);
   }
 };
-
-  
+ 
   
   
   
