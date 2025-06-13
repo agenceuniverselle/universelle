@@ -340,7 +340,7 @@ if (documentWasDeleted) {
         description: "Votre session a expiré. Veuillez vous reconnecter.",
         variant: "destructive",
       });
-      navigate("/login");
+      navigate("/univ-2025");
     } else {
       toast({
         title: "Erreur lors de la sauvegarde",
