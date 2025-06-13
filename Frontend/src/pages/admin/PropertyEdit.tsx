@@ -861,7 +861,7 @@ className="
                       name="area"
                       value={bien.area || '' }
                       onChange={handleInputChange}
-                      type="number"
+                      type="text"
 className="
     transition-all duration-200
     hover:border-luxe-blue/30
