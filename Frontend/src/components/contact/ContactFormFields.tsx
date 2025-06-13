@@ -312,7 +312,7 @@ const ContactFormFields: React.FC<ContactFormFieldsProps> = ({ onSuccess }) => {
                       )}
                     </div>
                   </SelectTrigger>
-                 <SelectContent className="max-h-[300px] overflow-y-auto z-[9999]"> {/* Add a high z-index here */}
+                 <SelectContent className="z-[999999] max-h-[300px] overflow-y-auto"> {/* Add a high z-index here */}
   {countryCodes.map((country) => (
     <SelectItem key={country.iso2} value={country.iso2}>
       <span className="flex items-center">
