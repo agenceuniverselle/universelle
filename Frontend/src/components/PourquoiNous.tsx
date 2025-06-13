@@ -175,7 +175,7 @@ setTestimonials(Array.isArray(response.data) ? response.data : response.data?.da
 
         {/* Right Video */}
 <div className="relative">
-<div className="relative w-full aspect-w-16 aspect-h-9 rounded-2xl overflow-hidden shadow-2xl bg-black/20 backdrop-blur-sm border border-white/10">
+<div className="w-full md:w-[560px] lg:w-[700px] xl:w-[800px] aspect-w-16 aspect-h-9 rounded-2xl overflow-hidden shadow-2xl bg-black/20 backdrop-blur-sm border border-white/10 mx-auto md:mx-0">
   <iframe
     className="w-full h-full"
     src="https://www.youtube.com/embed/LRq7qI4wJU8"
