@@ -151,20 +151,32 @@ const Navbar = () => {
       </nav>
 
       {/* Modal Contact VIP */}
-      {showVipForm && (
-        <>
-          <div className="fixed inset-0 bg-black/50 z-[999998]" onClick={() => setShowVipForm(false)} />
-          <div className="fixed left-1/2 -translate-x-1/2 top-[80px] z-[999999] w-full max-w-xl p-6 bg-white rounded-lg shadow-2xl border">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-semibold text-luxe-blue">Contact VIP</h2>
-              <button className="text-gray-500 hover:text-red-500" onClick={() => setShowVipForm(false)}>
-                <X size={18} />
-              </button>
-            </div>
-            <Contact onSuccess={() => setShowVipForm(false)} />
-          </div>
-        </>
-      )}
+     {showVipForm && (
+  <>
+    {/* Overlay */}
+    <div
+      className="fixed inset-0 bg-black/50 z-[99998]"
+      onClick={() => setShowVipForm(false)}
+    />
+
+    {/* VIP Form */}
+    <div
+      className="fixed z-[99999] top-[80px] left-1/2 -translate-x-1/2 w-full max-w-xl bg-white border rounded-lg shadow-2xl p-6"
+    >
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-xl font-semibold text-luxe-blue">Contact VIP</h2>
+        <button
+          className="text-gray-500 hover:text-red-500"
+          onClick={() => setShowVipForm(false)}
+        >
+          <X size={18} />
+        </button>
+      </div>
+      <Contact onSuccess={() => setShowVipForm(false)} />
+    </div>
+  </>
+)}
+
     </>
   );
 };
