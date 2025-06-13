@@ -809,11 +809,12 @@ console.log("Offres filtrées à afficher:", filteredOffers);
 </TableCell>
               <TableCell>{c.email}</TableCell>
               <TableCell>{c.purpose}</TableCell>
-              <TableCell>
-                <div className="max-w-xs truncate" title={c.message}>
-                  {c.message}
-                </div>
-              </TableCell>
+             <TableCell>
+  <div className="whitespace-pre-line break-words max-w-md">
+    {c.message}
+  </div>
+</TableCell>
+
               <TableCell>{new Date(c.created_at).toLocaleString()}</TableCell>
               <TableCell className="text-center">
                 <Button
