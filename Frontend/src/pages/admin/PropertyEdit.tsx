@@ -480,7 +480,7 @@ if (documentWasDeleted) {
         <div className="flex items-center justify-between mb-6">
           <Button 
             variant="outline" 
-           onClick={() => navigate(`/admin/biens/${bienId}`)}
+           onClick={() => navigate('/admin/biens')}
             className="transition-all duration-200 hover:bg-gray-100 hover:scale-105 active:scale-95 dark:text-black"
           >
             <ChevronLeft className="h-4 w-4 mr-2" />
