@@ -60,14 +60,19 @@ const PourquoiNous = () => {
 const projectScrollRef = useRef(null);
 const testimonialScrollRef = useRef(null);
 const [canScrollLeft, setCanScrollLeft] = useState(false);
+const [hasScrolledRight, setHasScrolledRight] = useState(false);
+
 const updateScrollButtons = () => {
   const container = projectScrollRef.current;
   if (container) {
     const { scrollLeft, scrollWidth, clientWidth } = container;
+
     const isOverflowing = scrollWidth > clientWidth;
-    setCanScrollLeft(isOverflowing && scrollLeft > 0);
+    setCanScrollLeft(scrollLeft > 0);
+    setHasScrolledRight(scrollLeft > 0); // ✅ pour afficher flèche seulement après scroll
   }
 };
+
 
   useEffect(() => {
   const container = projectScrollRef.current;
@@ -336,7 +341,8 @@ setTestimonials(Array.isArray(response.data) ? response.data : response.data?.da
 
               <div className="relative">
                 {/* Left Arrow - Only show if there are projects */}
-                {projects.length > 0 && canScrollLeft && (
+                {projects.length > 0 && hasScrolledRight && (
+
                   <button 
                     onClick={scrollProjectsLeft}
                     className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-6 bg-white p-2 rounded-full shadow-md hover:bg-gray-100 z-10 transition-all"
