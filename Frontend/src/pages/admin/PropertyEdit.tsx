@@ -392,11 +392,11 @@ if (documentWasDeleted) {
   const handleCancel = () => {
     if (hasChanges) {
       if (window.confirm('Vous avez des modifications non enregistrées. Êtes-vous sûr de vouloir quitter ?')) {
-      navigate(`/admin/biens/${bienId}`);
+      navigate('/admin/biens');
 
       }
     } else {
-      navigate(`/admin/biens/${bienId}`);
+      navigate('/admin/biens');
 
     }
   };
