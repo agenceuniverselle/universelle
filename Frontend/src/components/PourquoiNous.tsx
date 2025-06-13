@@ -129,70 +129,66 @@ setTestimonials(Array.isArray(response.data) ? response.data : response.data?.da
     <MainLayout>
       <div className="min-h-screen w-full pt-20">
         {/* Hero Section */}
-       <section className="bg-gradient-to-br from-luxe-blue to-luxe-blue/90 text-white py-20">
-  <div className="w-full px-0 ">
-    <div className="w-full px-8">
- {/* <- changement ici */}
-      <div className="grid lg:grid-cols-2 gap-12 items-center">
-        <div className="text-left">
-          <h1 className="text-4xl md:text-6xl font-playfair font-bold mb-6">
-            Et si vous pouviez investir dans l'immobilier{' '}
-            <span className="gold-gradient">en toute confiance</span>?
-          </h1>
-          <p className="text-xl md:text-2xl mb-8 opacity-90">
-            Avec un partenaire qui pense comme un investisseur et agit comme un expert
-          </p>
-          <div className="flex flex-wrap justify-start gap-6 text-sm">
-            {stats.map((stat, index) => (
-              <div key={index} className="text-left">
-                <div className="text-2xl font-bold text-gold">{stat.value}</div>
-                <div className="opacity-80">{stat.label}</div>
-              </div>
-            ))}
-          </div>
-          {/* Boutons en dessous des stats */}
-  <div className="flex flex-col sm:flex-row gap-4 mt-10">
+  <section className="bg-gradient-to-br from-luxe-blue to-luxe-blue/90 text-white py-20">
+  <div className="w-full px-4 md:px-8">
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
 
-    <button
-      onClick={() => setShowContactForm(true)}
-      className="bg-white text-gold px-8 py-4 rounded-lg font-bold text-lg hover:bg-gray-100 transition-colors"
-    >
-      Contactez-nous
-    </button>
+      {/* Texte à gauche */}
+      <div className="text-left">
+        <h1 className="text-4xl md:text-6xl font-playfair font-bold mb-6">
+          Et si vous pouviez investir dans l'immobilier{' '}
+          <span className="gold-gradient">en toute confiance</span>?
+        </h1>
+        <p className="text-xl md:text-2xl mb-8 opacity-90">
+          Avec un partenaire qui pense comme un investisseur et agit comme un expert
+        </p>
 
-    <a
-      href="/investir"
-      className="border-2 border-white text-white px-8 py-4 rounded-lg font-bold text-lg hover:bg-white hover:text-gold transition-colors"
-    >
-      Investir
-    </a>
+        {/* Statistiques */}
+        <div className="flex flex-wrap justify-start gap-6 text-sm">
+          {stats.map((stat, index) => (
+            <div key={index} className="text-left">
+              <div className="text-2xl font-bold text-gold">{stat.value}</div>
+              <div className="opacity-80">{stat.label}</div>
+            </div>
+          ))}
+        </div>
+
+        {/* Boutons */}
+        <div className="flex flex-col sm:flex-row gap-4 mt-10">
+          <button
+            onClick={() => setShowContactForm(true)}
+            className="bg-white text-gold px-8 py-4 rounded-lg font-bold text-lg hover:bg-gray-100 transition-colors"
+          >
+            Contactez-nous
+          </button>
+
+          <a
+            href="/investir"
+            className="border-2 border-white text-white px-8 py-4 rounded-lg font-bold text-lg hover:bg-white hover:text-gold transition-colors"
+          >
+            Investir
+          </a>
+        </div>
+      </div>
+
+      {/* Vidéo à droite */}
+      <div className="w-full">
+        <div className="w-full h-64 sm:h-80 md:h-[400px] lg:h-[500px] rounded-2xl overflow-hidden shadow-2xl bg-black/20 backdrop-blur-sm border border-white/10">
+          <iframe
+            className="w-full h-full"
+            src="https://www.youtube.com/embed/LRq7qI4wJU8"
+            title="Vidéo de présentation"
+            frameBorder="0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowFullScreen
+          ></iframe>
+        </div>
+      </div>
+
+    </div>
   </div>
-</div>
-      
-
-
-
-
-        {/* Right Video */}
-<div className="relative w-full">
-  <div className="w-full max-w-full md:w-[800px] lg:w-[900px] h-96 md:h-[500px] lg:h-[600px] mx-auto rounded-2xl overflow-hidden shadow-2xl bg-black/20 backdrop-blur-sm border border-white/10">
-    <iframe
-      className="w-full h-full"
-      src="https://www.youtube.com/embed/LRq7qI4wJU8"
-      title="Vidéo de présentation"
-      frameBorder="0"
-      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-      allowFullScreen
-    ></iframe>
-  </div>
-</div>
- {/* ✅ Manquait cette fermeture */}
-</div>    {/* ✅ manquait la fermeture du grid */}
-</div>    {/* ✅ manquait la fermeture de .px-8 */}
-</div>    {/* ✅ manquait la fermeture de .px-0 */}
-      
-
-</section> {/* ✅ manquait cette fermeture */}
+</section>
+ {/* ✅ manquait cette fermeture */}
 
         {/* Problem Section */}
         <section className="py-20 bg-gray-50">
