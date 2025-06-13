@@ -262,8 +262,11 @@ const handleSave = async () => {
       } else if (Array.isArray(value)) {
         value.forEach((item, i) => {
           formData.append(`${key}[${i}]`, item);
-        });
-      } else {
+        });  
+      } else if (key === 'area') {
+    // ✅ Forcer area à être une chaîne (comme dans store)
+    formData.append('area', value.toString());
+  }  else {
         formData.append(key, value as any);
       }
     }
