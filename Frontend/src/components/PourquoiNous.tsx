@@ -60,20 +60,22 @@ const PourquoiNous = () => {
 const projectScrollRef = useRef(null);
 const testimonialScrollRef = useRef(null);
 const [canScrollLeft, setCanScrollLeft] = useState(false);
-const [hasScrolledRight, setHasScrolledRight] = useState(false);
+const [showLeftArrow, setShowLeftArrow] = useState(false);
+const [isScrollable, setIsScrollable] = useState(false);
 
 
 const updateScrollButtons = () => {
   const container = projectScrollRef.current;
   if (!container) return;
 
-  const { scrollLeft } = container;
-  setCanScrollLeft(scrollLeft > 0);
+  const { scrollLeft, scrollWidth, clientWidth } = container;
 
-  // si on a scrollé de >0px, on considère qu'on a scrollé à droite
-  if (scrollLeft > 0 && !hasScrolledRight) {
-    setHasScrolledRight(true);
-  }
+  // détecte si le contenu déborde (scrollable horizontalement)
+  const scrollable = scrollWidth > clientWidth;
+  setIsScrollable(scrollable);
+
+  // montre la flèche gauche seulement si on a scrollé manuellement
+  setShowLeftArrow(scrollable && scrollLeft > 10);
 };
 
 
@@ -83,14 +85,16 @@ useEffect(() => {
   const container = projectScrollRef.current;
   if (!container) return;
 
-  // Première passe
-  updateScrollButtons();
+  updateScrollButtons(); // initial
 
-  // À chaque scroll
   container.addEventListener('scroll', updateScrollButtons);
-  return () => container.removeEventListener('scroll', updateScrollButtons);
-}, [projects]);
+  window.addEventListener('resize', updateScrollButtons); // responsive
 
+  return () => {
+    container.removeEventListener('scroll', updateScrollButtons);
+    window.removeEventListener('resize', updateScrollButtons);
+  };
+}, [projects]);
 
 const scrollProjectsLeft = () => {
   const container = projectScrollRef.current;
@@ -346,12 +350,12 @@ setTestimonials(Array.isArray(response.data) ? response.data : response.data?.da
 
               <div className="relative">
                 {/* Left Arrow - Only show if there are projects */}
-               {projects.length > 0 && hasScrolledRight && (
+              {projects.length > 0 && showLeftArrow && (
   <button
     onClick={scrollProjectsLeft}
     className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-6 
-               bg-white p-2 rounded-full shadow-md hover:bg-gray-100
-               z-10 transition-all"
+             bg-white p-2 rounded-full shadow-md hover:bg-gray-100
+             z-10 transition-all"
   >
     <ChevronLeft className="w-6 h-6 text-gray-600" />
   </button>
