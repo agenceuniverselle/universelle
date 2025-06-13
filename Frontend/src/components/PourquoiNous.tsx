@@ -175,16 +175,17 @@ setTestimonials(Array.isArray(response.data) ? response.data : response.data?.da
 
         {/* Right Video */}
 <div className="relative">
-  <div className="w-full md:w-[800px] lg:w-[900px] h-96 md:h-[500px] lg:h-[600px] rounded-2xl overflow-hidden shadow-2xl bg-black/20 backdrop-blur-sm border border-white/10">
-    <iframe
-      className="w-full h-full"
-      src="https://www.youtube.com/embed/LRq7qI4wJU8"
-      title="Vidéo de présentation"
-      frameBorder="0"
-      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-      allowFullScreen
-    ></iframe>
-  </div>
+<div className="relative w-full aspect-w-16 aspect-h-9 rounded-2xl overflow-hidden shadow-2xl bg-black/20 backdrop-blur-sm border border-white/10">
+  <iframe
+    className="w-full h-full"
+    src="https://www.youtube.com/embed/LRq7qI4wJU8"
+    title="Vidéo de présentation"
+    frameBorder="0"
+    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+    allowFullScreen
+  ></iframe>
+</div>
+
 </div>  {/* ✅ Manquait cette fermeture */}
 </div>    {/* ✅ manquait la fermeture du grid */}
 </div>    {/* ✅ manquait la fermeture de .px-8 */}
