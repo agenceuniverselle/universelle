@@ -339,6 +339,12 @@ const AddInvestmentDialog: React.FC<AddInvestmentDialogProps> = ({
                             Touristique
                           </div>
                         </SelectItem>
+                        <SelectItem value="Mixte">
+  <div className="flex items-center">
+    <BuildingIcon className="h-4 w-4 mr-2 text-blue-600 dark:text-blue-400" />
+    Mixte
+  </div>
+</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />
