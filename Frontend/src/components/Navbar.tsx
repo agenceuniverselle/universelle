@@ -189,10 +189,10 @@ const Navbar = () => {
       </nav>
 
  {showVipForm && (
- <div
-  className="fixed left-1/2 -translate-x-1/2 z-[99999] w-full max-w-xl p-3 bg-white rounded-lg shadow-2xl border overflow-visible"
-  style={{ top: '80px' }}
+<div
+  className="fixed left-1/2 -translate-x-1/2 top-[80px] z-[999999] w-full max-w-xl p-6 bg-white rounded-lg shadow-2xl border overflow-visible"
 >
+
 
 
 
