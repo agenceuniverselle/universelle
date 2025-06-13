@@ -70,12 +70,12 @@ const updateScrollButtons = () => {
 
   const { scrollLeft, scrollWidth, clientWidth } = container;
 
+  // Vérifie si on peut scroller
   const isOverflowing = scrollWidth > clientWidth;
 
-  // ✅ La flèche gauche doit apparaître SEULEMENT si l'utilisateur a scrollé
-  setShowLeftArrow(scrollLeft > 10 && isOverflowing);
+  // ✅ Si le contenu déborde ET qu'on a scrollé manuellement
+  setShowLeftArrow(isOverflowing && scrollLeft > 10);
 };
-
 
 
 
