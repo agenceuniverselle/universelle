@@ -12,6 +12,7 @@ import {
   SheetDescription, // Import SheetDescription
 } from "@/components/ui/sheet";
 import Contact from "@/components/Contact";
+import ReactDOM from "react-dom";
 
 
 const Navbar = () => {
@@ -184,25 +185,25 @@ const Navbar = () => {
         </div>
       </nav>
 
- {showVipForm && (
-  <div
-    className="fixed left-1/2 -translate-x-1/2 z-[99999] w-full max-w-xl p-3 bg-white rounded-lg shadow-2xl border overflow-visible"
-    style={{ top: '80px' }}
-  >
-
-
-    <div className="flex justify-between items-center mb-4">
-      <h2 className="text-xl font-semibold text-luxe-blue">Contact VIP</h2>
-      <button
-        className="text-gray-500 hover:text-red-500"
-        onClick={() => setShowVipForm(false)}
-      >
-        <X size={18} />
-      </button>
-    </div>
-    <Contact onSuccess={() => setShowVipForm(false)} />
-  </div>
-)}
+{showVipForm &&
+  ReactDOM.createPortal(
+    <div
+      className="fixed left-1/2 -translate-x-1/2 z-[99999] w-full max-w-xl p-3 bg-white rounded-lg shadow-2xl border overflow-visible"
+      style={{ top: '80px' }}
+    >
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-xl font-semibold text-luxe-blue">Contact VIP</h2>
+        <button
+          className="text-gray-500 hover:text-red-500"
+          onClick={() => setShowVipForm(false)}
+        >
+          <X size={18} />
+        </button>
+      </div>
+      <Contact onSuccess={() => setShowVipForm(false)} />
+    </div>,
+    document.getElementById("vip-form-root")!
+  )}
 
 
     </>
