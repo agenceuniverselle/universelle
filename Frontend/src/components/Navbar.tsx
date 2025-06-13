@@ -67,12 +67,14 @@ const Navbar = () => {
 
   return (
     <>
-      <nav className={cn(
-        "fixed top-0 left-0 right-0 z-50 transition-all duration-300 py-5 px-6 lg:px-10",
-        isScrolled || !isHomePage
-          ? "bg-white/90 backdrop-blur-sm shadow-lg"
-          : "bg-transparent"
-      )}>
+      <nav
+  className={cn(
+    "fixed top-0 left-0 right-0 z-50 transition-all duration-300 py-5 px-6 lg:px-10 isolate",
+    isScrolled || !isHomePage
+      ? "bg-white/90 backdrop-blur-sm shadow-lg"
+      : "bg-transparent"
+  )}
+>
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center">
             <a href="/" className="flex items-center">
