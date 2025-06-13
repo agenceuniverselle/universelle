@@ -59,6 +59,24 @@ const PourquoiNous = () => {
 
 const projectScrollRef = useRef(null);
 const testimonialScrollRef = useRef(null);
+const [canScrollLeft, setCanScrollLeft] = useState(false);
+const updateScrollButtons = () => {
+  const container = projectScrollRef.current;
+  if (container) {
+    setCanScrollLeft(container.scrollLeft > 0);
+  }
+};
+  useEffect(() => {
+  const container = projectScrollRef.current;
+  if (!container) return;
+
+  updateScrollButtons(); // initial check
+
+  const handleScroll = () => updateScrollButtons();
+  container.addEventListener('scroll', handleScroll);
+
+  return () => container.removeEventListener('scroll', handleScroll);
+}, []);
 
 const scrollProjectsLeft = () => {
   const container = projectScrollRef.current;
@@ -315,7 +333,7 @@ setTestimonials(Array.isArray(response.data) ? response.data : response.data?.da
 
               <div className="relative">
                 {/* Left Arrow - Only show if there are projects */}
-                {projects.length > 0 && (
+                {projects.length > 0 && canScrollLeft && (
                   <button 
                     onClick={scrollProjectsLeft}
                     className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-6 bg-white p-2 rounded-full shadow-md hover:bg-gray-100 z-10 transition-all"
