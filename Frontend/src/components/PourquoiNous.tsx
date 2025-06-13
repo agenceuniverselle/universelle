@@ -154,23 +154,23 @@ setTestimonials(Array.isArray(response.data) ? response.data : response.data?.da
         </div>
 
         {/* Boutons */}
-        <div className="flex flex-col sm:flex-row gap-4 mt-10">
-         <button
-  onClick={() => setShowContactForm(true)}
-  className="flex items-center space-x-2 text-white rounded-md px-5 py-3 transition-all bg-gold hover:bg-gold-dark font-montserrat text-base shadow-md hover:shadow-lg"
->
-  <Phone size={18} />
-  <span>Contactez-nous</span>
-</button>
+       <div className="flex flex-col sm:flex-row gap-4 mt-10">
+  <button
+    onClick={() => setShowContactForm(true)}
+    className="flex items-center justify-center space-x-2 text-white rounded-md px-5 py-3 transition-all bg-gold hover:bg-gold-dark font-montserrat text-base shadow-md hover:shadow-lg w-full sm:w-[220px]"
+  >
+    <Phone size={18} />
+    <span>Contactez-nous</span>
+  </button>
 
-         <a
-  href="/investir"
-  className="inline-flex items-center justify-center px-8 py-3 border-2 border-white text-white rounded-md bg-transparent hover:bg-white/10 transition-colors"
->
-  Investir
-</a>
+  <a
+    href="/investir"
+    className="inline-flex items-center justify-center px-8 py-3 border-2 border-white text-white rounded-md bg-transparent hover:bg-white/10 transition-colors w-full sm:w-[220px]"
+  >
+    Investir
+  </a>
+</div>
 
-        </div>
       </div>
 
       {/* Vidéo à droite */}
