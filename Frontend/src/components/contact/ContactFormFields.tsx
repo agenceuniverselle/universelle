@@ -387,7 +387,7 @@ const ContactFormFields: React.FC<ContactFormFieldsProps> = ({ onSuccess }) => {
                 <SelectTrigger id="purpose" name="purpose" className={cn("input-field", formErrors.purpose && "border-red-500")}>
                   <SelectValue placeholder="Sélectionnez votre Objectif" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="z-[999999]">
                   <SelectItem value="information">Demande d'informations générales</SelectItem>
                   <SelectItem value="purchase">Achat d'un bien immobilier</SelectItem>
                   <SelectItem value="investment">Investissement immobilier</SelectItem>
@@ -414,7 +414,7 @@ const ContactFormFields: React.FC<ContactFormFieldsProps> = ({ onSuccess }) => {
                 <SelectTrigger id="budget" name="budget" className={cn("input-field", formErrors.budget && "border-red-500")}>
                   <SelectValue placeholder="Sélectionnez votre budget" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="z-[999999]">
                   <SelectItem value="100-300k">100,000 MAD - 300,000 MAD</SelectItem>
                   <SelectItem value="300-500k">300,000 MAD - 500,000 MAD</SelectItem>
                   <SelectItem value="500-1M">500,000 MAD - 1,000,000 MAD</SelectItem>
