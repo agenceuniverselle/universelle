@@ -63,9 +63,12 @@ const [canScrollLeft, setCanScrollLeft] = useState(false);
 const updateScrollButtons = () => {
   const container = projectScrollRef.current;
   if (container) {
-    setCanScrollLeft(container.scrollLeft > 0);
+    const { scrollLeft, scrollWidth, clientWidth } = container;
+    const isOverflowing = scrollWidth > clientWidth;
+    setCanScrollLeft(isOverflowing && scrollLeft > 0);
   }
 };
+
   useEffect(() => {
   const container = projectScrollRef.current;
   if (!container) return;
