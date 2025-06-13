@@ -70,13 +70,13 @@ const updateScrollButtons = () => {
 
   const { scrollLeft, scrollWidth, clientWidth } = container;
 
-  // détecte si le contenu déborde (scrollable horizontalement)
-  const scrollable = scrollWidth > clientWidth;
-  setIsScrollable(scrollable);
+  // Vérifie si on peut scroller
+  const isOverflowing = scrollWidth > clientWidth;
 
-  // montre la flèche gauche seulement si on a scrollé manuellement
-  setShowLeftArrow(scrollable && scrollLeft > 10);
+  // ✅ Si le contenu déborde ET qu'on a scrollé manuellement
+  setShowLeftArrow(isOverflowing && scrollLeft > 10);
 };
+
 
 
 
@@ -350,7 +350,7 @@ setTestimonials(Array.isArray(response.data) ? response.data : response.data?.da
 
               <div className="relative">
                 {/* Left Arrow - Only show if there are projects */}
-              {projects.length > 0 && showLeftArrow && (
+            {projects.length > 0 && showLeftArrow && (
   <button
     onClick={scrollProjectsLeft}
     className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-6 
@@ -360,6 +360,7 @@ setTestimonials(Array.isArray(response.data) ? response.data : response.data?.da
     <ChevronLeft className="w-6 h-6 text-gray-600" />
   </button>
 )}
+
                 
                 {/* Projects Container */}
                 <div 
