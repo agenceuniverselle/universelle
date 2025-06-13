@@ -127,10 +127,12 @@ const Navbar = () => {
                   <Menu className={isScrolled || !isHomePage ? "text-luxe-blue" : "text-white"} size={24} />
                 </button>
               </SheetTrigger>
-              <SheetContent
-                side="right"
-                className="bg-luxe-blue/95 backdrop-blur-md border-none p-0 w-full sm:w-[350px] h-screen flex flex-col"
-              >
+         <SheetContent
+  side="right"
+  className="bg-luxe-blue/95 border-none p-0 w-full sm:w-[350px] h-screen flex flex-col"
+>
+
+
                 {/* Add SheetHeader, SheetTitle, and SheetDescription here */}
                 <SheetHeader className="px-8 py-6 flex justify-between items-center border-b border-white/10">
                   <SheetTitle className="sr-only">Menu de Navigation</SheetTitle> {/* Visually hidden title for accessibility */}
