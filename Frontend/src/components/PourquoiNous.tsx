@@ -61,17 +61,22 @@ const projectScrollRef = useRef(null);
 const testimonialScrollRef = useRef(null);
 const [canScrollLeft, setCanScrollLeft] = useState(false);
 const [hasScrolledRight, setHasScrolledRight] = useState(false);
+const [hasInteracted, setHasInteracted] = useState(false);
 
 const updateScrollButtons = () => {
   const container = projectScrollRef.current;
-  if (container) {
-    const { scrollLeft, scrollWidth, clientWidth } = container;
+  if (!container) return;
 
-    const isOverflowing = scrollWidth > clientWidth;
-    setCanScrollLeft(scrollLeft > 0);
-    setHasScrolledRight(scrollLeft > 0); // ✅ pour afficher flèche seulement après scroll
+  const { scrollLeft, scrollWidth, clientWidth } = container;
+
+  setCanScrollLeft(scrollLeft > 0);
+
+  // ✅ Ne change "hasInteracted" qu'après premier scroll vers la droite
+  if (scrollLeft > 10 && !hasInteracted) {
+    setHasInteracted(true);
   }
 };
+
 
 
   useEffect(() => {
@@ -106,17 +111,16 @@ const scrollProjectsRight = () => {
   if (container) {
     const maxScrollLeft = container.scrollWidth - container.clientWidth;
 
+    setHasInteracted(true); // ✅ dès que bouton utilisé
+
     if (container.scrollLeft >= maxScrollLeft - 10) {
-      // Si on est presque à la fin → scroll vers le début
-      container.scrollTo({
-        left: 0,
-        behavior: 'smooth',
-      });
+      container.scrollTo({ left: 0, behavior: 'smooth' });
     } else {
       container.scrollBy({ left: 300, behavior: 'smooth' });
     }
   }
 };
+
 
 
 const scrollTestimonialsLeft = () => {
@@ -341,15 +345,14 @@ setTestimonials(Array.isArray(response.data) ? response.data : response.data?.da
 
               <div className="relative">
                 {/* Left Arrow - Only show if there are projects */}
-                {projects.length > 0 && hasScrolledRight && (
-
-                  <button 
-                    onClick={scrollProjectsLeft}
-                    className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-6 bg-white p-2 rounded-full shadow-md hover:bg-gray-100 z-10 transition-all"
-                  >
-                    <ChevronLeft className="w-6 h-6 text-gray-600" />
-                  </button>
-                )}
+                {projects.length > 0 && hasInteracted && (
+  <button 
+    onClick={scrollProjectsLeft}
+    className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-6 bg-white p-2 rounded-full shadow-md hover:bg-gray-100 z-10 transition-all"
+  >
+    <ChevronLeft className="w-6 h-6 text-gray-600" />
+  </button>
+)}
                 
                 {/* Projects Container */}
                 <div 
