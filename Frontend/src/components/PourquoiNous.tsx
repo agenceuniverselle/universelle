@@ -61,16 +61,37 @@ const projectScrollRef = useRef(null);
 const testimonialScrollRef = useRef(null);
 
 const scrollProjectsLeft = () => {
-  if (projectScrollRef.current) {
-    projectScrollRef.current.scrollBy({ left: -300, behavior: 'smooth' });
+  const container = projectScrollRef.current;
+  if (container) {
+    if (container.scrollLeft <= 0) {
+      // Si on est tout au début → scroll vers la fin
+      container.scrollTo({
+        left: container.scrollWidth,
+        behavior: 'smooth',
+      });
+    } else {
+      container.scrollBy({ left: -300, behavior: 'smooth' });
+    }
   }
 };
 
 const scrollProjectsRight = () => {
-  if (projectScrollRef.current) {
-    projectScrollRef.current.scrollBy({ left: 300, behavior: 'smooth' });
+  const container = projectScrollRef.current;
+  if (container) {
+    const maxScrollLeft = container.scrollWidth - container.clientWidth;
+
+    if (container.scrollLeft >= maxScrollLeft - 10) {
+      // Si on est presque à la fin → scroll vers le début
+      container.scrollTo({
+        left: 0,
+        behavior: 'smooth',
+      });
+    } else {
+      container.scrollBy({ left: 300, behavior: 'smooth' });
+    }
   }
 };
+
 
 const scrollTestimonialsLeft = () => {
   if (testimonialScrollRef.current) {
