@@ -184,11 +184,12 @@ const Navbar = () => {
         </div>
       </nav>
 
-  {showVipForm && (
+ {showVipForm && (
   <div
-  className="fixed left-1/2 -translate-x-1/2 z-[10000] w-full max-w-xl p-3 bg-white rounded-lg shadow-2xl border"
-  style={{ top: '80px' }}
->
+    className="fixed left-1/2 -translate-x-1/2 z-[99999] w-full max-w-xl p-3 bg-white rounded-lg shadow-2xl border overflow-visible"
+    style={{ top: '80px' }}
+  >
+
 
     <div className="flex justify-between items-center mb-4">
       <h2 className="text-xl font-semibold text-luxe-blue">Contact VIP</h2>
