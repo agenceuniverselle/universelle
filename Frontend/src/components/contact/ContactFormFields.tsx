@@ -294,7 +294,7 @@ const ContactFormFields: React.FC<ContactFormFieldsProps> = ({ onSuccess }) => {
               )}>
                 {/* Country Code Selector (Dropdown) */}
                 <Select onValueChange={handleCountrySelectChange} value={selectedCountry?.iso2 || ''} disabled={isDetectingIp}>
-                  <SelectTrigger className="flex-shrink-0 w-[90px] border-y-0 border-l-0 rounded-none focus:ring-0 focus:ring-offset-0 px-2 py-2">
+                  <SelectTrigger className="flex-shrink-0 w-[60px] border-y-0 border-l-0 rounded-none focus:ring-0 focus:ring-offset-0 px-2 py-2">
                     <div className="flex items-center justify-between w-full">
                       {isDetectingIp ? (
                         <span className="animate-pulse text-gray-500 text-sm">Chargement...</span>
