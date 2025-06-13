@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import MainLayout from '@/components/layouts/MainLayout';
-import { Check, Award, Users, TrendingUp, Clock, Building, MapPin, Star, X, BadgeCheck, ShieldCheck, ChevronRight, ChevronLeft } from 'lucide-react';
+import { Check, Award, Users, TrendingUp, Clock, Building, MapPin, Star, X, BadgeCheck, ShieldCheck, ChevronRight, ChevronLeft,Phone } from 'lucide-react';
 import ContactFormFields from './contact/ContactFormFields';
 import axios from 'axios';
 
@@ -155,12 +155,13 @@ setTestimonials(Array.isArray(response.data) ? response.data : response.data?.da
 
         {/* Boutons */}
         <div className="flex flex-col sm:flex-row gap-4 mt-10">
-          <button
-            onClick={() => setShowContactForm(true)}
-            className="bg-white text-gold px-8 py-4 rounded-lg font-bold text-lg hover:bg-gray-100 transition-colors"
-          >
-            Contactez-nous
-          </button>
+         <button
+  onClick={() => setShowContactForm(true)}
+  className="flex items-center space-x-2 text-white rounded-md px-5 py-3 transition-all bg-gold hover:bg-gold-dark font-montserrat text-base shadow-md hover:shadow-lg"
+>
+  <Phone size={18} />
+  <span>Contactez-nous</span>
+</button>
 
           <a
             href="/investir"
