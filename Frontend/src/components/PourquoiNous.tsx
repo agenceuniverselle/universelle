@@ -163,12 +163,13 @@ setTestimonials(Array.isArray(response.data) ? response.data : response.data?.da
   <span>Contactez-nous</span>
 </button>
 
-          <a
-            href="/investir"
-            className="border-2 border-white text-white px-8 py-4 rounded-lg font-bold text-lg hover:bg-white hover:text-gold transition-colors"
-          >
-            Investir
-          </a>
+         <a
+  href="/investir"
+  className="inline-flex items-center justify-center px-8 py-3 border-2 border-white text-white rounded-md bg-transparent hover:bg-white/10 transition-colors"
+>
+  Investir
+</a>
+
         </div>
       </div>
 
