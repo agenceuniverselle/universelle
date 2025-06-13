@@ -61,35 +61,36 @@ const projectScrollRef = useRef(null);
 const testimonialScrollRef = useRef(null);
 const [canScrollLeft, setCanScrollLeft] = useState(false);
 const [hasScrolledRight, setHasScrolledRight] = useState(false);
-const [hasInteracted, setHasInteracted] = useState(false);
+
 
 const updateScrollButtons = () => {
   const container = projectScrollRef.current;
   if (!container) return;
 
-  const { scrollLeft, scrollWidth, clientWidth } = container;
-
+  const { scrollLeft } = container;
   setCanScrollLeft(scrollLeft > 0);
 
-  // ✅ Ne change "hasInteracted" qu'après premier scroll vers la droite
-  if (scrollLeft > 10 && !hasInteracted) {
-    setHasInteracted(true);
+  // si on a scrollé de >0px, on considère qu'on a scrollé à droite
+  if (scrollLeft > 0 && !hasScrolledRight) {
+    setHasScrolledRight(true);
   }
 };
 
 
 
-  useEffect(() => {
+
+useEffect(() => {
   const container = projectScrollRef.current;
   if (!container) return;
 
-  updateScrollButtons(); // initial check
+  // Première passe
+  updateScrollButtons();
 
-  const handleScroll = () => updateScrollButtons();
-  container.addEventListener('scroll', handleScroll);
+  // À chaque scroll
+  container.addEventListener('scroll', updateScrollButtons);
+  return () => container.removeEventListener('scroll', updateScrollButtons);
+}, [projects]);
 
-  return () => container.removeEventListener('scroll', handleScroll);
-}, []);
 
 const scrollProjectsLeft = () => {
   const container = projectScrollRef.current;
@@ -108,16 +109,16 @@ const scrollProjectsLeft = () => {
 
 const scrollProjectsRight = () => {
   const container = projectScrollRef.current;
-  if (container) {
-    const maxScrollLeft = container.scrollWidth - container.clientWidth;
+  if (!container) return;
 
-    setHasInteracted(true); // ✅ dès que bouton utilisé
+  // on marque qu'on a cliqué pour scroll à droite
+  setHasScrolledRight(true);
 
-    if (container.scrollLeft >= maxScrollLeft - 10) {
-      container.scrollTo({ left: 0, behavior: 'smooth' });
-    } else {
-      container.scrollBy({ left: 300, behavior: 'smooth' });
-    }
+  const maxScrollLeft = container.scrollWidth - container.clientWidth;
+  if (container.scrollLeft >= maxScrollLeft - 10) {
+    container.scrollTo({ left: 0, behavior: 'smooth' });
+  } else {
+    container.scrollBy({ left: 300, behavior: 'smooth' });
   }
 };
 
@@ -345,10 +346,12 @@ setTestimonials(Array.isArray(response.data) ? response.data : response.data?.da
 
               <div className="relative">
                 {/* Left Arrow - Only show if there are projects */}
-                {projects.length > 0 && hasInteracted && (
-  <button 
+               {projects.length > 0 && hasScrolledRight && (
+  <button
     onClick={scrollProjectsLeft}
-    className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-6 bg-white p-2 rounded-full shadow-md hover:bg-gray-100 z-10 transition-all"
+    className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-6 
+               bg-white p-2 rounded-full shadow-md hover:bg-gray-100
+               z-10 transition-all"
   >
     <ChevronLeft className="w-6 h-6 text-gray-600" />
   </button>
