@@ -33,7 +33,7 @@ const ActivityHistory = () => {
         return;
       }
 
-      const response = await axios.get("http://localhost:8000/api/activities", {
+      const response = await axios.get("https://back-qhore.ondigitalocean.app/api/activities", {
         headers: {
           Authorization: `Bearer ${token}`, // ✅ Token ajouté dans les headers
         },
