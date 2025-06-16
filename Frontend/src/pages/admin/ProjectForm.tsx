@@ -710,7 +710,7 @@ const handleEditImage = (index: number, isNew: boolean) => {
         className="text-black border-gray-300 hover:bg-gray-100 dark:text-white dark:border-gray-600 dark:hover:bg-gray-800"
 
 >
-  <XCircle className="h-4 w-4 mr-2 text-black" /> Annuler
+  <XCircle className="h-4 w-4 mr-2 text-black dark:text-black" /> Annuler
 </Button>
 
                 <Button
