@@ -227,7 +227,7 @@ const [selectedUserToDelete, setSelectedUserToDelete] = useState<User | null>(nu
 </TableCell>
 
 
-                      {(canEdit || canDelete) && (
+                      {(canEdit || canDelete) && user.role?.name !== 'Super Admin' && (
                 <TableCell className="text-right">
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
