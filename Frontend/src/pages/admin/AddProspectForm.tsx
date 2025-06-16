@@ -478,62 +478,99 @@ const AddProspectForm: React.FC = () => {
                 onChange={handleInputChange}
               />
             </div>
+            <div className="mt-6">
+  <div className="flex items-start space-x-2">
+    <input
+      type="checkbox"
+      id="consent"
+      name="consent"
+      className="w-4 h-4 mt-1 text-luxe-blue accent-luxe-blue"
+      checked={formData.consent}
+      onChange={(e) =>
+        setFormData({ ...formData, consent: e.target.checked })
+      }
+    />
+    <Label htmlFor="consent" className="text-sm font-medium dark:text-black">
+      J'accepte les{" "}
+      <a
+        href="/PrivacyPolicyPage"
+        className="text-blue-600 hover:text-blue-800 underline"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        conditions générales et la politique de confidentialité
+      </a>.
+    </Label>
+  </div>
+
+  {formErrors.consent && (
+    <p className="text-sm text-red-500 mt-1">
+      {formErrors.consent}
+    </p>
+  )}
+</div>
+
           </motion.div>
         );
 
       case 3:
         return (
-        <motion.div
-  key="step3"
-  custom={slideDirection.current}
-  initial="enter"
-  animate="center"
-  exit="exit"
-  variants={variants}
-  transition={{ type: "tween", ease: "easeInOut", duration: 0.3 }}
-  className="space-y-6 py-2"
->
-  <div className="bg-blue-50 border border-blue-200 p-6 rounded-lg">
-    <h3 className="text-xl font-semibold text-blue-800 mb-4">Récapitulatif du prospect</h3>
-
-    <div className="space-y-3 text-sm">
-      {/* tous les <div className="flex justify-between"> comme nom, email, etc. */}
-      {/* ... */}
-    </div>
-
-    {/* ✅ Place ici la checkbox DANS la même boîte bleu pâle */}
-    <div className="flex items-start space-x-2 mt-6">
-      <input
-        type="checkbox"
-        id="consent"
-        name="consent"
-        className="w-4 h-4 mt-1 text-luxe-blue accent-luxe-blue"
-        checked={formData.consent}
-        onChange={(e) =>
-          setFormData({ ...formData, consent: e.target.checked })
-        }
-      />
-      <Label htmlFor="consent" className="text-sm font-medium dark:text-black">
-        J'accepte les{" "}
-        <a
-          href="/PrivacyPolicyPage"
-          className="text-blue-600 hover:text-blue-800 underline"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          conditions générales et la politique de confidentialité
-        </a>.
-      </Label>
-    </div>
-
-    {formErrors.consent && (
-      <p className="text-sm text-red-500 mt-1">
-        {formErrors.consent}
-      </p>
-    )}
-  </div>
-</motion.div>
-
+          <motion.div
+            key="step3"
+            custom={slideDirection.current}
+            initial="enter"
+            animate="center"
+            exit="exit"
+            variants={variants}
+            transition={{ type: "tween", ease: "easeInOut", duration: 0.3 }}
+            className="space-y-6 py-2"
+          >
+            <div className="bg-blue-50 border border-blue-200 p-6 rounded-lg">
+              <h3 className="text-xl font-semibold text-blue-800 mb-4">Récapitulatif du prospect</h3>
+              <div className="space-y-3 text-sm">
+                <div className="flex justify-between">
+                  <span className="font-medium">Nom complet:</span>
+                  <span>{formData.firstName} {formData.lastName}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="font-medium">Email:</span>
+                  <span>{formData.email}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="font-medium">Téléphone:</span>
+                  <span>{formData.phone}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="font-medium">Nationalité:</span>
+                  <span>{formData.nationality}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="font-medium">Montant d'investissement:</span>
+                  <span>{formData.amount} MAD</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="font-medium">Type de participation:</span>
+                  <span>
+                    {formData.participationType === 'passive' && 'Investisseur passif'}
+                    {formData.participationType === 'partner' && 'Partenaire'}
+                    {formData.participationType === 'coDev' && 'Co-développement'}
+                  </span>
+                </div>
+                {formData.address && (
+                  <div className="flex justify-between">
+                    <span className="font-medium">Adresse:</span>
+                    <span className="text-right max-w-48">{formData.address}</span>
+                  </div>
+                )}
+                {formData.comments && (
+                  <div className="flex justify-between">
+                    <span className="font-medium">Commentaires:</span>
+                    <span className="text-right max-w-48">{formData.comments}</span>
+                  </div>
+                )}
+              </div>
+            </div>
+          </motion.div>
         );
       
       default:
