@@ -392,7 +392,7 @@ const handleEditImage = (index: number, isNew: boolean) => {
 
         <ScrollArea className="pr-4 max-h-[60vh]">
           {!isSubmitted ? (
-           <form onSubmit={handleSubmit} className="space-y-6 text-gray-800 dark:text-white"">
+           <form onSubmit={handleSubmit} className="space-y-6 text-gray-800 dark:text-white">
               {/* Project Name */}
               <div className="flex flex-col space-y-1.5">
                 <Label htmlFor="name" className="text-base font-medium">
