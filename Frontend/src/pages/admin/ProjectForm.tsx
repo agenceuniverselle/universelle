@@ -375,7 +375,7 @@ const handleEditImage = (index: number, isNew: boolean) => {
 };
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className={`max-w-2xl max-h-[90vh] overflow-auto ${isEditing ? 'bg-gray-900 text-white' : 'bg-white text-gray-800'}`}>
+<DialogContent className="max-w-2xl max-h-[90vh] overflow-auto bg-white text-gray-800 dark:bg-gray-900 dark:text-white">
         <DialogHeader>
           <DialogTitle className="text-2xl font-bold text-center">
             {isEditing ? 'Modifier le Projet' : 'Ajouter un Nouveau Projet'}
