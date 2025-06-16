@@ -177,7 +177,7 @@ const AddProspectForm: React.FC = () => {
         'Accept': 'application/json',
         'Content-Type': 'multipart/form-data',
       },
-      withCredentials: true,
+     
     });
 
     toast({
