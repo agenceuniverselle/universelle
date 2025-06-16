@@ -458,7 +458,7 @@ const AddProspectForm: React.FC = () => {
               <Textarea
                 id="address"
                 name="address"
-                className="min-h-24"
+                className="min-h-15"
                 placeholder="Adresse complète"
                 value={formData.address}
                 onChange={handleInputChange}
