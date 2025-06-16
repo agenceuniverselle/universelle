@@ -65,7 +65,7 @@ const EditProspectForm = () => {
     const fetchProspectData = async () => {
       try {
         setLoading(true);
-        const response = await axios.get(`http://localhost:8000/api/investor-requests/${id}`);
+        const response = await axios.get(`https://back-qhore.ondigitalocean.app/api/investor-requests/${id}`);
         const prospectData = response.data;
         
         setFormData({
