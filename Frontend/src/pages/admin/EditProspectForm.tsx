@@ -126,7 +126,7 @@ const EditProspectForm = () => {
     try {
       setLoading(true);
 
-const res = await axios.post(`https://back-qhore.ondigitalocean.app/api/investor-requests/${id}?_method=PUT`, { ... });
+const res = await axios.post(`https://back-qhore.ondigitalocean.app/api/investor-requests/${id}?_method=PUT`, { 
 montant_investissement: formData.amount.trim(),
         type_participation: formData.participationType,
         prenom: formData.firstName,
