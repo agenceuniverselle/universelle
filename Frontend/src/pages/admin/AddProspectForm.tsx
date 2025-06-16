@@ -160,7 +160,8 @@ const AddProspectForm: React.FC = () => {
   setIsLoading(true);
 
   const formDataToSend = new FormData();
-  formDataToSend.append('montant_investissement', formData.amount);
+  const rawAmount = formData.amount.replace(/\D/g, ''); // supprime tout sauf chiffres
+  formDataToSend.append('montant_investissement', rawAmount);
   formDataToSend.append('type_participation', formData.participationType);
   formDataToSend.append('prenom', formData.firstName);
   formDataToSend.append('nom', formData.lastName);
