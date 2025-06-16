@@ -422,21 +422,134 @@ const handleEditImage = (index: number, isNew: boolean) => {
     )}
   </div>
 
-  {/* ... même chose pour les autres champs ... */}
-  {/* Remplace dans tout le formulaire chaque condition `isEditing && ...` dans className */}
+  {/* Location & Type */}
+  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+    {/* Location */}
+    <div className="flex flex-col space-y-1.5">
+      <Label htmlFor="location" className="text-base font-medium">
+        Localisation <span className="text-red-500">*</span>
+      </Label>
+      <div className="relative">
+        <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+          <MapPin className="h-4 w-4 text-gray-400" />
+        </div>
+        <Input
+          id="location"
+          name="location"
+          className={cn(
+            "pl-10 w-full transition-all duration-200 hover:border-luxe-blue/30 focus:scale-[1.01] bg-white text-black border-gray-300 dark:bg-gray-900 dark:text-white dark:border-gray-700 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-luxe-blue/50 dark:focus:ring-luxe-blue/30",
+            getErrorMessage('location') && "border-red-500"
+          )}
+          placeholder="Ville, Pays"
+          value={formData.location}
+          onChange={handleInputChange}
+        />
+      </div>
+      {getErrorMessage('location') && (
+        <p className="text-sm text-red-500 mt-1 flex items-center">
+          <AlertCircle className="h-3 w-3 mr-1" />
+          {getErrorMessage('location')}
+        </p>
+      )}
+    </div>
+
+    {/* Type */}
+    <div className="flex flex-col space-y-1.5">
+      <Label htmlFor="type" className="text-base font-medium">
+        Type de Projet <span className="text-red-500">*</span>
+      </Label>
+      <div className="relative">
+        <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+          <Building className="h-4 w-4 text-gray-400" />
+        </div>
+        <Input
+          id="type"
+          name="type"
+          className={cn(
+            "pl-8 w-full transition-all duration-200 hover:border-luxe-blue/30 focus:scale-[1.01] bg-white text-black border-gray-300 dark:bg-gray-900 dark:text-white dark:border-gray-700 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-luxe-blue/50 dark:focus:ring-luxe-blue/30",
+            getErrorMessage('type') && "border-red-500"
+          )}
+          placeholder="Ex: Résidentiel, Commercial"
+          value={formData.type}
+          onChange={handleInputChange}
+        />
+      </div>
+      {getErrorMessage('type') && (
+        <p className="text-sm text-red-500 mt-1 flex items-center">
+          <AlertCircle className="h-3 w-3 mr-1" />
+          {getErrorMessage('type')}
+        </p>
+      )}
+    </div>
+  </div>
+
+  {/* Details */}
+  <div className="flex flex-col space-y-1.5">
+    <Label htmlFor="details" className="text-base font-medium">
+      Détails <span className="text-red-500">*</span>
+    </Label>
+    <div className="relative">
+      <div className="absolute top-3 left-3 pointer-events-none">
+        <Clipboard className="h-4 w-4 text-gray-400" />
+      </div>
+      <Textarea
+        id="details"
+        name="details"
+        className={cn(
+          "min-h-15 w-full pl-10 pt-3 transition-all duration-200 hover:border-luxe-blue/30 focus:scale-[1.01] bg-white text-black border-gray-300 dark:bg-gray-900 dark:text-white dark:border-gray-700 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-luxe-blue/50 dark:focus:ring-luxe-blue/30",
+          getErrorMessage('details') && "border-red-500"
+        )}
+        placeholder="Description du projet..."
+        value={formData.details}
+        onChange={handleInputChange}
+      />
+    </div>
+    {getErrorMessage('details') && (
+      <p className="text-sm text-red-500 mt-1 flex items-center">
+        <AlertCircle className="h-3 w-3 mr-1" />
+        {getErrorMessage('details')}
+      </p>
+    )}
+  </div>
+
+  {/* Surface */}
+  <div className="flex flex-col space-y-1.5">
+    <Label htmlFor="surface" className="text-base font-medium">
+      Surface <span className="text-red-500">*</span>
+    </Label>
+    <div className="relative">
+      <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+        <Ruler className="h-4 w-4 text-gray-400" />
+      </div>
+      <Input
+        id="surface"
+        name="surface"
+        className={cn(
+          "pl-10 w-full transition-all duration-200 hover:border-luxe-blue/30 focus:scale-[1.01] bg-white text-black border-gray-300 dark:bg-gray-900 dark:text-white dark:border-gray-700 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-luxe-blue/50 dark:focus:ring-luxe-blue/30",
+          getErrorMessage('surface') && "border-red-500"
+        )}
+        placeholder="Ex: 2,400 m²"
+        value={formData.surface}
+        onChange={handleInputChange}
+      />
+    </div>
+    {getErrorMessage('surface') && (
+      <p className="text-sm text-red-500 mt-1 flex items-center">
+        <AlertCircle className="h-3 w-3 mr-1" />
+        {getErrorMessage('surface')}
+      </p>
+    )}
+  </div>
 
   {/* Status */}
   <div className="flex flex-col space-y-1.5">
     <Label htmlFor="status" className="text-base font-medium">
       Statut <span className="text-red-500">*</span>
     </Label>
-    <Select
-      value={formData.status}
-      onValueChange={handleSelectChange('status')}
-    >
+    <Select value={formData.status} onValueChange={handleSelectChange('status')}>
       <SelectTrigger
         className={cn(
-          "w-full ml-2 flex items-center justify-between rounded-md border px-3 py-2 transition-colors",
+          "w-full flex items-center justify-between rounded-md border px-3 py-2 transition-colors",
           "bg-white text-gray-800 border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600"
         )}
       >
@@ -452,10 +565,7 @@ const handleEditImage = (index: number, isNew: boolean) => {
           <SelectItem
             key={status}
             value={status}
-            className={cn(
-              "cursor-pointer px-3 py-2",
-              "bg-white text-gray-800 dark:bg-gray-800 dark:text-white"
-            )}
+            className="cursor-pointer px-3 py-2 bg-white text-gray-800 dark:bg-gray-800 dark:text-white"
           >
             {status}
           </SelectItem>
@@ -480,7 +590,6 @@ const handleEditImage = (index: number, isNew: boolean) => {
     >
       <XCircle className="h-4 w-4 mr-2" /> Annuler
     </Button>
-
     <Button
       type="submit"
       disabled={isLoading}
@@ -500,6 +609,7 @@ const handleEditImage = (index: number, isNew: boolean) => {
     </Button>
   </DialogFooter>
 </form>
+
 
           ) : (
             <div className="text-center py-8">
