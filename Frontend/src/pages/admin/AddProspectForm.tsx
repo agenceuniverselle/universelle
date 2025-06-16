@@ -265,43 +265,44 @@ const AddProspectForm: React.FC = () => {
     Montants suggérés (MAD)
   </Label>
 
-  <div className="grid grid-cols-2 gap-3 mt-2">
-    {suggestedAmounts.map((amount, index) => {
-      const isSelected = formData.amount === amount.toLocaleString();
-      return (
-        <Button 
-          key={index}
-          type="button"
-          variant={isSelected ? "default" : "outline"}
-          className={cn(
-            "h-12 text-base transition-all hover:scale-102",
-            isSelected 
-              ? "bg-luxe-blue text-white dark:text-white shadow-md"
-              : "text-gray-800 dark:text-gray-100 border-gray-300 dark:border-gray-600"
-          )}
-          onClick={() => setFormData({ ...formData, amount: amount.toLocaleString() })}
-        >
-          {formatAmount(amount.toString())} MAD
-        </Button>
-      );
-    })}
+ <div className="grid grid-cols-2 gap-3 mt-2">
+  {suggestedAmounts.map((amount, index) => {
+    const isSelected = formData.amount === amount.toLocaleString();
+    return (
+      <Button 
+        key={index}
+        type="button"
+        variant={isSelected ? "default" : "outline"}
+        className={cn(
+          "h-12 text-base transition-all hover:scale-102",
+          isSelected 
+            ? "bg-luxe-blue text-white dark:text-white shadow-md"
+            : "bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 border border-gray-300 dark:border-gray-600"
+        )}
+        onClick={() => setFormData({ ...formData, amount: amount.toLocaleString() })}
+      >
+        {formatAmount(amount.toString())} MAD
+      </Button>
+    );
+  })}
 
-    <Button
-      type="button"
-      variant={formData.amount === "Autre" ? "default" : "outline"}
-      className={cn(
-        "h-12 text-base transition-all hover:scale-102",
-        formData.amount === "Autre"
-          ? "bg-luxe-blue text-white dark:text-white shadow-md"
-          : "text-gray-800 dark:text-gray-100 border-gray-300 dark:border-gray-600"
-      )}
-      onClick={() => {
-        setFormData({ ...formData, amount: "Autre" });
-      }}
-    >
-      Autre
-    </Button>
-  </div>
+  <Button
+    type="button"
+    variant={formData.amount === "Autre" ? "default" : "outline"}
+    className={cn(
+      "h-12 text-base transition-all hover:scale-102",
+      formData.amount === "Autre"
+        ? "bg-luxe-blue text-white dark:text-white shadow-md"
+        : "bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 border border-gray-300 dark:border-gray-600"
+    )}
+    onClick={() => {
+      setFormData({ ...formData, amount: "Autre" });
+    }}
+  >
+    Autre
+  </Button>
+</div>
+
 </div>
 
 
