@@ -172,13 +172,13 @@ const AddProspectForm: React.FC = () => {
   formDataToSend.append('commentaire', formData.comments);
 
   try {
-    await axios.post(`https://back-qhore.ondigitalocean.app/api/prospects/store`, formDataToSend, {
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'multipart/form-data',
-      },
-     
-    });
+   await axios.post(`https://back-qhore.ondigitalocean.app/api/prospects/store`, formDataToSend, {
+  headers: {
+    'Accept': 'application/json',
+    'Content-Type': 'multipart/form-data',
+  }
+});
+
 
     toast({
       title: "Prospect ajouté",
