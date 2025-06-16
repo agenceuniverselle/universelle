@@ -228,7 +228,7 @@ const InvestmentCard: React.FC<InvestmentCardProps> = ({
                 <span className="text-sm text-gray-500">Prix</span>
                 <span className="font-medium flex items-center">
                   <Wallet className="h-4 w-4 mr-1 text-gray-600" />
-                  {property.price}
+                  {property.price} MAD
                 </span>
               </div>
             )}
@@ -238,7 +238,7 @@ const InvestmentCard: React.FC<InvestmentCardProps> = ({
                 <span className="text-sm text-gray-500">Rentabilité</span>
                 <span className="font-medium flex items-center text-green-600">
                   <TrendingUp className="h-4 w-4 mr-1" />
-                  {investmentDetails?.returnRate || property.return}
+                  {investmentDetails?.returnRate || property.return} %
                 </span>
               </div>
             )}
@@ -248,7 +248,7 @@ const InvestmentCard: React.FC<InvestmentCardProps> = ({
                 <span className="text-sm text-gray-500">Durée recommandée</span>
                 <span className="font-medium flex items-center">
                   <Clock className="h-4 w-4 mr-1 text-gray-600" />
-                  {investmentDetails.recommendedDuration}
+                  {investmentDetails.recommendedDuration} Ans
                 </span>
               </div>
             )}
@@ -258,7 +258,7 @@ const InvestmentCard: React.FC<InvestmentCardProps> = ({
                 <span className="text-sm text-gray-500">Prix d'entrée</span>
                 <span className="font-medium flex items-center">
                   <Wallet className="h-4 w-4 mr-1 text-gray-600" />
-                  {investmentDetails?.minEntryPrice || property.price}
+                  {investmentDetails?.minEntryPrice || property.price} MAD
                 </span>
               </div>
             )}
