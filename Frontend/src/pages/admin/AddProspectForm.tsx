@@ -536,38 +536,40 @@ const AddProspectForm: React.FC = () => {
                     <span className="text-right max-w-48">{formData.comments}</span>
                   </div>
                 )}
-                <div className="flex items-center space-x-2 mt-4">
-  <input
-    type="checkbox"
-    id="consent"
-    name="consent"
-    className="w-4 h-4 text-luxe-blue bg-gray-100 accent-luxe-blue"
-    checked={formData.consent}
-    onChange={(e) =>
-      setFormData({ ...formData, consent: e.target.checked })
-    }
-  />
-  <Label htmlFor="consent" className="text-sm font-medium dark:text-black">
-    J'accepte les{' '}
-    <a
-      href="/PrivacyPolicyPage"
-      className="text-blue-600 hover:text-blue-800 underline"
-      target="_blank"
-      rel="noopener noreferrer"
-    >
-      conditions générales et la politique de confidentialité
-    </a>.
-  </Label>
-</div>
-
-{formErrors.consent && (
-  <p className="text-sm text-red-500 mt-1">
-    {formErrors.consent}
-  </p>
-)}
+             
 
               </div>
             </div>
+             <div className="flex items-start space-x-2 mt-6">
+      <input
+        type="checkbox"
+        id="consent"
+        name="consent"
+        className="w-4 h-4 mt-1 text-luxe-blue accent-luxe-blue"
+        checked={formData.consent}
+        onChange={(e) =>
+          setFormData({ ...formData, consent: e.target.checked })
+        }
+      />
+      <Label htmlFor="consent" className="text-sm font-medium dark:text-black">
+        J'accepte les{" "}
+        <a
+          href="/PrivacyPolicyPage"
+          className="text-blue-600 hover:text-blue-800 underline"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          conditions générales et la politique de confidentialité
+        </a>.
+      </Label>
+    </div>
+
+    {formErrors.consent && (
+      <p className="text-sm text-red-500 mt-1">
+        {formErrors.consent}
+      </p>
+    )}
+  </div>
           </motion.div>
         );
       
