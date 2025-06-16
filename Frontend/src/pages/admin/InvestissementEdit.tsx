@@ -98,14 +98,14 @@ const InvestissementEdit = () => {
       setIsDeleting(true);
   
       if (deleteTarget.type === 'document') {
-        await axios.delete(`http://localhost:8000/api/properties/${propertyId}/document/${deleteTarget.index}`);
+        await axios.delete(`https://back-qhore.ondigitalocean.app/api/properties/${propertyId}/documents/${deleteTarget.index}`);
         const updated = [...bien.documents];
         updated.splice(deleteTarget.index, 1);
         setBien(prev => ({ ...prev, documents: updated }));
       }
   
       if (deleteTarget.type === 'image') {
-        await axios.delete(`http://localhost:8000/api/properties/${propertyId}/image/${deleteTarget.index}`);
+        await axios.delete(`https://back-qhore.ondigitalocean.app/api/properties/${propertyId}/image/${deleteTarget.index}`);
         const updated = [...bien.images];
         updated.splice(deleteTarget.index, 1);
         setBien(prev => ({ ...prev, images: updated }));
@@ -132,7 +132,7 @@ const InvestissementEdit = () => {
     if (indexToDelete === null || propertyId === undefined) return;
   
     try {
-      await axios.delete(`http://localhost:8000/api/properties/${propertyId}/document/${indexToDelete}`);
+      await axios.delete(`https://back-qhore.ondigitalocean.app/api/properties/${propertyId}/document/${indexToDelete}`);
       const updatedDocs = [...bien.documents];
       updatedDocs.splice(indexToDelete, 1);
       setBien(prev => ({
@@ -163,7 +163,7 @@ const InvestissementEdit = () => {
     if (propertyId === undefined) return;
   
     try {
-      await axios.delete(`http://localhost:8000/api/properties/${propertyId}/image/${index}`);
+      await axios.delete(`https://back-qhore.ondigitalocean.app/api/properties/${propertyId}/image/${index}`);
       const updatedImages = [...bien.images];
       updatedImages.splice(index, 1);
       setBien(prev => ({ ...prev, images: updatedImages }));
@@ -188,7 +188,7 @@ const InvestissementEdit = () => {
       try {
         const token = getToken();
         if (!token) throw new Error("Non authentifié");
-        const res = await axios.get(`http://localhost:8000/api/properties/${propertyId}`, {
+        const res = await axios.get(`https://back-qhore.ondigitalocean.app/api/properties/${propertyId}`, {
             headers: {
               Authorization: `Bearer ${token}`
             }
@@ -343,7 +343,7 @@ const InvestissementEdit = () => {
         const token = getToken();
         if (!token) throw new Error("Non authentifié");
       const res =   await axios.post(
-        `http://localhost:8000/api/properties/${propertyId}?_method=PUT`,
+        `https://back-qhore.ondigitalocean.app/api/properties/${propertyId}?_method=PUT`,
         formData,
         {
           headers: {
@@ -824,7 +824,7 @@ const InvestissementEdit = () => {
     {(bien.documents || []).map((doc: string, index: number) => (
       <div key={index} className="flex items-center justify-between border rounded-md p-3">
         <a
-          href={`http://localhost:8000/api/download/${bien.id}/${index}`}
+          href={`https://back-qhore.ondigitalocean.app/api/download/${bien.id}/${index}`}
           download
           className="text-blue-600 hover:underline"
         >
@@ -927,7 +927,7 @@ const InvestissementEdit = () => {
               <div key={i} className="relative group">
                 
                 <img
-  src={img.startsWith('blob:') ? img : `http://localhost:8000/${img}`}
+  src={img.startsWith('blob:') ? img : `https://back-qhore.ondigitalocean.app/${img}`}
   alt={`Image ${i}`}
   className="rounded border object-cover w-full h-40"
 />
