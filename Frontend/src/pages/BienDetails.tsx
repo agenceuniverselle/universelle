@@ -259,7 +259,7 @@ const isVideo = (url: string) => {
     // Use the E.164 format if parsing was successful, otherwise use the raw data.phone
     const phoneNumberForDb = phoneNumberParsed ? phoneNumberParsed.format('E.164') : data.phone;
 
-    await axios.post('/api/messages', {
+    await axios.post('https://back-qhore.ondigitalocean.app/api/messages', {
       bien_id: bien.id, // Now it's safe to access bien.id
       name: data.name,
       email: data.email,
