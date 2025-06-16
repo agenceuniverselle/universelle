@@ -375,8 +375,18 @@ const handleEditImage = (index: number, isNew: boolean) => {
 };
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-<DialogContent   className="dialog-close max-w-2xl max-h-[90vh] overflow-auto bg-white text-gray-800 dark:bg-gray-900 dark:text-white">
-        <DialogHeader>
+<DialogContent
+  className="relative max-w-2xl max-h-[90vh] overflow-auto bg-white text-gray-800 dark:bg-gray-900 dark:text-white"
+>
+  {/* Close button personnalisé */}
+  <button
+    type="button"
+    onClick={handleClose}
+    className="absolute top-3 right-3 z-50 text-black dark:text-black hover:opacity-80"
+  >
+    <XCircle className="w-6 h-6" />
+  </button>    
+  <DialogHeader>
           <DialogTitle className="text-2xl font-bold text-center">
             {isEditing ? 'Modifier le Projet' : 'Ajouter un Nouveau Projet'}
           </DialogTitle>
