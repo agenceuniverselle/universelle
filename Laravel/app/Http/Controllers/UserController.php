@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use App\Models\Permission; // ✅ Assurez-vous que cette ligne est présente
+use Illuminate\Support\Facades\Cache;
 
 class UserController extends Controller
 {
