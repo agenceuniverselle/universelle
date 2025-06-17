@@ -22,6 +22,9 @@ class UserController extends Controller
         $role = $user->roles->first(); // récupérer le premier rôle
         $user->role = $role; // ajouter un attribut virtuel "role"
         unset($user->roles); // enlever "roles" si tu ne veux pas l'envoyer
+                // 🔥 Récupère la dernière connexion depuis le cache
+        $user->lastLogin = Cache::get("last_login_user_{$user->id}");
+
         return $user;
     });
 
