@@ -61,53 +61,50 @@ const ExclusiveOfferDialog: React.FC<ExclusiveOfferDialogProps> = ({ open, onOpe
   }, []);
 
   const onSubmit = async (values: ExclusiveOfferFormValues) => {
-    setIsSubmitting(true);
+  setIsSubmitting(true);
+  const token = localStorage.getItem('access_token');
 
-    // Récupération token
-    const token = localStorage.getItem('access_token');
-    if (!token) {
-      alert("Votre session a expiré. Veuillez vous reconnecter.");
-      onOpenChange(false);
-      setIsSubmitting(false);
-      return;
-    }
+  if (!token) {
+    alert("Votre session a expiré. Veuillez vous reconnecter.");
+    onOpenChange(false);
+    setIsSubmitting(false);
+    return;
+  }
 
-    try {
-      // Préparation des données à envoyer
-      const payload = {
-        propertyId: values.propertyId,
-        currentValue: values.currentValue,
-        monthlyRentalIncome: values.monthlyRentalIncome,
-        annualGrowthRate: values.annualGrowthRate,
-        durationYears: values.durationYears,
-        initialInvestment: values.initialInvestment,
-      };
+  try {
+    const payload = {
+      propertyId: parseInt(values.propertyId, 10),
+      currentValue: parseFloat(values.currentValue.replace(/,/g, '')),
+      monthlyRentalIncome: parseFloat(values.monthlyRentalIncome.replace(/,/g, '')),
+      annualGrowthRate: parseFloat(values.annualGrowthRate.replace(/,/g, '')),
+      durationYears: parseInt(values.durationYears, 10),
+      initialInvestment: parseFloat(values.initialInvestment.replace(/,/g, '')),
+    };
 
-      const response = await axios.post('https://back-qhore.ondigitalocean.app/api/exclusive-offers', payload, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+    const response = await axios.post('https://back-qhore.ondigitalocean.app/api/exclusive-offers', payload, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
 
-      toast({
-        title: 'Offre ajoutée',
-        description: 'Votre offre exclusive a été enregistrée avec succès.',
-      
-      });
+    toast({
+      title: 'Offre ajoutée',
+      description: 'Votre offre exclusive a été enregistrée avec succès.',
+    });
 
-      onOfferAdded(); // Notifier le parent
-      onOpenChange(false); // Fermer le dialog
-    } catch (error) {
-      console.error('Erreur lors de l\'ajout de l\'offre:', error);
-      toast({
-        title: 'Erreur',
-        description: error.response?.data?.message || error.message || 'Une erreur est survenue',
-        variant: 'destructive',
-      });
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+    onOfferAdded();
+    onOpenChange(false);
+  } catch (error) {
+    console.error("Erreur lors de l'ajout de l'offre:", error);
+    toast({
+      title: 'Erreur',
+      description: error.response?.data?.message || error.message || 'Une erreur est survenue',
+      variant: 'destructive',
+    });
+  } finally {
+    setIsSubmitting(false);
+  }
+};
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
