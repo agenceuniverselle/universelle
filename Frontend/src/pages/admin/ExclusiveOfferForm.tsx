@@ -72,20 +72,22 @@ const ExclusiveOfferDialog: React.FC<ExclusiveOfferDialogProps> = ({ open, onOpe
   }
 
   try {
-    const payload = {
-      propertyId: parseInt(values.propertyId, 10),
-      currentValue: parseFloat(values.currentValue.replace(/,/g, '')),
-      monthlyRentalIncome: parseFloat(values.monthlyRentalIncome.replace(/,/g, '')),
-      annualGrowthRate: parseFloat(values.annualGrowthRate.replace(/,/g, '')),
-      durationYears: parseInt(values.durationYears, 10),
-      initialInvestment: parseFloat(values.initialInvestment.replace(/,/g, '')),
-    };
+   const payload = {
+  property_id: parseInt(values.propertyId, 10),
+  current_value: parseFloat(values.currentValue.replace(/,/g, '')),
+  monthly_rental_income: parseFloat(values.monthlyRentalIncome.replace(/,/g, '')),
+  annual_growth_rate: parseFloat(values.annualGrowthRate.replace(/,/g, '')),
+  duration_years: parseInt(values.durationYears, 10),
+  initial_investment: parseFloat(values.initialInvestment.replace(/,/g, '')),
+};
 
-    const response = await axios.post('https://back-qhore.ondigitalocean.app/api/exclusive-offers', payload, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
+
+   await axios.post('https://back-qhore.ondigitalocean.app/api/exclusive-offers', payload, {
+  headers: {
+    Authorization: `Bearer ${token}`,
+  },
+});
+
 
     toast({
       title: 'Offre ajoutée',
