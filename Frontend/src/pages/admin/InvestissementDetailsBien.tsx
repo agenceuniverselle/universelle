@@ -38,7 +38,16 @@ const [investmentProperty, setInvestmentProperty] = useState<InvestmentProperty 
         data.partners = Array.isArray(data.partners) ? data.partners : JSON.parse(data.partners || '[]');
         data.images = Array.isArray(data.images) ? data.images : JSON.parse(data.images || '[]');
         data.documents = Array.isArray(data.documents) ? data.documents : JSON.parse(data.documents || '[]');
-
+data.investmentDetails = {
+        returnRate: data.returnRate,
+        minEntryPrice: data.minEntryPrice,
+        recommendedDuration: data.recommendedDuration,
+        investmentType: data.investmentType,
+        projectStatus: data.projectStatus,
+        financingEligibility: data.financingEligibility,
+        partners: data.partners,
+        documents: data.documents
+      };
         setInvestmentProperty(data);
       } catch (err) {
         toast({
@@ -135,7 +144,7 @@ const [investmentProperty, setInvestmentProperty] = useState<InvestmentProperty 
                 <p><strong>Chambres :</strong> {investmentProperty.bedrooms}</p>
                 <p><strong>Salles de bain :</strong> {investmentProperty.bathrooms}</p>
                 <p><strong>Description :</strong> {investmentProperty.description}</p>
-                <p><strong>Taux de rentabilité :</strong> {investmentProperty?.investmentDetails?.returnRate ?? 'N/A'} </p>
+                <p><strong>Taux de rentabilité :</strong> {investmentProperty?.investmentDetails?.returnRate ?? 'N/A'} %</p>
                 <p><strong>Prix d'entrée :</strong> {investmentProperty?.investmentDetails?.minEntryPrice} MAD</p>
                 <p><strong>Durée recommandée :</strong> {investmentProperty?.investmentDetails?.recommendedDuration}</p>
                 <p><strong>Financement :</strong>  {investmentProperty?.investmentDetails?.financingEligibility ? 'Éligible' : 'Non éligible'}</p>
