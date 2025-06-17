@@ -213,33 +213,35 @@ data.investmentDetails = {
 
             {/* Documents */}
             {investmentProperty?.investmentDetails?.documents?.length > 0 && (
-    <Card  className="w-full bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-100">
-                <CardHeader><CardTitle>Documents</CardTitle></CardHeader>
-                <CardContent>
-                  <ul className="list-disc list-inside text-blue-600">
-                    {investmentProperty?.investmentDetails?.documents.map((doc: string, index: number) => {
-                      const customNames = {
-                        0: "Brochure complète.pdf",
-                        1: "Plans détaillés.pdf"
-                      };
-                      const displayName = customNames[index] ?? doc.split('/').pop();
-                      return (
-                        <li key={index}>
-                          <a
-  href={`https://universelle-images.lon1.cdn.digitaloceanspaces.com/properties/documents/${docFileName}`}
-  download={displayName}
-  className="hover:underline"
->
-  {displayName}
-</a>
+  <Card className="w-full bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-100">
+    <CardHeader><CardTitle>Documents</CardTitle></CardHeader>
+    <CardContent>
+      <ul className="list-disc list-inside text-blue-600">
+        {investmentProperty?.investmentDetails?.documents.map((doc: string, index: number) => {
+          const customNames = {
+            0: "Brochure complète.pdf",
+            1: "Plans détaillés.pdf"
+          };
+          const displayName = customNames[index] ?? doc.split('/').pop();
 
-                        </li>
-                      );
-                    })}
-                  </ul>
-                </CardContent>
-              </Card>
-            )}
+          return (
+            <li key={index}>
+              <a
+                href={`https://universelle-images.lon1.cdn.digitaloceanspaces.com/properties/documents/${doc}`}
+                download={displayName}
+                className="hover:underline"
+              >
+                {displayName}
+              </a>
+            </li>
+          );
+        })}
+      </ul>
+    </CardContent>
+  </Card>
+)}
+
+            
           </div>
         </div>
   
