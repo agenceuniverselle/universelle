@@ -96,15 +96,40 @@ const InvestmentDetailDialog: React.FC<InvestmentDetailDialogProps> = ({
 
 
   // Fonction de téléchargement
-const handleDownload = (url: string, filename: string) => {
-  const link = document.createElement('a');
-  link.href = url;
-  link.setAttribute('download', filename); // forcera le nom du fichier
-  link.setAttribute('target', '_blank');
-  document.body.appendChild(link);
-  link.click();
-  link.remove();
+const handleDownload = async (url: string, filename: string) => {
+  try {
+    setIsDownloading(true);
+    const response = await fetch(url);
+    if (!response.ok) {
+      throw new Error('Erreur lors du téléchargement');
+    }
+
+    const blob = await response.blob();
+    const blobUrl = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = blobUrl;
+    link.setAttribute('download', filename);
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    window.URL.revokeObjectURL(blobUrl);
+
+    toast({
+      title: 'Téléchargement terminé',
+      description: `Le fichier ${filename} a été téléchargé avec succès.`,
+    });
+  } catch (error) {
+    toast({
+      title: 'Erreur',
+      description: `Le téléchargement a échoué : ${(error as Error).message}`,
+      variant: 'destructive',
+    });
+  } finally {
+    setIsDownloading(false);
+  }
 };
+
+
 
 
 
