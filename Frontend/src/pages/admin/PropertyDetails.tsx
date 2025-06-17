@@ -41,7 +41,7 @@ const PropertyDetails = () => {
       if (!bienId) return;
   
       try {
-        const res = await axios.get(`http://localhost:8000/api/biens/${bienId}`);
+        const res = await axios.get(`https://back-qhore.ondigitalocean.app/api/biens/${bienId}`);
         setProperty(res.data);
       } catch (err) {
         console.error("Erreur lors du chargement du bien :", err);
@@ -70,7 +70,7 @@ const handleDeleteProperty = async (id: string | null) => {
       return;
     }
 
-    await axios.delete(`http://localhost:8000/api/biens/${id}`, {
+    await axios.delete(`https://back-qhore.ondigitalocean.app/api/biens/${id}`, {
       headers: {
         Authorization: `Bearer ${token}`, // ✅ Ajout du token dans les headers
       },
@@ -251,18 +251,19 @@ const handleDeleteProperty = async (id: string | null) => {
       <p className="text-gray-600">{bien.proximite?.join(', ')}</p>
     </div>
     )}
- {bien.documents && bien.documents.length > 0 && (
+{bien.documents && bien.documents.length > 0 && (
   <div className="mt-6">
     <h3 className="font-semibold mb-2">Plan</h3>
     <a
-      href={`http://localhost:8000/api/download/${bien.id}`}
+      href={`https://universelle-images.lon1.cdn.digitaloceanspaces.com/Biens/documents/${bien.documents[0]}`}
       className="flex items-center text-sm text-blue-600 hover:underline"
-      download
+      download={`Plan_${bien.title.replace(/\s/g, '_')}.pdf`}
     >
       📄 Plan_{bien.title.replace(/\s/g, '_')}.pdf
     </a>
   </div>
 )}
+
 
 
   </CardContent>
@@ -281,11 +282,12 @@ const handleDeleteProperty = async (id: string | null) => {
     .filter((img: string) => !!img) // ← élimine les falsy (null, "", undefined)
     .map((img: string, index: number) => (
       <div key={index} className="aspect-video bg-gray-100 overflow-hidden rounded-md">
-        <img
-          src={`http://localhost:8000/${img}`}
-          alt={`Vue ${index + 1}`}
-          className="w-full h-full object-cover"
-        />
+      <img
+  src={`https://universelle-images.lon1.cdn.digitaloceanspaces.com/Biens/images/${img}`}
+  alt={`Vue ${index + 1}`}
+  className="w-full h-full object-cover"
+/>
+
       </div>
     ))
 ) : (
@@ -423,13 +425,13 @@ const handleDeleteProperty = async (id: string | null) => {
         const fileName = docPath.split('/').pop(); // nom réel du fichier
         return (
           <li key={index}>
-            <a
-              href={`http://localhost:8000/${docPath}`} // si les fichiers sont servis via public/storage
-              target="_blank"
-              rel="noopener noreferrer"
-              className="hover:underline"
-              download
-            >
+           <a
+  href={`https://universelle-images.lon1.cdn.digitaloceanspaces.com/Biens/documents/${docPath}`}
+  target="_blank"
+  rel="noopener noreferrer"
+  className="hover:underline"
+  download
+>
               {fileName}
             </a>
           </li>
