@@ -374,33 +374,40 @@ const InvestmentDetailDialog: React.FC<InvestmentDetailDialogProps> = ({
 
         <Separator className="my-4" />
 
-        <div className="space-y-4">
-          <h3 className="text-lg font-semibold">Documents disponibles</h3>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <Button
-              variant="outline"
-              className="flex items-center justify-between"
-              onClick={() => handleDownload(Number(property.id), 0)}
-            >
-              <div className="flex items-center">
-                <FileText className="h-4 w-4 mr-2" />
-                Brochure complète
-              </div>
-              <Download className="h-4 w-4 ml-2" />
-            </Button>
-            <Button
-              variant="outline"
-              className="flex items-center justify-between"
-              onClick={() => handleDownload(Number(property.id), 1)}
-            >
-              <div className="flex items-center">
-                <FileText className="h-4 w-4 mr-2" />
-                Plans détaillés
-              </div>
-              <Download className="h-4 w-4 ml-2" />
-            </Button>
+       {property.documents && property.documents.length > 0 && (
+  <>
+    <Separator className="my-4" />
+
+    <div className="space-y-4">
+      <h3 className="text-lg font-semibold">Documents disponibles</h3>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <Button
+          variant="outline"
+          className="flex items-center justify-between"
+          onClick={() => handleDownload(Number(property.id), 0)}
+        >
+          <div className="flex items-center">
+            <FileText className="h-4 w-4 mr-2" />
+            Brochure complète
           </div>
-        </div>
+          <Download className="h-4 w-4 ml-2" />
+        </Button>
+        <Button
+          variant="outline"
+          className="flex items-center justify-between"
+          onClick={() => handleDownload(Number(property.id), 1)}
+        >
+          <div className="flex items-center">
+            <FileText className="h-4 w-4 mr-2" />
+            Plans détaillés
+          </div>
+          <Download className="h-4 w-4 ml-2" />
+        </Button>
+      </div>
+    </div>
+  </>
+)}
+
 
         <DialogFooter className="flex flex-col sm:flex-row gap-3 mt-6">
           <Button
