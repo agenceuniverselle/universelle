@@ -439,33 +439,38 @@ $existingDocuments[] = Storage::disk('spaces')->url($storedPath);
 
 //delete documents 
 
-public function deleteDocumentAtIndex($id, $index)
+public function deleteDocumentAtIndex($id, $index): JsonResponse
 {
     $property = Property::findOrFail($id);
 
-    // S'assurer que documents est bien un tableau
     $documents = is_array($property->documents)
         ? $property->documents
-        : json_decode($property->documents, true);
+        : json_decode($property->documents ?? '[]', true);
 
-    // Vérifier l'existence de l'index demandé
     if (!isset($documents[$index])) {
-        return response()->json(['message' => 'Document introuvable'], 404);
+        return response()->json(['message' => 'Document introuvable à cet index.'], 404);
     }
 
-    // Supprimer le fichier du disque
-    $path = str_replace('storage/', '', $documents[$index]);
-    if (Storage::disk('public')->exists($path)) {
-        Storage::disk('public')->delete($path);
+    $documentUrl = $documents[$index];
+    $urlPrefix = 'https://universelle-images.lon1.cdn.digitaloceanspaces.com/';
+    $pathToDelete = str_replace($urlPrefix, '', $documentUrl);
+
+    // Supprimer du bucket Spaces
+    if (Storage::disk('spaces')->exists($pathToDelete)) {
+        Storage::disk('spaces')->delete($pathToDelete);
     }
 
-    // Supprimer l'entrée du tableau
-    array_splice($documents, $index, 1);
-    $property->documents = $documents;
+    // Mise à jour du tableau
+    unset($documents[$index]);
+    $property->documents = array_values($documents); // Réindexer
     $property->save();
 
-    return response()->json(['message' => 'Document supprimé avec succès']);
+    return response()->json([
+        'message' => 'Document supprimé avec succès',
+        'documents' => $property->documents,
+    ]);
 }
+
 //delete image 
 
 
@@ -503,7 +508,7 @@ public function deleteImageAtIndex($id, $index): JsonResponse
 
 
 //delete bien a investir 
-public function destroy($id)
+public function destroy($id): JsonResponse
 {
     $property = Property::find($id);
 
@@ -511,31 +516,33 @@ public function destroy($id)
         return response()->json(['message' => 'Bien non trouvé'], 404);
     }
 
-    // Supprimer les images liées
+    // Supprimer les images depuis Spaces
     $images = is_array($property->images) ? $property->images : json_decode($property->images ?? '[]', true);
     foreach ($images as $imgPath) {
-        $relativePath = str_replace('storage/', '', $imgPath);
-        \Storage::disk('public')->delete($relativePath);
+        $relativePath = str_replace('https://universelle-images.lon1.cdn.digitaloceanspaces.com/', '', $imgPath);
+        Storage::disk('spaces')->delete($relativePath);
     }
 
-    // Supprimer les documents liés
+    // Supprimer les documents depuis Spaces
     $documents = is_array($property->documents) ? $property->documents : json_decode($property->documents ?? '[]', true);
     foreach ($documents as $docPath) {
-        $relativePath = str_replace('storage/', '', $docPath);
-        \Storage::disk('public')->delete($relativePath);
+        $relativePath = str_replace('https://universelle-images.lon1.cdn.digitaloceanspaces.com/', '', $docPath);
+        Storage::disk('spaces')->delete($relativePath);
     }
+
     $propertyTitle = $property->title;
 
-    // Supprimer le bien
     $property->delete();
-// ✅ Journalisation de l'activité
-event(new ActivityLogged(
-    'delete_property',
-    "Le bien à investir {$propertyTitle} a été supprimé.",
-    Auth::check() ? Auth::id() : null
-));
+
+    event(new ActivityLogged(
+        'delete_property',
+        "Le bien à investir {$propertyTitle} a été supprimé.",
+        Auth::check() ? Auth::id() : null
+    ));
+
     return response()->json(['message' => 'Bien supprimé avec succès'], 200);
 }
+
 
 
 }
