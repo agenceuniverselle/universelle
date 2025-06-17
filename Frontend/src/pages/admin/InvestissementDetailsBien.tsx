@@ -157,12 +157,13 @@ const [investmentProperty, setInvestmentProperty] = useState<InvestmentProperty 
                 <CardHeader><CardTitle>Images</CardTitle></CardHeader>
                 <CardContent className="grid grid-cols-2 md:grid-cols-3 gap-4">
                   {investmentProperty.images.map((img: string, idx: number) => (
-                    <img
-                      key={idx}
-                      src={`http://localhost:8000/${img}`}
-                      alt={`Image ${idx}`}
-                      className="rounded-md border"
-                    />
+                   <img
+  key={idx}
+  src={`https://universelle-images.lon1.cdn.digitaloceanspaces.com/properties/images/${img}`}
+  alt={`Image ${idx}`}
+  className="rounded-md border"
+/>
+
                   ))}
                 </CardContent>
               </Card>
@@ -216,10 +217,13 @@ const [investmentProperty, setInvestmentProperty] = useState<InvestmentProperty 
                       return (
                         <li key={index}>
                           <a
-                            href={`http://localhost:8000/api/download/${investmentProperty.id}/${index}?v=${Date.now()}`}
-                            download={displayName}
-                            className="hover:underline"
-                          >
+  href={`https://universelle-images.lon1.cdn.digitaloceanspaces.com/properties/documents/${docFileName}`}
+  download={displayName}
+  className="hover:underline"
+>
+  {displayName}
+</a>
+
                             📄 {displayName}
                           </a>
                         </li>
