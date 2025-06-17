@@ -32,7 +32,7 @@ const [investmentProperty, setInvestmentProperty] = useState<InvestmentProperty 
   useEffect(() => {
     const fetchInvestmentProperty = async () => {
       try {
-        const res = await axios.get(`http://localhost:8000/api/properties/${propertyId}`);
+        const res = await axios.get(`https://back-qhore.ondigitalocean.app/api/properties/${propertyId}`);
         const data = res.data.data ?? res.data;
 
         data.partners = Array.isArray(data.partners) ? data.partners : JSON.parse(data.partners || '[]');
@@ -67,7 +67,7 @@ const [investmentProperty, setInvestmentProperty] = useState<InvestmentProperty 
         return;
       }
 
-      await axios.delete(`http://localhost:8000/api/properties/${propertyId}`, {
+      await axios.delete(`https://back-qhore.ondigitalocean.app/api/properties/${propertyId}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
