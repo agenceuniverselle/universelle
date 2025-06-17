@@ -199,7 +199,8 @@ const res = await axios.get(`https://back-qhore.ondigitalocean.app/api/blogs/${a
               articleId={article.id}
               onRate={async (selectedRating) => {
                 try {
-                  const res = await axios.post(https://back-qhore.ondigitalocean.app/api/blogs/${article.id}/rate, {
+                  const res = await axios.post(  `https://back-qhore.ondigitalocean.app/api/blogs/${article.id}/rate`,
+, {
                     rating: selectedRating,
                   });
                   setRating(res.data.rating);
