@@ -96,18 +96,24 @@ const InvestmentDetailDialog: React.FC<InvestmentDetailDialogProps> = ({
 
 
   // Fonction de téléchargement
-const handleDownload = async (url: string, filename: string) => {
+const handleDownload = async (
+  propertyId: number,
+  documentIndex: number,
+  filename: string
+) => {
   try {
-    const res = await fetch(url, {
-      method: 'GET',
-      mode: 'cors', // facultatif ici
-    });
+    const response = await fetch(
+      `https://back-qhore.ondigitalocean.app/api/download/${propertyId}/${documentIndex}`,
+      {
+        method: 'GET',
+      }
+    );
 
-    if (!res.ok) {
-      throw new Error('Le téléchargement a échoué.');
+    if (!response.ok) {
+      throw new Error('Le téléchargement a échoué. Vérifie que le document existe.');
     }
 
-    const blob = await res.blob();
+    const blob = await response.blob();
     const blobUrl = window.URL.createObjectURL(blob);
 
     const link = document.createElement('a');
@@ -115,14 +121,13 @@ const handleDownload = async (url: string, filename: string) => {
     link.download = filename;
     document.body.appendChild(link);
     link.click();
-
-    // Nettoyage
     link.remove();
+
     window.URL.revokeObjectURL(blobUrl);
 
     toast({
-      title: 'Téléchargement démarré',
-      description: `Le fichier ${filename} a été téléchargé.`,
+      title: 'Téléchargement en cours',
+      description: `${filename} a été lancé.`,
     });
   } catch (error) {
     toast({
@@ -130,10 +135,9 @@ const handleDownload = async (url: string, filename: string) => {
       description: (error as Error).message,
       variant: 'destructive',
     });
-    console.error('Erreur téléchargement:', error);
+    console.error('Erreur:', error);
   }
 };
-
 
 
 
@@ -389,15 +393,10 @@ const handleDownload = async (url: string, filename: string) => {
   <h3 className="text-lg font-semibold">Documents disponibles</h3>
 
   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-  <Button
+ <Button
   variant="outline"
   className="flex items-center justify-between"
-  onClick={() =>
-    handleDownload(
-      'https://universelle-images.lon1.cdn.digitaloceanspaces.com/properties/documents/gnmQE0taY1lbDfoYmkTMOKarkAvHqJwJ0kxEPStN.pdf',
-      'Brochure_complète.pdf'
-    )
-  }
+  onClick={() => handleDownload(property.id, 0, 'Brochure_complète.pdf')}
 >
   <div className="flex items-center">
     <FileText className="h-4 w-4 mr-2" />
@@ -409,12 +408,7 @@ const handleDownload = async (url: string, filename: string) => {
 <Button
   variant="outline"
   className="flex items-center justify-between"
-  onClick={() =>
-    handleDownload(
-      'https://universelle-images.lon1.cdn.digitaloceanspaces.com/properties/documents/Xx3B1YpHzD1vkoKY2AYU1vynCrF6W23IkqKcRK9q.pdf',
-      'Plans_détaillés.pdf'
-    )
-  }
+  onClick={() => handleDownload(property.id, 1, 'Plans_détaillés.pdf')}
 >
   <div className="flex items-center">
     <FileText className="h-4 w-4 mr-2" />
@@ -422,6 +416,7 @@ const handleDownload = async (url: string, filename: string) => {
   </div>
   <Download className="h-4 w-4 ml-2" />
 </Button>
+
 
   </div>
 </div>
