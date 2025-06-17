@@ -96,43 +96,46 @@ const InvestmentDetailDialog: React.FC<InvestmentDetailDialogProps> = ({
 
 
   // Fonction de téléchargement
-const handleDownload = (propertyId: number, documentIndex: number) => {
+const handleDownload = (documentUrl: string, filename: string) => {
   if (isDownloading) return;
-
-  const documentUrl = property.documents?.[documentIndex];
-
-  if (!documentUrl) {
-    toastSonner('Document non disponible', {
-      description: 'Aucun document trouvé pour ce bien.',
-    });
-    return;
-  }
 
   setIsDownloading(true);
 
   toastSonner('Téléchargement démarré', {
     description: 'Le document est en cours de téléchargement.',
+    action: {
+      label: 'Fermer',
+      onClick: () => {},
+    },
   });
 
-  try {
-    const link = document.createElement('a');
-    link.href = documentUrl;
-    link.setAttribute(
-      'download',
-      documentIndex === 0 ? 'Brochure_complète.pdf' : 'Plans_détaillés.pdf'
-    );
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  } catch (error) {
-    console.error('Erreur de téléchargement', error);
-    toastSonner('Échec du téléchargement', {
-      description: 'Impossible de télécharger le fichier.',
+  fetch(documentUrl)
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error('Erreur lors du téléchargement du document');
+      }
+      return response.blob();
+    })
+    .then((blob) => {
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    })
+    .catch((error) => {
+      console.error('Erreur de téléchargement', error);
+      toastSonner('Erreur', {
+        description: 'Impossible de télécharger le fichier.',
+        variant: 'destructive',
+      });
+    })
+    .finally(() => {
+      setIsDownloading(false);
     });
-  } finally {
-    setIsDownloading(false);
-  }
 };
+
 
   const handleDownloadBrochure = () => {
     toast({
