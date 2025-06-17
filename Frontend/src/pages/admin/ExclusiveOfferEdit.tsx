@@ -26,8 +26,8 @@ const ExclusiveOfferEdit = () => {
     const fetchData = async () => {
       try {
         const [offerRes, propertiesRes] = await Promise.all([
-          axios.get(`http://localhost:8000/api/exclusive-offers/${offerId}`),
-          axios.get('http://localhost:8000/api/properties')
+          axios.get(`https://back-qhore.ondigitalocean.app/api/exclusive-offers/${offerId}`),
+          axios.get('https://back-qhore.ondigitalocean.app/api/properties')
         ]);
 
         setOffer(offerRes.data.data ?? offerRes.data);
@@ -61,7 +61,7 @@ const ExclusiveOfferEdit = () => {
 
     // ✅ Requête de mise à jour avec le token
     await axios.put(
-      `http://localhost:8000/api/exclusive-offers/${offerId}`,
+      `https://back-qhore.ondigitalocean.app/api/exclusive-offers/${offerId}`,
       {
         property_id: offer.property_id.toString(), // ✅ Convertir en string
         current_value: offer.current_value ? offer.current_value.toString() : "0", // ✅ Convertir en string
