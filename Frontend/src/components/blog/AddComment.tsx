@@ -22,7 +22,7 @@ const AddComment = ({ articleId, onCommentAdded, parentId }: Props) => {
     setLoading(true);
 
     try {
-      await axios.post(`/api/blogs/${articleId}/comments`, {
+      await axios.post(`https://back-qhore.ondigitalocean.app/api/blogs/${articleId}/comments`, {
         first_name: firstName,
         last_name: lastName,
         email,
