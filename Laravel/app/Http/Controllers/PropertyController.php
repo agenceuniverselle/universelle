@@ -404,13 +404,13 @@ $existingDocuments[] = Storage::disk('spaces')->url($storedPath);
     }
 
     // ➕ Add new documents (max 2)
-    if ($request->hasFile('documents')) {
-        foreach ($request->file('documents') as $file) {
-            if (count($existingDocuments) >= 2) break;
-            $storedPath = $file->store('properties/documents', 'public');
-            $existingDocuments[] = 'storage/' . $storedPath;
-        }
+   if ($request->hasFile('documents')) {
+    foreach ($request->file('documents') as $file) {
+        if (count($existingDocuments) >= 2) break;
+        $storedPath = $file->store('properties/documents', 'spaces');
+        $existingDocuments[] = Storage::disk('spaces')->url($storedPath);
     }
+}
 
     // ✅ Final save for documents
     $property->documents = json_encode(array_values($existingDocuments));
