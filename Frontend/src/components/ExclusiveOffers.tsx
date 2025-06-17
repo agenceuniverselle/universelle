@@ -52,10 +52,10 @@ const ExclusiveOffers = () => {
   const [selectedPropertyForm, setSelectedPropertyForm] = useState<Property | null>(null);
   const [imageError, setImageError] = useState<{ [key: number]: boolean }>({});
 const formatNumber = (value: unknown): string => {
-  if (value === null || value === undefined) return 'N/A';
   const number = Number(value);
   return isNaN(number) ? 'N/A' : number.toLocaleString();
 };
+
 
 
 
@@ -210,9 +210,11 @@ const formatPercent = (value: unknown): string => {
     return currentValue * Math.pow(1 + rate / 100, years);
   };
 
-const calculateAnnualLocatif = (monthlyRental?: number) => {
-  return typeof monthlyRental === 'number' ? monthlyRental * 12 : null;
+const calculateAnnualLocatif = (monthlyRental?: number | string | null) => {
+  const value = Number(monthlyRental);
+  return isNaN(value) ? null : value * 12;
 };
+
 
 
   const calculateAnnualROI = (initial_investment: number, final_investment: number) => {
