@@ -49,7 +49,7 @@ const BlogArticle = ({ article, onBack, onSelectArticle }: BlogArticleProps) => 
   }, [article.id]);
   
   const fetchComments = async () => {
-    const res = await axios.get(`/api/blogs/${article.id}/comments`);
+    const res = await axios.get(`https://back-qhore.ondigitalocean.app/api/blogs/${article.id}/comments`);
     const formatted = res.data.map((comment: Comment) => ({
       ...comment,
       replies: comment.replies ?? [],
@@ -59,7 +59,7 @@ const BlogArticle = ({ article, onBack, onSelectArticle }: BlogArticleProps) => 
 
   const fetchSimilar = async () => {
     try {
-      const res = await axios.get(`/api/blogs/${article.id}/similaires`);
+      const res = await axios.get(`https://back-qhore.ondigitalocean.app/api/blogs/${article.id}/similaires`);
       setSimilarArticles(res.data);
     } catch (err) {
       console.error('Erreur lors du chargement des articles similaires', err);
@@ -195,7 +195,7 @@ const BlogArticle = ({ article, onBack, onSelectArticle }: BlogArticleProps) => 
               articleId={article.id}
               onRate={async (selectedRating) => {
                 try {
-                  const res = await axios.post(`/api/blogs/${article.id}/rate`, {
+                  const res = await axios.post(`https://back-qhore.ondigitalocean.app/api/blogs/${article.id}/rate`, {
                     rating: selectedRating,
                   });
                   setRating(res.data.rating);
