@@ -927,7 +927,11 @@ const InvestissementEdit = () => {
               <div key={i} className="relative group">
                 
                 <img
-  src={img.startsWith('blob:') ? img : `https://back-qhore.ondigitalocean.app/${img}`}
+  src={
+    img.startsWith('blob:')
+      ? img
+      : `https://universelle-images.lon1.cdn.digitaloceanspaces.com/${img}`
+  }
   alt={`Image ${i}`}
   className="rounded border object-cover w-full h-40"
 />
