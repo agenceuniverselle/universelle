@@ -225,56 +225,40 @@ $property->documents = $documents;
 public function downloadDocument($propertyId, $documentIndex)
 {
     try {
-        // Récupération du bien
         $property = Property::findOrFail($propertyId);
-
-        // Lecture sécurisée des documents
         $documentsRaw = $property->documents;
 
-        // Si déjà un tableau, ok
-        if (is_array($documentsRaw)) {
-            $documents = $documentsRaw;
-        } else {
-            // Sinon on tente de décoder
-            $documents = json_decode($documentsRaw, true);
-        }
+        $documents = is_array($documentsRaw)
+            ? $documentsRaw
+            : json_decode($documentsRaw, true) ?? [];
 
-        // Si échec ou pas un tableau
-        if (!is_array($documents)) {
-            \Log::error("⚠️ Documents mal formés pour property ID {$propertyId}: " . var_export($documentsRaw, true));
-            return response()->json(['error' => 'Données de documents invalides'], 500);
-        }
-
-        // Index demandé
-        $documentPath = $documents[(int)$documentIndex] ?? null;
-
-        if (!$documentPath || !is_string($documentPath)) {
+        if (!isset($documents[$documentIndex])) {
             return response()->json(['error' => 'Document non trouvé'], 404);
         }
 
-        // Chemin absolu
-        $relativePath = str_replace('storage/', '', $documentPath);
-        $absolutePath = storage_path('app/public/' . $relativePath);
+        $documentUrl = $documents[$documentIndex];
 
-        if (!file_exists($absolutePath)) {
-            \Log::error("Fichier manquant: {$absolutePath}");
-            return response()->json(['error' => 'Fichier introuvable'], 404);
+        // Extraire le chemin du fichier depuis l’URL publique
+        $urlPrefix = 'https://universelle-images.lon1.cdn.digitaloceanspaces.com/';
+        $path = str_replace($urlPrefix, '', $documentUrl);
+
+        if (!Storage::disk('spaces')->exists($path)) {
+            return response()->json(['error' => 'Fichier introuvable sur le bucket.'], 404);
         }
 
-        // Nom personnalisé facultatif
-        $customNames = [
-            0 => 'Brochure complète.pdf',
-            1 => 'Plans détaillés.pdf',
-        ];
+        // Récupérer le fichier depuis le bucket (en local temporaire)
+        $stream = Storage::disk('spaces')->readStream($path);
 
-        $downloadName = $customNames[$documentIndex] ?? basename($absolutePath);
+        return response()->streamDownload(function () use ($stream) {
+            fpassthru($stream);
+        }, basename($path));
 
-        return response()->download($absolutePath, $downloadName);
     } catch (\Exception $e) {
-        \Log::error("Erreur downloadDocument pour property ID {$propertyId}: " . $e->getMessage());
-        return response()->json(['error' => 'Erreur serveur'], 500);
+        \Log::error("Erreur téléchargement document depuis Spaces : " . $e->getMessage());
+        return response()->json(['error' => 'Erreur serveur.'], 500);
     }
 }
+
 
 //show 
 public function show($id)
