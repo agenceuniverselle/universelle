@@ -238,23 +238,30 @@ public function downloadDocument($propertyId, $documentIndex)
 
         $documentUrl = $documents[$documentIndex];
 
-        // Extraire le chemin du fichier depuis l’URL publique
+        // Supprime l’URL de début pour récupérer le chemin relatif
         $urlPrefix = 'https://universelle-images.lon1.cdn.digitaloceanspaces.com/';
-        $path = str_replace($urlPrefix, '', $documentUrl);
+        $relativePath = str_replace($urlPrefix, '', $documentUrl);
 
-        if (!Storage::disk('spaces')->exists($path)) {
-            return response()->json(['error' => 'Fichier introuvable sur le bucket.'], 404);
+        if (!Storage::disk('spaces')->exists($relativePath)) {
+            \Log::error("Fichier manquant dans Spaces : $relativePath");
+            return response()->json(['error' => 'Fichier introuvable dans Spaces.'], 404);
         }
 
-        // Récupérer le fichier depuis le bucket (en local temporaire)
-        $stream = Storage::disk('spaces')->readStream($path);
+        $stream = Storage::disk('spaces')->readStream($relativePath);
+
+        // Nom de téléchargement lisible
+        $customNames = [
+            0 => 'Brochure_complète.pdf',
+            1 => 'Plans_détaillés.pdf',
+        ];
+        $downloadName = $customNames[$documentIndex] ?? basename($relativePath);
 
         return response()->streamDownload(function () use ($stream) {
             fpassthru($stream);
-        }, basename($path));
+        }, $downloadName);
 
     } catch (\Exception $e) {
-        \Log::error("Erreur téléchargement document depuis Spaces : " . $e->getMessage());
+        \Log::error("Erreur lors du téléchargement du document ID {$propertyId}: " . $e->getMessage());
         return response()->json(['error' => 'Erreur serveur.'], 500);
     }
 }
