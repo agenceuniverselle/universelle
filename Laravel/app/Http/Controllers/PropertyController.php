@@ -379,26 +379,28 @@ public function update(Request $request, $id)
     foreach ($request->allFiles() as $key => $file) {
         Log::debug("Analyse du fichier reçu : $key");
 
-            if (preg_match('/^replace_images_(\d+)$/', $key, $matches)) {
+           if (preg_match('/^replace_images_(\d+)$/', $key, $matches)) {
+    $index = (int) $matches[1];
 
-            $index = (int) $matches[1];
-            if (isset($existingImages[$index])) {
-                $oldPath = str_replace('storage/', '', $existingImages[$index]);
-                Storage::disk('public')->delete($oldPath);
-            }
-            $storedPath = $file->store('properties/images', 'public');
-            $existingImages[$index] = 'storage/' . $storedPath;
-        }
+    // Supprime l'ancienne si tu veux
+    if (isset($existingImages[$index])) {
+        $oldPath = str_replace('https://universelle-images.lon1.cdn.digitaloceanspaces.com/', '', $existingImages[$index]);
+        Storage::disk('spaces')->delete($oldPath);
+    }
+
+    $storedPath = $file->store('properties/images', 'spaces');
+    $existingImages[$index] = Storage::disk('spaces')->url($storedPath);
+}
     }
 
     // ➕ 2. Add new images
-    if ($request->hasFile('images')) {
-        foreach ($request->file('images') as $file) {
-           $storedPath = $file->store('properties/images', 'spaces');
-$existingImages[$index] = Storage::disk('spaces')->url($storedPath);
-
-        }
+   if ($request->hasFile('images')) {
+    foreach ($request->file('images') as $file) {
+        $storedPath = $file->store('properties/images', 'spaces');
+        $existingImages[] = Storage::disk('spaces')->url($storedPath);
     }
+}
+
 
     // ✅ Final save for images
     $property->images = json_encode(array_values($existingImages));
@@ -488,13 +490,18 @@ public function deleteImageAtIndex($id, $index): JsonResponse
         return response()->json(['message' => 'Image introuvable à cet index.'], 404);
     }
 
-    $pathToDelete = str_replace('storage/', '', $images[$index]);
-    if (Storage::disk('public')->exists($pathToDelete)) {
-        Storage::disk('public')->delete($pathToDelete);
+    // Extraire le chemin relatif à partir de l'URL du bucket
+    $urlPrefix = 'https://universelle-images.lon1.cdn.digitaloceanspaces.com/';
+    $pathToDelete = str_replace($urlPrefix, '', $images[$index]);
+
+    // Supprimer l'image du bucket DigitalOcean Spaces
+    if (Storage::disk('spaces')->exists($pathToDelete)) {
+        Storage::disk('spaces')->delete($pathToDelete);
     }
 
+    // Supprimer l'entrée dans le tableau
     unset($images[$index]);
-    $property->images = array_values($images); // Réindexer
+    $property->images = array_values($images); // Réindexer les clés
     $property->save();
 
     return response()->json([
@@ -502,6 +509,7 @@ public function deleteImageAtIndex($id, $index): JsonResponse
         'images' => $property->images,
     ]);
 }
+
 
 //delete bien a investir 
 public function destroy($id)
