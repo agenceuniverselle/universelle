@@ -96,45 +96,16 @@ const InvestmentDetailDialog: React.FC<InvestmentDetailDialogProps> = ({
 
 
   // Fonction de téléchargement
-const handleDownload = (documentUrl: string, filename: string) => {
-  if (isDownloading) return;
-
-  setIsDownloading(true);
-
-  toastSonner('Téléchargement démarré', {
-    description: 'Le document est en cours de téléchargement.',
-    action: {
-      label: 'Fermer',
-      onClick: () => {},
-    },
-  });
-
-  fetch(documentUrl)
-    .then((response) => {
-      if (!response.ok) {
-        throw new Error('Erreur lors du téléchargement du document');
-      }
-      return response.blob();
-    })
-    .then((blob) => {
-      const link = document.createElement('a');
-      link.href = URL.createObjectURL(blob);
-      link.download = filename;
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-    })
-    .catch((error) => {
-      console.error('Erreur de téléchargement', error);
-      toastSonner('Erreur', {
-        description: 'Impossible de télécharger le fichier.',
-        variant: 'destructive',
-      });
-    })
-    .finally(() => {
-      setIsDownloading(false);
-    });
+const handleDownload = (url: string, filename: string) => {
+  const link = document.createElement('a');
+  link.href = url;
+  link.setAttribute('download', filename); // forcera le nom du fichier
+  link.setAttribute('target', '_blank');
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
 };
+
 
 
   const handleDownloadBrochure = () => {
@@ -385,33 +356,46 @@ const handleDownload = (documentUrl: string, filename: string) => {
   <>
     <Separator className="my-4" />
 
-    <div className="space-y-4">
-      <h3 className="text-lg font-semibold">Documents disponibles</h3>
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        <Button
-          variant="outline"
-          className="flex items-center justify-between"
-          onClick={() => handleDownload(Number(property.id), 0)}
-        >
-          <div className="flex items-center">
-            <FileText className="h-4 w-4 mr-2" />
-            Brochure complète
-          </div>
-          <Download className="h-4 w-4 ml-2" />
-        </Button>
-        <Button
-          variant="outline"
-          className="flex items-center justify-between"
-          onClick={() => handleDownload(Number(property.id), 1)}
-        >
-          <div className="flex items-center">
-            <FileText className="h-4 w-4 mr-2" />
-            Plans détaillés
-          </div>
-          <Download className="h-4 w-4 ml-2" />
-        </Button>
+   <div className="space-y-4 mt-4">
+  <h3 className="text-lg font-semibold">Documents disponibles</h3>
+
+  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+    <Button
+      variant="outline"
+      className="flex items-center justify-between"
+      onClick={() =>
+        handleDownload(
+          'https://universelle-images.lon1.cdn.digitaloceanspaces.com/properties/documents/gnmQE0taY1lbDfoYmkTMOKarkAvHqJwJ0kxEPStN.pdf',
+          'Brochure_complète.pdf'
+        )
+      }
+    >
+      <div className="flex items-center">
+        <FileText className="h-4 w-4 mr-2" />
+        Brochure complète
       </div>
-    </div>
+      <Download className="h-4 w-4 ml-2" />
+    </Button>
+
+    <Button
+      variant="outline"
+      className="flex items-center justify-between"
+      onClick={() =>
+        handleDownload(
+          'https://universelle-images.lon1.cdn.digitaloceanspaces.com/properties/documents/Xx3B1YpHzD1vkoKY2AYU1vynCrF6W23IkqKcRK9q.pdf',
+          'Plans_détaillés.pdf'
+        )
+      }
+    >
+      <div className="flex items-center">
+        <FileText className="h-4 w-4 mr-2" />
+        Plans détaillés
+      </div>
+      <Download className="h-4 w-4 ml-2" />
+    </Button>
+  </div>
+</div>
+
   </>
 )}
 
