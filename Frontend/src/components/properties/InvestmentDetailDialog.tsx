@@ -96,40 +96,48 @@ const InvestmentDetailDialog: React.FC<InvestmentDetailDialogProps> = ({
 
 
   // Fonction de téléchargement
-  const handleDownload = (propertyId: number, documentIndex: number) => {
-    if (isDownloading) return; // Empêche le double clic si le téléchargement est déjà en cours
+ const handleDownload = (propertyId: number, documentIndex: number) => {
+  if (isDownloading) return;
 
-    setIsDownloading(true); // Marquer le téléchargement comme en cours
-    // Toast démarrage
-    toastSonner('Téléchargement démarré', {
-      description: 'Le plan est en cours de téléchargement.',
-      action: {
-        label: 'Fermer',
-        onClick: () => {},
-      },
+  const documentUrl = property.documents?.[documentIndex];
+
+  if (!documentUrl) {
+    toastSonner('Document non disponible', {
+      description: 'Aucun document trouvé pour ce bien.',
     });
+    return;
+  }
 
-    fetch(`https://back-qhore.ondigitalocean.app/api/download/${propertyId}/${documentIndex}`)
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error('Erreur lors du téléchargement du document');
-        }
-        return response.blob(); // Récupérer le fichier
-      })
-      .then((blob) => {
-        const link = document.createElement('a');
-        link.href = URL.createObjectURL(blob);
-        link.download =
-          documentIndex === 0 ? 'Brochure_complète.pdf' : 'Plans_détaillés.pdf';
-        link.click();
-      })
-      .catch((error) => {
-        console.error('Erreur de téléchargement', error);
-      })
-      .finally(() => {
-        setIsDownloading(false); // Réinitialiser l'état du téléchargement
+  setIsDownloading(true);
+
+  toastSonner('Téléchargement démarré', {
+    description: 'Le document est en cours de téléchargement.',
+  });
+
+  fetch(documentUrl)
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error('Erreur lors du téléchargement du document');
+      }
+      return response.blob();
+    })
+    .then((blob) => {
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download =
+        documentIndex === 0 ? 'Brochure_complète.pdf' : 'Plans_détaillés.pdf';
+      link.click();
+    })
+    .catch((error) => {
+      console.error('Erreur de téléchargement', error);
+      toastSonner('Échec du téléchargement', {
+        description: 'Impossible de télécharger le fichier.',
       });
-  };
+    })
+    .finally(() => {
+      setIsDownloading(false);
+    });
+};
 
   const handleDownloadBrochure = () => {
     toast({
