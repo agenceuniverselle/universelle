@@ -142,15 +142,22 @@ public function uploadImage(Request $request)
 {
     $request->validate([
         'image' => 'required|image|mimes:jpeg,png,jpg,gif,svg,webp,avif|max:2048',
-
     ]);
 
     if ($request->hasFile('image')) {
-        $path = $request->file('image')->store('uploads/blog', 'public');
+        $file = $request->file('image');
+        $filename = uniqid('blog_', true) . '.' . $file->getClientOriginalExtension();
+        $path = "Blog/images/$filename";
 
-        return response()->json([
-            'url' => asset('storage/' . $path)
-        ]);
+        $success = \Storage::disk('spaces')->put($path, file_get_contents($file), 'public');
+
+        if ($success) {
+            return response()->json([
+                'url' => \Storage::disk('spaces')->url($path)
+            ]);
+        }
+
+        return response()->json(['error' => 'Échec de l\'upload'], 500);
     }
 
     return response()->json(['error' => 'Aucun fichier trouvé'], 400);
