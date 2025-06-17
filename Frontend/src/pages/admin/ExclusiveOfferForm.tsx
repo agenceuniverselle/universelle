@@ -83,7 +83,7 @@ const ExclusiveOfferDialog: React.FC<ExclusiveOfferDialogProps> = ({ open, onOpe
         initialInvestment: values.initialInvestment,
       };
 
-      const response = await axios.post('/api/exclusive-offers', payload, {
+      const response = await axios.post('https://back-qhore.ondigitalocean.app/api/exclusive-offers', payload, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
