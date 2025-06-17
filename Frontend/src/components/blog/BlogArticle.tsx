@@ -163,9 +163,7 @@ const BlogArticle = ({ article, onBack, onSelectArticle }: BlogArticleProps) => 
               <Button variant="outline" size="icon">
                 <Share2 size={16} />
               </Button>
-              <Button variant="outline" size="icon">
-                <Bookmark size={16} />
-              </Button>
+              
             </div>
           </div>
         </div>
