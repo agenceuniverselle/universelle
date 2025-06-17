@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Auth;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use Carbon\Carbon;
 use App\Models\User;
+use Illuminate\Support\Facades\Cache;
 
 class JwtAuthController extends Controller
 {
@@ -32,8 +33,7 @@ class JwtAuthController extends Controller
         // ✅ Mettre à jour la date de dernière connexion
        $user = auth()->user();
 if ($user instanceof User) {
-    $user->last_login = Carbon::now();
-    $user->save(); // ✅ Intelephense recognizes save() after type check
+    Cache::put("last_login_user_{$user->id}", now()->toDateTimeString(), now()->addDays(7));
 }
 
         return response()->json([
