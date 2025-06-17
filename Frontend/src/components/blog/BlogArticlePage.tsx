@@ -13,7 +13,7 @@ const BlogDetailPage = () => {
   useEffect(() => {
     const fetchArticle = async () => {
       try {
-        const response = await axios.get(`/api/blogs/${id}`);
+        const response = await axios.get(`https://back-qhore.ondigitalocean.app/api/blogs/${id}`);
         setArticle(response.data);
       } catch (error) {
         console.error('Erreur lors du chargement de l’article', error);
