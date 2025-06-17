@@ -18,6 +18,9 @@ class EventServiceProvider extends ServiceProvider
         \App\Events\ActivityLogged::class => [
             \App\Listeners\LogActivityListener::class,
         ],
+    \Illuminate\Auth\Events\Login::class => [
+        \App\Listeners\LogUserLogin::class,
+    ],
     ];
 
     /**
