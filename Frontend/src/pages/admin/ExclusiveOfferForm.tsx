@@ -51,7 +51,7 @@ const ExclusiveOfferDialog: React.FC<ExclusiveOfferDialogProps> = ({ open, onOpe
   useEffect(() => {
     const fetchProperties = async () => {
       try {
-        const { data } = await axios.get('/api/properties');
+        const { data } = await axios.get('https://back-qhore.ondigitalocean.app/api/properties');
         setProperties(data.data || []);
       } catch (error) {
         console.error('Erreur récupération propriétés:', error);
