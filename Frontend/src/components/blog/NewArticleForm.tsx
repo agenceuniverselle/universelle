@@ -117,7 +117,7 @@ const NewArticleForm = ({ open, onOpenChange, onSubmit }: NewArticleFormProps) =
     formData.append('image', file);
   
     try {
-      const res = await axios.post('/api/admin/upload', formData, {
+      const res = await axios.post('https://back-qhore.ondigitalocean.app/api/admin/upload', formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
   
