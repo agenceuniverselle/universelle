@@ -78,7 +78,7 @@ const [article, setArticle] = useState<Partial<BlogPost>>({});
   // Initial fetch & styles
 useEffect(() => {
   if (id) {
-    axios.get(`/api/admin/blogs/${id}`).then((res) => {
+    axios.get(`https://back-qhore.ondigitalocean.app/api/admin/blogs/${id}`).then((res) => {
       const data = res.data;
       setArticle(data);
       setAuthorType(data.author_type);
@@ -226,7 +226,7 @@ useEffect(() => {
     formData.append('image', file);
 
     try {
-      const res = await axios.post('/api/admin/upload', formData);
+      const res = await axios.post('https://back-qhore.ondigitalocean.app/api/admin/upload', formData);
       const url = res.data.url;
 
       if (imageToReplace) {
@@ -301,7 +301,7 @@ const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
       }
   
       await axios.post(
-        `http://localhost:8000/api/blogs/${id}?_method=PUT`, // simulate PUT via POST
+        `https://back-qhore.ondigitalocean.app/api/blogs/${id}?_method=PUT`, // simulate PUT via POST
         formData,
         {
           headers: {
