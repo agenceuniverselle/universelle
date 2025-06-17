@@ -224,8 +224,6 @@ const [investmentProperty, setInvestmentProperty] = useState<InvestmentProperty 
   {displayName}
 </a>
 
-                            📄 {displayName}
-                          </a>
                         </li>
                       );
                     })}
