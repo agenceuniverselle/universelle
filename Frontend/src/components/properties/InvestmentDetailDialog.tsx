@@ -86,13 +86,14 @@ const InvestmentDetailDialog: React.FC<InvestmentDetailDialogProps> = ({
   const [isDownloading, setIsDownloading] = useState(false);
 
   const getImageUrl = (imagePath: string): string => {
-    if (!imagePath)
-      return 'https://via.placeholder.com/600x400?text=Image+indisponible';
+  if (!imagePath)
+    return 'https://via.placeholder.com/600x400?text=Image+indisponible';
 
-    return imagePath.startsWith('http')
-      ? imagePath
-      : `http://localhost:8000/${imagePath}`;
-  };
+  return imagePath.startsWith('http')
+    ? imagePath
+    : `https://back-qhore.ondigitalocean.app/${imagePath}`;
+};
+
 
   // Fonction de téléchargement
   const handleDownload = (propertyId: number, documentIndex: number) => {
@@ -108,7 +109,7 @@ const InvestmentDetailDialog: React.FC<InvestmentDetailDialogProps> = ({
       },
     });
 
-    fetch(`http://localhost:8000/api/download/${propertyId}/${documentIndex}`)
+    fetch(`https://back-qhore.ondigitalocean.app/api/download/${propertyId}/${documentIndex}`)
       .then((response) => {
         if (!response.ok) {
           throw new Error('Erreur lors du téléchargement du document');
