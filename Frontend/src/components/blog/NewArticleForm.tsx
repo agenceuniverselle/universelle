@@ -210,7 +210,7 @@ const NewArticleForm = ({ open, onOpenChange, onSubmit }: NewArticleFormProps) =
       }
   
       // ✅ Requête sécurisée avec le token
-      const res = await axios.post('/api/admin/blogs', formData, {
+      const res = await axios.post('https://back-qhore.ondigitalocean.app/api/admin/blogs', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
           Authorization: `Bearer ${token}`, // ✅ Ajout du token dans les headers
