@@ -34,7 +34,6 @@ const [investmentProperty, setInvestmentProperty] = useState<InvestmentProperty 
       try {
         const res = await axios.get(`https://back-qhore.ondigitalocean.app/api/properties/${propertyId}`);
         const data = res.data.data ?? res.data;
-console.log("Réponse API complète :", data);
 
         data.partners = Array.isArray(data.partners) ? data.partners : JSON.parse(data.partners || '[]');
         data.images = Array.isArray(data.images) ? data.images : JSON.parse(data.images || '[]');
@@ -136,7 +135,7 @@ console.log("Réponse API complète :", data);
                 <p><strong>Chambres :</strong> {investmentProperty.bedrooms}</p>
                 <p><strong>Salles de bain :</strong> {investmentProperty.bathrooms}</p>
                 <p><strong>Description :</strong> {investmentProperty.description}</p>
-                <p><strong>Taux de rentabilité :</strong> {investmentProperty?.investmentDetails?.returnRate ?? 'N/A'}%</p>
+                <p><strong>Taux de rentabilité :</strong> {investmentProperty?.investmentDetails?.returnRate ?? 'N/A'} </p>
                 <p><strong>Prix d'entrée :</strong> {investmentProperty?.investmentDetails?.minEntryPrice} MAD</p>
                 <p><strong>Durée recommandée :</strong> {investmentProperty?.investmentDetails?.recommendedDuration}</p>
                 <p><strong>Financement :</strong>  {investmentProperty?.investmentDetails?.financingEligibility ? 'Éligible' : 'Non éligible'}</p>
