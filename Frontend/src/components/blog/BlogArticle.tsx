@@ -26,7 +26,7 @@ const BlogArticle = ({ article, onBack, onSelectArticle }: BlogArticleProps) => 
   const [rating, setRating] = useState(article.rating || 0);
   const [ratingCount, setRatingCount] = useState(article.rating_count || 0);
   const [showAllComments, setShowAllComments] = useState(false);
-  const hasRated = localStorage.getItem(rated-stars-${article.id});
+const hasRated = localStorage.getItem(`rated-stars-${article.id}`);
 
   
   useEffect(() => {
@@ -49,7 +49,7 @@ const BlogArticle = ({ article, onBack, onSelectArticle }: BlogArticleProps) => 
   }, [article.id]);
   
   const fetchComments = async () => {
-    const res = await axios.get(https://back-qhore.ondigitalocean.app/api/blogs/${article.id}/comments);
+const res = await axios.get(`https://back-qhore.ondigitalocean.app/api/blogs/${article.id}/comments`);
     const formatted = res.data.map((comment: Comment) => ({
       ...comment,
       replies: comment.replies ?? [],
@@ -60,7 +60,7 @@ const BlogArticle = ({ article, onBack, onSelectArticle }: BlogArticleProps) => 
   const fetchSimilar = async () => {
   if (!article.id) return; // ← NE PAS CONTINUER si pas d'ID
   try {
-    const res = await axios.get(https://back-qhore.ondigitalocean.app/api/blogs/${article.id}/similaires);
+    const res = await axios.get(`https://back-qhore.ondigitalocean.app/api/blogs/${article.id}/similaires`);
     setSimilarArticles(res.data);
   } catch (err) {
     console.error('Erreur lors du chargement des articles similaires', err);
