@@ -96,27 +96,44 @@ const InvestmentDetailDialog: React.FC<InvestmentDetailDialogProps> = ({
 
 
   // Fonction de téléchargement
-const handleDownload = (url: string, filename: string) => {
+const handleDownload = async (url: string, filename: string) => {
   try {
+    const res = await fetch(url, {
+      method: 'GET',
+      mode: 'cors', // facultatif ici
+    });
+
+    if (!res.ok) {
+      throw new Error('Le téléchargement a échoué.');
+    }
+
+    const blob = await res.blob();
+    const blobUrl = window.URL.createObjectURL(blob);
+
     const link = document.createElement('a');
-    link.href = url;
-    link.setAttribute('download', filename); // Forcer le téléchargement
+    link.href = blobUrl;
+    link.download = filename;
     document.body.appendChild(link);
     link.click();
-    document.body.removeChild(link);
+
+    // Nettoyage
+    link.remove();
+    window.URL.revokeObjectURL(blobUrl);
 
     toast({
       title: 'Téléchargement démarré',
-      description: `Le fichier ${filename} est en cours de téléchargement.`,
+      description: `Le fichier ${filename} a été téléchargé.`,
     });
   } catch (error) {
     toast({
-      title: 'Erreur',
-      description: `Impossible de lancer le téléchargement.`,
+      title: 'Erreur de téléchargement',
+      description: (error as Error).message,
       variant: 'destructive',
     });
+    console.error('Erreur téléchargement:', error);
   }
 };
+
 
 
 
@@ -372,7 +389,7 @@ const handleDownload = (url: string, filename: string) => {
   <h3 className="text-lg font-semibold">Documents disponibles</h3>
 
   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-   <Button
+  <Button
   variant="outline"
   className="flex items-center justify-between"
   onClick={() =>
