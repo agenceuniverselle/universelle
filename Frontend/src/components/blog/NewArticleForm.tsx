@@ -117,11 +117,12 @@ const NewArticleForm = ({ open, onOpenChange, onSubmit }: NewArticleFormProps) =
     formData.append('image', file);
   
     try {
-      const res = await axios.post('https://back-qhore.ondigitalocean.app/api/admin/upload', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' }
-      });
-  
-      const imageUrl = res.data.url;
+     const res = await axios.post('https://back-qhore.ondigitalocean.app/api/admin/upload', formData, {
+  headers: { 'Content-Type': 'multipart/form-data' }
+});
+
+const imageUrl = res.data.url;
+
   
       const div = excerptRef.current;
       if (!div) return;
