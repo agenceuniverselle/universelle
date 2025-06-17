@@ -98,7 +98,7 @@ const InvestissementEdit = () => {
       setIsDeleting(true);
   
       if (deleteTarget.type === 'document') {
-        await axios.delete(`https://back-qhore.ondigitalocean.app/api/properties/${propertyId}/documents/${deleteTarget.index}`);
+        await axios.delete(`https://back-qhore.ondigitalocean.app/api/properties/${propertyId}/document/${deleteTarget.index}`);
         const updated = [...bien.documents];
         updated.splice(deleteTarget.index, 1);
         setBien(prev => ({ ...prev, documents: updated }));
