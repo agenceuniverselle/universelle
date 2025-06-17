@@ -256,7 +256,7 @@ const InvestmentDetailDialog: React.FC<InvestmentDetailDialogProps> = ({
                   <span className="text-gray-700">Prix d'entrée minimum</span>
                 </div>
                 <span className="font-medium">
-                  {investmentDetails?.minEntryPrice || property.price}MAD
+                  {investmentDetails?.minEntryPrice || property.price} MAD
                 </span>
               </div>
 
@@ -266,7 +266,7 @@ const InvestmentDetailDialog: React.FC<InvestmentDetailDialogProps> = ({
                   <span className="text-gray-700">Rendement estimé</span>
                 </div>
                 <span className="font-medium text-green-600">
-                  {investmentDetails?.returnRate || property.return}%
+                  {investmentDetails?.returnRate || property.return} %
                 </span>
               </div>
 
@@ -275,7 +275,7 @@ const InvestmentDetailDialog: React.FC<InvestmentDetailDialogProps> = ({
                   <Clock className="h-5 w-5 mr-2 text-luxe-blue" />
                   <span className="text-gray-700">Durée recommandée</span>
                 </div>
-                <span className="font-medium">{investmentDetails?.recommendedDuration || 'N/A'}Ans</span>
+                <span className="font-medium">{investmentDetails?.recommendedDuration || 'N/A'} Ans</span>
               </div>
 
               <div className="flex justify-between items-center p-3 bg-gray-50 rounded-md">
