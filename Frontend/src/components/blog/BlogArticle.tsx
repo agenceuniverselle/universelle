@@ -58,13 +58,15 @@ const BlogArticle = ({ article, onBack, onSelectArticle }: BlogArticleProps) => 
   };
 
   const fetchSimilar = async () => {
-    try {
-      const res = await axios.get(`https://back-qhore.ondigitalocean.app/api/blogs/${article.id}/similaires`);
-      setSimilarArticles(res.data);
-    } catch (err) {
-      console.error('Erreur lors du chargement des articles similaires', err);
-    }
-  };
+  if (!article.id) return; // ← NE PAS CONTINUER si pas d'ID
+  try {
+    const res = await axios.get(`https://back-qhore.ondigitalocean.app/api/blogs/${article.id}/similaires`);
+    setSimilarArticles(res.data);
+  } catch (err) {
+    console.error('Erreur lors du chargement des articles similaires', err);
+  }
+};
+
 
   const cleanedExcerpt = (() => {
     const div = document.createElement('div');
