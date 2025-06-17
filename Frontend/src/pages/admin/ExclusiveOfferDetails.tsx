@@ -30,7 +30,7 @@ const canDeleteOffers = permissions.includes("delete_exclusive_offers");
   useEffect(() => {
     const fetchOffer = async () => {
       try {
-        const res = await axios.get(`http://localhost:8000/api/exclusive-offers/${offerId}`);
+        const res = await axios.get(`https://back-qhore.ondigitalocean.app/api/exclusive-offers/${offerId}`);
         setOffer(res.data.data || res.data);
       } catch (error) {
         toast({ title: "Erreur", description: "Offre introuvable.", variant: "destructive" });
@@ -57,7 +57,7 @@ const canDeleteOffers = permissions.includes("delete_exclusive_offers");
       }
   
       // ✅ Requête de suppression avec le token
-      await axios.delete(`http://localhost:8000/api/exclusive-offers/${offerId}`, {
+      await axios.delete(`https://back-qhore.ondigitalocean.app/api/exclusive-offers/${offerId}`, {
         headers: {
           Authorization: `Bearer ${token}`, // ✅ Ajout du token dans les headers
         },
@@ -139,12 +139,13 @@ const canDeleteOffers = permissions.includes("delete_exclusive_offers");
                 <CardHeader><CardTitle>Images du bien</CardTitle></CardHeader>
                 <CardContent className="grid grid-cols-2 md:grid-cols-3 gap-4">
                   {property.images.map((img: string, idx: number) => (
-                    <img
-                      key={idx}
-                      src={`http://localhost:8000/${img}`}
-                      alt={`Image ${idx}`}
-                      className="rounded-md border"
-                    />
+                   <img
+  key={idx}
+  src={`https://universelle-images.lon1.cdn.digitaloceanspaces.com/properties/images/${img}`}
+  alt={`Image ${idx}`}
+  className="rounded-md border"
+/>
+
                   ))}
                 </CardContent>
               </Card>
