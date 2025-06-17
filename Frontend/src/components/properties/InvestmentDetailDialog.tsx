@@ -120,9 +120,6 @@ const handleDownload = (url: string, filename: string) => {
 
 
 
-
-
-
   const handleDownloadBrochure = () => {
     toast({
       title: 'Téléchargement démarré',
@@ -375,39 +372,40 @@ const handleDownload = (url: string, filename: string) => {
   <h3 className="text-lg font-semibold">Documents disponibles</h3>
 
   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-    <Button
-      variant="outline"
-      className="flex items-center justify-between"
-      onClick={() =>
-        handleDownload(
-          'https://universelle-images.lon1.cdn.digitaloceanspaces.com/properties/documents/gnmQE0taY1lbDfoYmkTMOKarkAvHqJwJ0kxEPStN.pdf',
-          'Brochure_complète.pdf'
-        )
-      }
-    >
-      <div className="flex items-center">
-        <FileText className="h-4 w-4 mr-2" />
-        Brochure complète
-      </div>
-      <Download className="h-4 w-4 ml-2" />
-    </Button>
+   <Button
+  variant="outline"
+  className="flex items-center justify-between"
+  onClick={() =>
+    handleDownload(
+      'https://universelle-images.lon1.cdn.digitaloceanspaces.com/properties/documents/gnmQE0taY1lbDfoYmkTMOKarkAvHqJwJ0kxEPStN.pdf',
+      'Brochure_complète.pdf'
+    )
+  }
+>
+  <div className="flex items-center">
+    <FileText className="h-4 w-4 mr-2" />
+    Brochure complète
+  </div>
+  <Download className="h-4 w-4 ml-2" />
+</Button>
 
-    <Button
-      variant="outline"
-      className="flex items-center justify-between"
-      onClick={() =>
-        handleDownload(
-          'https://universelle-images.lon1.cdn.digitaloceanspaces.com/properties/documents/Xx3B1YpHzD1vkoKY2AYU1vynCrF6W23IkqKcRK9q.pdf',
-          'Plans_détaillés.pdf'
-        )
-      }
-    >
-      <div className="flex items-center">
-        <FileText className="h-4 w-4 mr-2" />
-        Plans détaillés
-      </div>
-      <Download className="h-4 w-4 ml-2" />
-    </Button>
+<Button
+  variant="outline"
+  className="flex items-center justify-between"
+  onClick={() =>
+    handleDownload(
+      'https://universelle-images.lon1.cdn.digitaloceanspaces.com/properties/documents/Xx3B1YpHzD1vkoKY2AYU1vynCrF6W23IkqKcRK9q.pdf',
+      'Plans_détaillés.pdf'
+    )
+  }
+>
+  <div className="flex items-center">
+    <FileText className="h-4 w-4 mr-2" />
+    Plans détaillés
+  </div>
+  <Download className="h-4 w-4 ml-2" />
+</Button>
+
   </div>
 </div>
 
