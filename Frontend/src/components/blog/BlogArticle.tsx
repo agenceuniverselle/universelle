@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import StarRating from '@/components/ui/StarRating';
-import { ArrowLeft, Calendar, Share2, Bookmark } from 'lucide-react';
+import { ArrowLeft, Calendar, Share2, Bookmark,Facebook,Twitter,Linkedin,Copy,X,Instagram, } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -27,6 +27,15 @@ const BlogArticle = ({ article, onBack, onSelectArticle }: BlogArticleProps) => 
   const [ratingCount, setRatingCount] = useState(article.rating_count || 0);
   const [showAllComments, setShowAllComments] = useState(false);
   const hasRated = localStorage.getItem(`rated-stars-${article.id}`);
+  const [showSharePopup, setShowSharePopup] = useState(false);
+const copyLink = async () => {
+  try {
+    await navigator.clipboard.writeText(window.location.href);
+    alert("Lien copié dans le presse-papiers !");
+  } catch (err) {
+    alert("Échec de la copie du lien");
+  }
+};
 
   useEffect(() => {
     setRating(article.rating || 0);
@@ -89,6 +98,17 @@ const BlogArticle = ({ article, onBack, onSelectArticle }: BlogArticleProps) => 
       year: 'numeric',
     });
   };
+useEffect(() => {
+  const handleClickOutside = (event: MouseEvent) => {
+    const target = event.target as HTMLElement;
+    if (!target.closest('.relative')) {
+      setShowSharePopup(false);
+    }
+  };
+
+  document.addEventListener('click', handleClickOutside);
+  return () => document.removeEventListener('click', handleClickOutside);
+}, []);
 
   const countTotalComments = (comments: Comment[]): number => {
     return comments.reduce((total, comment) => {
@@ -159,12 +179,92 @@ const BlogArticle = ({ article, onBack, onSelectArticle }: BlogArticleProps) => 
               </div>
             </div>
 
-            <div className="flex gap-2">
-              <Button variant="outline" size="icon">
-                <Share2 size={16} />
-              </Button>
-              
-            </div>
+           <div className="relative">
+  <Button
+    variant="outline"
+    size="icon"
+    onClick={() => setShowSharePopup(!showSharePopup)}
+  >
+    <Share2 size={16} />
+  </Button>
+
+  {showSharePopup && (
+    <div className="absolute right-0 mt-2 w-72 bg-white border border-gray-200 shadow-lg rounded-md p-4 z-50">
+      <div className="flex items-center justify-between mb-3">
+        <p className="text-sm font-semibold">Partager cet article</p>
+        <button onClick={() => setShowSharePopup(false)}>
+          <X size={16} />
+        </button>
+      </div>
+
+      <div className="flex flex-wrap gap-4 justify-between mb-4">
+        <a
+          href={`https://wa.me/?text=${encodeURIComponent(window.location.href)}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          title="WhatsApp"
+        >
+          <img src="/icons/whatsapp.svg" alt="WhatsApp" className="w-6 h-6" />
+        </a>
+
+        <a
+          href={`https://www.instagram.com/`}
+          target="_blank"
+          rel="noopener noreferrer"
+          title="Instagram"
+        >
+          <Instagram size={24} className="text-pink-600" />
+        </a>
+
+        <a
+          href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          title="Facebook"
+        >
+          <Facebook size={24} className="text-blue-600" />
+        </a>
+
+        <a
+          href={`https://www.linkedin.com/shareArticle?mini=true&url=${encodeURIComponent(window.location.href)}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          title="LinkedIn"
+        >
+          <Linkedin size={24} className="text-blue-800" />
+        </a>
+
+        <a
+          href={`https://twitter.com/intent/tweet?url=${encodeURIComponent(window.location.href)}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          title="Twitter"
+        >
+          <Twitter size={24} className="text-blue-400" />
+        </a>
+
+        <a
+          href={`https://www.tiktok.com/`}
+          target="_blank"
+          rel="noopener noreferrer"
+          title="TikTok"
+        >
+          <img src="/icons/tiktok.svg" alt="TikTok" className="w-6 h-6" />
+        </a>
+      </div>
+
+      <Button
+        onClick={copyLink}
+        variant="outline"
+        className="w-full flex items-center gap-2 justify-center"
+      >
+        <Copy size={16} />
+        Copier le lien
+      </Button>
+    </div>
+  )}
+</div>
+
           </div>
         </div>
 
