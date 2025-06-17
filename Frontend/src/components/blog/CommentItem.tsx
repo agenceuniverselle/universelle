@@ -56,7 +56,7 @@ export default function CommentItem({
     try {
       const isRemoving = selectedReaction === emoji;
   
-      await axios.post(`/api/comments/${comment.id}/reaction`, {
+      await axios.post(`https://back-qhore.ondigitalocean.app/api/comments/${comment.id}/reaction`, {
         reaction: isRemoving ? null : emoji,
       });
   
