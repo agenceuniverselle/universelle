@@ -37,7 +37,7 @@ useEffect(() => {
       const response = await axios.get('https://back-qhore.ondigitalocean.app/api/blogs');
       console.log('[API Response]', response.data);
 
-      const data: BlogPost[] = response.data?.data || [];
+      const data: BlogPost[] = response.data || [];
 
       const formatted = data.map((item) => ({
         ...item,
@@ -52,8 +52,8 @@ useEffect(() => {
     }
   };
 
-  fetchArticles(); // ✅ TU OUBLIES CETTE LIGNE !!
-}, []); // ✅ Ajoute cette ligne pour terminer le useEffect
+  fetchArticles();
+}, []);
 
 
 
