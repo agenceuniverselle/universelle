@@ -100,25 +100,27 @@ const BlogArticle = ({ article, onBack, onSelectArticle }: BlogArticleProps) => 
   return (
     <MainLayout>
       <Helmet>
-        <script type="application/ld+json">
-          {JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": "Article",
-            "name": article.title,
-            "headline": article.title,
-            "author": {
-              "@type": "Person",
-              "name": article.author,
-            },
-            "datePublished": new Date(article.created_at).toISOString(),
-            "aggregateRating": {
-              "@type": "AggregateRating",
-              "ratingValue": rating.toFixed(1),
-              "reviewCount": ratingCount,
-            },
-          })}
-        </script>
-      </Helmet>
+  <script type="application/ld+json">
+    {JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "Article",
+      "name": article.title,
+      "headline": article.title,
+      "author": {
+        "@type": "Person",
+        "name": article.author,
+      },
+      "datePublished": isNaN(new Date(article.created_at).getTime())
+        ? new Date().toISOString()
+        : new Date(article.created_at).toISOString(),
+      "aggregateRating": {
+        "@type": "AggregateRating",
+        "ratingValue": rating.toFixed(1),
+        "reviewCount": ratingCount,
+      },
+    })}
+  </script>
+</Helmet>
 
       <div className="max-w-4xl mx-auto py-8">
       <div className="mb-8">
