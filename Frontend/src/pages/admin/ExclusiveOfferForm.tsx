@@ -72,14 +72,17 @@ const ExclusiveOfferDialog: React.FC<ExclusiveOfferDialogProps> = ({ open, onOpe
   }
 
   try {
-   const payload = {
-  property_id: parseInt(values.propertyId, 10),
-  current_value: parseFloat(values.currentValue.replace(/,/g, '')),
-  monthly_rental_income: parseFloat(values.monthlyRentalIncome.replace(/,/g, '')),
-  annual_growth_rate: parseFloat(values.annualGrowthRate.replace(/,/g, '')),
-  duration_years: parseInt(values.durationYears, 10),
-  initial_investment: parseFloat(values.initialInvestment.replace(/,/g, '')),
+  const payload = {
+  property_id: values.propertyId ? parseInt(values.propertyId, 10) : null,
+  current_value: parseFloat(values.currentValue.replace(/,/g, '')) || 0,
+  monthly_rental_income: parseFloat(values.monthlyRentalIncome.replace(/,/g, '')) || 0,
+  annual_growth_rate: parseFloat(values.annualGrowthRate.replace(/,/g, '')) || 0,
+  duration_years: values.durationYears ? parseInt(values.durationYears, 10) : null,
+  initial_investment: parseFloat(values.initialInvestment.replace(/,/g, '')) || 0,
 };
+
+
+console.log("Payload envoyé :", payload);
 
 
    await axios.post('https://back-qhore.ondigitalocean.app/api/exclusive-offers', payload, {
