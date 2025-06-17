@@ -148,7 +148,7 @@ const BlogArticle = ({ article, onBack, onSelectArticle }: BlogArticleProps) => 
             <Avatar className="h-10 w-10 mr-3">
               <AvatarImage src="" alt={article.author} />
               <AvatarFallback className="bg-luxe-blue text-white">
-                {article.author.charAt(0)}
+                {article.author ? article.author.charAt(0) : 'A'}
               </AvatarFallback>
             </Avatar>
             <div>
