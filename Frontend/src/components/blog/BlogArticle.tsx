@@ -204,7 +204,7 @@ useEffect(() => {
           rel="noopener noreferrer"
           title="WhatsApp"
         >
-          <img src="/icons/whatsapp.svg" alt="WhatsApp" className="w-6 h-6" />
+          <img src="Whatsapp.png" alt="WhatsApp" className="w-6 h-6" />
         </a>
 
         <a
@@ -249,7 +249,7 @@ useEffect(() => {
           rel="noopener noreferrer"
           title="TikTok"
         >
-          <img src="/icons/tiktok.svg" alt="TikTok" className="w-6 h-6" />
+          <img src="Tiktok.png" alt="TikTok" className="w-6 h-6" />
         </a>
       </div>
 
