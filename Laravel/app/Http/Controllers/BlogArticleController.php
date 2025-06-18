@@ -66,7 +66,11 @@ public function rate(Request $request, $id)
     $article->rating = round($newAverage, 2);
     $article->rating_count = $newRatingCount;
     $article->save();
-
+ // ✅ Créer une notification pour la note ajoutée
+    \App\Models\Notification::create([
+        'type' => 'rating',
+        'content' => "⭐ Une nouvelle note de {$request->rating} a été ajoutée à l'article « {$article->title} ».",
+    ]);
     return response()->json([
         'message' => 'Note enregistrée avec succès',
         'rating' => $article->rating,
