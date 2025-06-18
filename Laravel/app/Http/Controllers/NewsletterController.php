@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Subscriber;
 use Illuminate\Http\Request;
+use App\Models\Notification; 
 
 class NewsletterController extends Controller
 {
@@ -14,6 +15,11 @@ class NewsletterController extends Controller
         ]);
 
         $subscriber = Subscriber::create($validated);
+ // ✅ Créer une notification
+        Notification::create([
+            'type' => 'newsletter',
+            'content' => "📧 Nouvelle inscription à la newsletter : {$subscriber->email}",
+        ]);
 
         return response()->json([
             'message' => 'Merci pour votre inscription !',
