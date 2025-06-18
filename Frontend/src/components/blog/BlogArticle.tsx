@@ -193,81 +193,115 @@ useEffect(() => {
     <Share2 size={16} />
   </Button>
 
-  {showSharePopup && (
-    <div className="absolute right-0 mt-2 w-72 bg-white border border-gray-200 shadow-lg rounded-md p-4 z-50">
-      <div className="flex items-center justify-between mb-3">
-        <p className="text-sm font-semibold">Partager cet article</p>
-        <button onClick={() => setShowSharePopup(false)}>
-          <X size={16} />
-        </button>
-      </div>
-
-      <div className="flex flex-wrap gap-4 justify-between mb-4">
-        <a
-          href={`https://wa.me/?text=${encodeURIComponent(window.location.href)}`}
-          target="_blank"
-          rel="noopener noreferrer"
-          title="WhatsApp"
-        >
-          <img src="/Whatssap.png" alt="WhatsApp" className="w-6 h-6" />
-        </a>
-
-        <a
-          href={`https://www.instagram.com/`}
-          target="_blank"
-          rel="noopener noreferrer"
-          title="Instagram"
-        >
-          <Instagram size={24} className="text-pink-600" />
-        </a>
-
-        <a
-          href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}`}
-          target="_blank"
-          rel="noopener noreferrer"
-          title="Facebook"
-        >
-          <Facebook size={24} className="text-blue-600" />
-        </a>
-
-        <a
-          href={`https://www.linkedin.com/shareArticle?mini=true&url=${encodeURIComponent(window.location.href)}`}
-          target="_blank"
-          rel="noopener noreferrer"
-          title="LinkedIn"
-        >
-          <Linkedin size={24} className="text-blue-800" />
-        </a>
-
-        <a
-          href={`https://twitter.com/intent/tweet?url=${encodeURIComponent(window.location.href)}`}
-          target="_blank"
-          rel="noopener noreferrer"
-          title="Twitter"
-        >
-          <Twitter size={24} className="text-blue-400" />
-        </a>
-
-        <a
-          href={`https://www.tiktok.com/`}
-          target="_blank"
-          rel="noopener noreferrer"
-          title="TikTok"
-        >
-          <img src="/Tiktok.png" alt="TikTok" className="w-6 h-6" />
-        </a>
-      </div>
-
-      <Button
-        onClick={copyLink}
-        variant="outline"
-        className="w-full flex items-center gap-2 justify-center"
-      >
-        <Copy size={16} />
-        Copier le lien
-      </Button>
+{showSharePopup && (
+  <div className="absolute right-0 mt-2 w-72 bg-white border border-gray-200 shadow-lg rounded-md p-4 z-50">
+    <div className="flex items-center justify-between mb-3">
+      <p className="text-sm font-semibold">Partager cet article</p>
+      <button onClick={() => setShowSharePopup(false)}>
+        <X size={16} />
+      </button>
     </div>
-  )}
+
+    <div className="flex flex-wrap gap-4 justify-between mb-4">
+      {/* WhatsApp */}
+      <a
+        href="#"
+        title="WhatsApp"
+        onClick={async (e) => {
+          e.preventDefault();
+          await axios.post(`https://back-qhore.ondigitalocean.app/api/blogs/${article.id}/share`);
+          window.open(`https://wa.me/?text=${encodeURIComponent(window.location.href)}`, '_blank');
+        }}
+      >
+        <img src="/Whatssap.png" alt="WhatsApp" className="w-6 h-6" />
+      </a>
+
+      {/* Instagram */}
+      <a
+        href="#"
+        title="Instagram"
+        onClick={async (e) => {
+          e.preventDefault();
+          await axios.post(`https://back-qhore.ondigitalocean.app/api/blogs/${article.id}/share`);
+          window.open(`https://www.instagram.com/`, '_blank');
+        }}
+      >
+        <Instagram size={24} className="text-pink-600" />
+      </a>
+
+      {/* Facebook */}
+      <a
+        href="#"
+        title="Facebook"
+        onClick={async (e) => {
+          e.preventDefault();
+          await axios.post(`https://back-qhore.ondigitalocean.app/api/blogs/${article.id}/share`);
+          window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}`, '_blank');
+        }}
+      >
+        <Facebook size={24} className="text-blue-600" />
+      </a>
+
+      {/* LinkedIn */}
+      <a
+        href="#"
+        title="LinkedIn"
+        onClick={async (e) => {
+          e.preventDefault();
+          await axios.post(`https://back-qhore.ondigitalocean.app/api/blogs/${article.id}/share`);
+          window.open(`https://www.linkedin.com/shareArticle?mini=true&url=${encodeURIComponent(window.location.href)}`, '_blank');
+        }}
+      >
+        <Linkedin size={24} className="text-blue-800" />
+      </a>
+
+      {/* Twitter */}
+      <a
+        href="#"
+        title="Twitter"
+        onClick={async (e) => {
+          e.preventDefault();
+          await axios.post(`https://back-qhore.ondigitalocean.app/api/blogs/${article.id}/share`);
+          window.open(`https://twitter.com/intent/tweet?url=${encodeURIComponent(window.location.href)}`, '_blank');
+        }}
+      >
+        <Twitter size={24} className="text-blue-400" />
+      </a>
+
+      {/* TikTok */}
+      <a
+        href="#"
+        title="TikTok"
+        onClick={async (e) => {
+          e.preventDefault();
+          await axios.post(`https://back-qhore.ondigitalocean.app/api/blogs/${article.id}/share`);
+          window.open(`https://www.tiktok.com/`, '_blank');
+        }}
+      >
+        <img src="/Tiktok.png" alt="TikTok" className="w-6 h-6" />
+      </a>
+    </div>
+
+    {/* Copier le lien */}
+    <Button
+      onClick={async () => {
+        try {
+          await navigator.clipboard.writeText(window.location.href);
+          await axios.post(`https://back-qhore.ondigitalocean.app/api/blogs/${article.id}/share`);
+          alert("Lien copié dans le presse-papiers !");
+        } catch (err) {
+          alert("Échec de la copie du lien");
+        }
+      }}
+      variant="outline"
+      className="w-full flex items-center gap-2 justify-center"
+    >
+      <Copy size={16} />
+      Copier le lien
+    </Button>
+  </div>
+)}
+
 </div>
 
           </div>
