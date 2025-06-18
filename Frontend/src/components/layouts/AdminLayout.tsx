@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useDarkMode } from "@/context/DarkModeContext"; // ✅ IMPORTER DARK MODE
+import { useNotifications } from "@/hooks/use-notifications"; // 🔔 Assure-toi que ce hook est importé
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -46,11 +47,10 @@ const AdminLayout = ({ children, title }: AdminLayoutProps) => {
   const isMobile = useIsMobile();
   const [sidebarOpen, setSidebarOpen] = useState(!isMobile);
   const { isDarkMode, toggleDarkMode } = useDarkMode(); // ✅ UTILISER DARK MODE
-
   const { isAuthenticated, user, logout, permissions } = useAuth();
-
   const { toast } = useToast();
-
+  const { notifications, unreadCount, markAsRead } = useNotifications();
+  const [isNotifOpen, setIsNotifOpen] = useState(false); // 👈 ouvrir/fermer le menu
  
 
   const handleLogout = async () => {
@@ -245,14 +245,53 @@ const getNavItems = () => {
     )}
   </Button>
 
-  <Button 
-    variant="outline" 
-    size="icon" 
+<div className="relative">
+  <Button
+    variant="outline"
+    size="icon"
+    onClick={() => setIsNotifOpen((prev) => !prev)}
     className="relative bg-white dark:bg-gray-700 dark:text-white dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-600"
   >
     <Bell className="h-5 w-5 text-gray-700 dark:text-gray-200" />
-    <span className="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full"></span>
+    {unreadCount > 0 && (
+      <span className="absolute top-0 right-0 w-2.5 h-2.5 bg-red-500 rounded-full" />
+    )}
   </Button>
+
+  {isNotifOpen && (
+    <div className="absolute right-0 mt-2 w-72 bg-white dark:bg-gray-800 border dark:border-gray-700 shadow-lg rounded-md z-50">
+      <div className="px-4 py-2 border-b dark:border-gray-700 font-semibold text-sm text-gray-800 dark:text-gray-200">
+        Notifications
+      </div>
+      <ul className="max-h-60 overflow-y-auto text-sm divide-y dark:divide-gray-700">
+        {notifications.length === 0 ? (
+          <li className="px-4 py-2 text-gray-500 dark:text-gray-400 text-center">Aucune notification</li>
+        ) : (
+          notifications.slice(0, 5).map((notif) => (
+            <li
+              key={notif.id}
+              className={cn(
+                "px-4 py-2 cursor-pointer transition-colors",
+                !notif.is_read
+                  ? "bg-red-50 dark:bg-red-900 hover:bg-red-100 dark:hover:bg-red-800"
+                  : "hover:bg-gray-100 dark:hover:bg-gray-700"
+              )}
+              onClick={() => markAsRead(notif.id)}
+            >
+              <p className="font-medium text-gray-700 dark:text-gray-100">{notif.content}</p>
+              <p className="text-xs text-gray-400">
+                {new Date(notif.created_at).toLocaleString()}
+              </p>
+            </li>
+          ))
+        )}
+      </ul>
+      <div className="px-4 py-2 text-xs text-right text-blue-500 hover:underline cursor-pointer">
+        Voir toutes les notifications
+      </div>
+    </div>
+  )}
+</div>
    <Button
         onClick={handleLogout}
         variant="outline"
