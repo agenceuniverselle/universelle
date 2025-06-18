@@ -52,6 +52,24 @@ const AdminLayout = ({ children, title }: AdminLayoutProps) => {
   const { isAuthenticated, user, logout, permissions } = useAuth();
   const { toast } = useToast();
   const { notifications, unreadCount, markAsRead } = useNotifications();
+  const [notifiedIds, setNotifiedIds] = useState<number[]>([]);
+
+useEffect(() => {
+  const unread = notifications.filter(n => !n.is_read && !notifiedIds.includes(n.id));
+  
+  unread.forEach((notif) => {
+    toast({
+      title: "Nouvelle notification",
+      description: notif.content,
+      duration: 8000, // 8s
+      variant: "default",
+    });
+  });
+
+  // Marque comme notifié localement
+  setNotifiedIds((prev) => [...prev, ...unread.map(n => n.id)]);
+}, [notifications]);
+
   const [isNotifOpen, setIsNotifOpen] = useState(false); 
   const [showAll, setShowAll] = useState(false);
   const notifRef = useRef<HTMLDivElement>(null);
