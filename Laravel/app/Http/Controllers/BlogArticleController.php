@@ -223,5 +223,20 @@ public function update(Request $request, $id)
         'data' => $article,
     ]);
 }
+public function notifyShare($id)
+{
+    $article = \App\Models\BlogPost::find($id);
+
+    if (!$article) {
+        return response()->json(['error' => 'Article introuvable'], 404);
+    }
+
+    \App\Models\Notification::create([
+        'type' => 'share',
+        'content' => "🔗 L’article « {$article->title} » a été partagé.",
+    ]);
+
+    return response()->json(['message' => 'Notification de partage créée']);
+}
 
 }
