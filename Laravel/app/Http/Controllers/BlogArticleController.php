@@ -224,19 +224,22 @@ public function update(Request $request, $id)
         'data' => $article,
     ]);
 }
-public function notifyShare($id)
+public function notifyShare(Request $request, $id)
 {
-    $article = BlogArticle::find($id); // ✅ correction ici
+    $article = BlogArticle::find($id);
 
     if (!$article) {
         return response()->json(['error' => 'Article introuvable'], 404);
     }
 
+    $network = $request->input('network', 'inconnu');
+
     Notification::create([
         'type' => 'share',
-        'content' => "🔗 L’article « {$article->title} » a été partagé.",
+        'content' => "🔗 L’article « {$article->title} » a été partagé via {$network}.",
     ]);
 
     return response()->json(['message' => 'Notification de partage créée']);
 }
+
 }
