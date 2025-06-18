@@ -64,9 +64,18 @@ const AdminLayout = ({ children, title }: AdminLayoutProps) => {
       navigate("/admin/prospects");
       break;
     case "comment":
-      navigate("/admin/content");
+      navigate("/admin/prospects");
       break;
-    case "expert":
+    case "investisseur":
+      navigate("/admin/prospects"); // ou autre
+      break;
+       case "message":
+      navigate("/admin/prospects"); // ou autre
+      break;
+       case "newsletter":
+      navigate("/admin/prospects"); // ou autre
+      break;
+       case "offers":
       navigate("/admin/prospects"); // ou autre
       break;
     default:
