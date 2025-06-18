@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Comment;
-
+use App\Models\Notification; 
 class CommentController extends Controller
 {
    // GET /api/blogs/{id}/comments
@@ -65,7 +65,11 @@ public function store(Request $request, $id)
         ...$validated,
         'blog_article_id' => $id,
     ]);
-
+ // ✅ Création de la notification
+    Notification::create([
+        'type' => 'comment',
+        'content' => "💬 Nouveau commentaire de {$comment->first_name} {$comment->last_name} ({$comment->email}) sur un article de blog",
+    ]);
     return response()->json($comment, 201);
 }
 
