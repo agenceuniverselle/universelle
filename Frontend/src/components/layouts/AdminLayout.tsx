@@ -30,6 +30,7 @@ import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
+import { useNavigate } from "react-router-dom";
 
 interface AdminLayoutProps {
   children: ReactNode;
@@ -54,6 +55,27 @@ const AdminLayout = ({ children, title }: AdminLayoutProps) => {
   const [isNotifOpen, setIsNotifOpen] = useState(false); // 👈 ouvrir/fermer le menu
   const notifRef = useRef<HTMLDivElement>(null);
   useClickOutside(notifRef, () => setIsNotifOpen(false));
+  const navigate = useNavigate();
+const handleNotificationClick = async (notif: Notification) => {
+  await markAsRead(notif.id);
+
+  // Redirection selon le type
+  switch (notif.type) {
+    case "contact":
+      navigate("/admin/prospects");
+      break;
+    case "comment":
+      navigate("/admin/content");
+      break;
+    case "expert":
+      navigate("/admin/prospects"); // ou autre
+      break;
+    default:
+      // fallback
+      navigate("/admin/dashboard");
+      break;
+  }
+};
 
   const handleLogout = async () => {
   try {
@@ -279,7 +301,7 @@ const getNavItems = () => {
                   ? "bg-red-50 dark:bg-red-900 hover:bg-red-100 dark:hover:bg-red-800"
                   : "hover:bg-gray-100 dark:hover:bg-gray-700"
               )}
-              onClick={() => markAsRead(notif.id)}
+              onClick={() => handleNotificationClick(notif)}
             >
               <p className="font-medium text-gray-700 dark:text-gray-100">{notif.content}</p>
               <p className="text-xs text-gray-400">
