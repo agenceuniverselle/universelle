@@ -55,8 +55,7 @@ const AdminLayout = ({ children, title }: AdminLayoutProps) => {
   const [isNotifOpen, setIsNotifOpen] = useState(false); // 👈 ouvrir/fermer le menu
   const notifRef = useRef<HTMLDivElement>(null);
   useClickOutside(notifRef, () => setIsNotifOpen(false));
-  const navigate = useNavigate();
-const handleNotificationClick = async (notif: Notification) => {
+  const handleNotificationClick = async (notif: Notification) => {
   await markAsRead(notif.id);
 
   // Redirection selon le type
