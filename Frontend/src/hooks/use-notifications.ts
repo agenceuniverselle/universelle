@@ -14,8 +14,17 @@ export const useNotifications = () => {
   const [unreadCount, setUnreadCount] = useState(0);
 
   const fetchNotifications = async () => {
+    const token = localStorage.getItem("access_token"); // ✅ récupérer le token
+    if (!token) return;
+
     try {
-      const res = await axios.get("https://back-qhore.ondigitalocean.app/api/notifications");
+      const res = await axios.get("https://back-qhore.ondigitalocean.app/api/notifications", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          Accept: "application/json",
+        },
+      });
+
       setNotifications(res.data);
       setUnreadCount(res.data.filter((n: Notification) => !n.is_read).length);
     } catch (error) {
@@ -24,8 +33,24 @@ export const useNotifications = () => {
   };
 
   const markAsRead = async (id: number) => {
-    await axios.post(`https://back-qhore.ondigitalocean.app/api/notifications/${id}/read`);
-    fetchNotifications();
+    const token = localStorage.getItem("access_token");
+    if (!token) return;
+
+    try {
+      await axios.post(
+        `https://back-qhore.ondigitalocean.app/api/notifications/${id}/read`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            Accept: "application/json",
+          },
+        }
+      );
+      fetchNotifications(); // recharger après lecture
+    } catch (error) {
+      console.error("Erreur lors du marquage comme lu :", error);
+    }
   };
 
   useEffect(() => {
