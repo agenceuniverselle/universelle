@@ -204,7 +204,7 @@ useEffect(() => {
           rel="noopener noreferrer"
           title="WhatsApp"
         >
-          <img src="/Whatsapp.png" alt="WhatsApp" className="w-6 h-6" />
+          <img src="/Whatssap.png" alt="WhatsApp" className="w-6 h-6" />
         </a>
 
         <a
