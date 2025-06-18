@@ -87,6 +87,9 @@ const AdminLayout = ({ children, title }: AdminLayoutProps) => {
        case "message":
       navigate("/admin/prospects"); // ou autre
       break;
+        case "conseiller":
+      navigate("/admin/investissements"); // ou autre
+      break;
     default:
       // fallback
       navigate("/admin/dashboard");
