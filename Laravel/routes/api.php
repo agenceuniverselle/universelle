@@ -22,6 +22,7 @@ use App\Http\Controllers\ActivityController;
 use App\Http\Controllers\ConseillerContactController;
 use App\Http\Controllers\ExpertContactController;
 use App\Http\Controllers\ProjectController;
+use App\Http\Controllers\NotificationController;
 
 /*
 |--------------------------------------------------------------------------
@@ -197,3 +198,9 @@ Route::middleware('auth:api')->group(function () {
     Route::put('/projects/{id}', [ProjectController::class, 'update']);     // Mettre à jour un projet
     Route::delete('/projects/{id}', [ProjectController::class, 'destroy']); // Supprimer un projet
 });
+//Notification 
+Route::middleware('auth:api')->group(function () {
+Route::get('/notifications', [NotificationController::class, 'index']);
+Route::post('/notifications', [NotificationController::class, 'store']);
+Route::post('/notifications/{id}/read', [NotificationController::class, 'markAsRead']);
+    });
