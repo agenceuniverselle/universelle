@@ -29,6 +29,11 @@ import { countryCodes, CountryData } from '@/lib/countryCodes'; // Make sure thi
 import { cn } from '@/lib/utils';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
+const formatPrice = (value: number | string | undefined | null) => {
+  if (!value) return "N/A";
+  const number = typeof value === 'string' ? parseFloat(value.replace(/\s/g, '')) : value;
+  return new Intl.NumberFormat('fr-FR').format(number);
+};
 
 const contactFormSchema = z.object({
   name: z.string().min(2, { message: "Le nom doit contenir au moins 2 caractères" }),
@@ -621,7 +626,7 @@ const mockImages = Array.isArray(bien.images)
               </div>
               
               <div className="flex items-center">
-                <span className="font-bold">{bien.price} MAD </span>
+                <span className="font-bold">{formatPrice(bien.price)} MAD </span>
               </div>
             </div>
             
@@ -958,13 +963,13 @@ onClick={() => handleDownload(bien.id)}>
     <ul className="space-y-3">
       <li className="flex justify-between border-b pb-2">
         <span className="text-gray-600">Prix</span>
-        <span className="font-medium">{bien.price} MAD</span>
+        <span className="font-medium">{formatPrice(bien.price)} MAD</span>
       </li>
       {bien.price && bien.area && (
         <li className="flex justify-between border-b pb-2">
           <span className="text-gray-600">Prix au m²</span>
           <span className="font-medium">
-            {(parseFloat(bien.price.replace(/\s/g, '')) / parseFloat(bien.area)).toFixed(2)} MAD/m²
+  {formatPrice(parseFloat(bien.price.replace(/\s/g, '')) / parseFloat(bien.area))} MAD/m²
           </span>
         </li>
       )}
