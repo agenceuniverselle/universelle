@@ -23,6 +23,11 @@ const Navbar = () => {
   const isHomePage = location.pathname === "/";
   const isMobile = useIsMobile();
   const mobileMenuRef = useRef<HTMLDivElement>(null);
+const navigateAndScrollTop = (path: string) => {
+  navigate(path);
+  window.scrollTo({ top: 0, behavior: "smooth" });
+  setIsMobileMenuOpen(false);
+};
 
   useEffect(() => {
     const handleScroll = () => {
@@ -94,28 +99,24 @@ const Navbar = () => {
             </a>
           </div>
 
-          <div className="hidden lg:flex items-center space-x-8">
-            <Link to="/" className={getLinkClasses('/')}>Accueil</Link>
-            <Link to="/investir" className={getLinkClasses('/investir')}>Investir</Link>
-            <Link to="/nos-biens" className={getLinkClasses('/nos-biens')}>Nos Biens</Link>
-            <Link to="/nos-services" className={getLinkClasses('/nos-services')}>Nos Services</Link>
-            <Link
-              to="/PourquoiNous"
-              onClick={handleWhyUsClick}
-              className={getLinkClasses('/PourquoiNous')}
-            >
-              Pourquoi Nous
-            </Link>
-            <Link to="/blog" className={getLinkClasses('/blog')}>Articles</Link>
+        // ...
+<div className="hidden lg:flex items-center space-x-8">
+  <button onClick={() => navigateAndScrollTop('/')} className={getLinkClasses('/')}>Accueil</button>
+  <button onClick={() => navigateAndScrollTop('/investir')} className={getLinkClasses('/investir')}>Investir</button>
+  <button onClick={() => navigateAndScrollTop('/nos-biens')} className={getLinkClasses('/nos-biens')}>Nos Biens</button>
+  <button onClick={() => navigateAndScrollTop('/nos-services')} className={getLinkClasses('/nos-services')}>Nos Services</button>
+  <button onClick={() => navigateAndScrollTop('/PourquoiNous')} className={getLinkClasses('/PourquoiNous')}>Pourquoi Nous</button>
+  <button onClick={() => navigateAndScrollTop('/blog')} className={getLinkClasses('/blog')}>Articles</button>
 
-            <button
-              onClick={() => setShowVipForm(true)}
-              className="flex items-center space-x-2 text-white rounded-md px-5 py-3 transition-all bg-gold hover:bg-gold-dark font-montserrat text-base shadow-md hover:shadow-lg"
-            >
-              <Phone size={18} />
-              <span>Contact VIP</span>
-            </button>
-          </div>
+  <button
+    onClick={() => setShowVipForm(true)}
+    className="flex items-center space-x-2 text-white rounded-md px-5 py-3 transition-all bg-gold hover:bg-gold-dark font-montserrat text-base shadow-md hover:shadow-lg"
+  >
+    <Phone size={18} />
+    <span>Contact VIP</span>
+  </button>
+</div>
+
 
           {isMobile && (
             <Sheet>
@@ -148,26 +149,14 @@ const Navbar = () => {
                 </SheetHeader>
 
                 <div className="flex-1 overflow-y-auto py-4">
-                  <div className="container px-8 flex flex-col space-y-2 items-center">
-                    <Link to="/" className={getMobileLinkClasses('/')} onClick={() => setIsMobileMenuOpen(false)}>
-                      Accueil
-                    </Link>
-                    <Link to="/investir" className={getMobileLinkClasses('/investir')} onClick={() => setIsMobileMenuOpen(false)}>
-                      Investir
-                    </Link>
-                    <Link to="/nos-biens" className={getMobileLinkClasses('/nos-biens')} onClick={() => setIsMobileMenuOpen(false)}>
-                      Nos Biens
-                    </Link>
-                    <Link to="/nos-services" className={getMobileLinkClasses('/nos-services')} onClick={() => setIsMobileMenuOpen(false)}>
-                      Nos Services
-                    </Link>
-                    <Link to="/PourquoiNous" className={getMobileLinkClasses('/PourquoiNous')} onClick={handleWhyUsClick}>
-                      Pourquoi Nous
-                    </Link>
-                    <Link to="/blog" className={getMobileLinkClasses('/blog')} onClick={() => setIsMobileMenuOpen(false)}>
-                      Blog
-                    </Link>
-                  </div>
+                 <div className="container px-8 flex flex-col space-y-2 items-center">
+  <button onClick={() => navigateAndScrollTop('/')} className={getMobileLinkClasses('/')}>Accueil</button>
+  <button onClick={() => navigateAndScrollTop('/investir')} className={getMobileLinkClasses('/investir')}>Investir</button>
+  <button onClick={() => navigateAndScrollTop('/nos-biens')} className={getMobileLinkClasses('/nos-biens')}>Nos Biens</button>
+  <button onClick={() => navigateAndScrollTop('/nos-services')} className={getMobileLinkClasses('/nos-services')}>Nos Services</button>
+  <button onClick={() => navigateAndScrollTop('/PourquoiNous')} className={getMobileLinkClasses('/PourquoiNous')}>Pourquoi Nous</button>
+  <button onClick={() => navigateAndScrollTop('/blog')} className={getMobileLinkClasses('/blog')}>Blog</button>
+</div>
                 </div>
 
                 <div className="p-6 border-t border-white/10">
