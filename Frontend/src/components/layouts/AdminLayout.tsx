@@ -78,7 +78,7 @@ const AdminLayout = ({ children, title }: AdminLayoutProps) => {
        case "newsletter":
       navigate("/admin/prospects"); // ou autre
       break;
-       case "offers":
+       case "offer":
       navigate("/admin/prospects"); // ou autre
       break;
        case "expert_contact":
