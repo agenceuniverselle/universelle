@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\ExpertContact;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use App\Models\Notification;
 
 class ExpertContactController extends Controller
 {
@@ -42,7 +43,11 @@ class ExpertContactController extends Controller
             'service_type'   => $request->service_type,   // CORRIGÉ
             'consent'        => $request->consent,
         ]);
-
+// ✅ Créer une notification
+    Notification::create([
+        'type' => 'expert_contact',
+        'content' => "🧑‍💼 Nouvelle demande de contact expert par {$contact->name} ({$contact->email}) pour l'expert « {$contact->expert} ».",
+    ]);
         // Ici tu peux déclencher un email, notification, etc.
 
         return response()->json([
