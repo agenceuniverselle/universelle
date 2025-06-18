@@ -59,10 +59,7 @@ class InvestorRequestController extends Controller
             'commentaire' => $validated['commentaire'] ?? null,
             'consent' => $validated['consent'],
         ]);
-  Notification::create([
-            'type' => 'investor',
-            'content' => "📩 Nouveau prospect investisseur : {$validated['prenom']} {$validated['nom']}.",
-        ]);
+ 
         return response()->json([
             'message' => 'Prospect ajouté avec succès.',
             'data' => $prospect,
@@ -89,7 +86,10 @@ class InvestorRequestController extends Controller
             ...$validated,
               'consent' => $validated['consent'],
         ]);
-
+ Notification::create([
+            'type' => 'investor',
+            'content' => "📩 Nouveau prospect investisseur : {$validated['prenom']} {$validated['nom']}.",
+        ]);
         return response()->json([
             'message' => 'Demande enregistrée avec succès.',
             'data' => $investorRequest,
