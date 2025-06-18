@@ -99,7 +99,7 @@ const navigateAndScrollTop = (path: string) => {
             </a>
           </div>
 
-        // ...
+      
 <div className="hidden lg:flex items-center space-x-8">
   <button onClick={() => navigateAndScrollTop('/')} className={getLinkClasses('/')}>Accueil</button>
   <button onClick={() => navigateAndScrollTop('/investir')} className={getLinkClasses('/investir')}>Investir</button>
