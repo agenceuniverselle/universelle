@@ -5,6 +5,7 @@ import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useDarkMode } from "@/context/DarkModeContext"; // ✅ IMPORTER DARK MODE
 import { useNotifications } from "@/hooks/use-notifications"; // 🔔 Assure-toi que ce hook est importé
+import { useClickOutside } from "@/hooks/use-click-outside";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -51,7 +52,8 @@ const AdminLayout = ({ children, title }: AdminLayoutProps) => {
   const { toast } = useToast();
   const { notifications, unreadCount, markAsRead } = useNotifications();
   const [isNotifOpen, setIsNotifOpen] = useState(false); // 👈 ouvrir/fermer le menu
- 
+  const notifRef = useRef<HTMLDivElement>(null);
+  useClickOutside(notifRef, () => setIsNotifOpen(false));
 
   const handleLogout = async () => {
   try {
@@ -245,7 +247,8 @@ const getNavItems = () => {
     )}
   </Button>
 
-<div className="relative">
+<div className="relative" ref={notifRef}>
+
   <Button
     variant="outline"
     size="icon"
