@@ -100,6 +100,7 @@ Route::get('/blogs/{id}', action: [BlogArticleController::class, 'show']);
 Route::post('/admin/upload', [BlogArticleController::class, 'uploadImage']);
 Route::get('/admin/blogs/{id}', [BlogArticleController::class, 'show']);
 Route::post('/blogs/{id}/rate', [BlogArticleController::class, 'rate']);
+Route::post('/blogs/{id}/share', [BlogArticleController::class, 'notifyShare']);
 
 //blog similaires 
 Route::get('/blogs/{id}/similaires', [BlogArticleController::class, 'similaires']);
