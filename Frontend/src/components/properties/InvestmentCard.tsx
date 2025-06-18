@@ -23,6 +23,11 @@ import { cn } from '@/lib/utils';
 // Lazy loading des composants lourds
 const InvestmentDetailDialog = lazy(() => import('./InvestmentDetailDialog'));
 const InvestmentForm = lazy(() => import('./InvestmentForm'));
+const formatPrice = (value: number | string | undefined | null) => {
+  if (!value) return "N/A";
+  const number = typeof value === 'string' ? parseFloat(value) : value;
+  return new Intl.NumberFormat('fr-FR').format(number);
+};
 
 interface InvestmentCardProps {
   property: Property;
@@ -228,7 +233,8 @@ const InvestmentCard: React.FC<InvestmentCardProps> = ({
                 <span className="text-sm text-gray-500">Prix</span>
                 <span className="font-medium flex items-center">
                   <Wallet className="h-4 w-4 mr-1 text-gray-600" />
-                  {property.price} MAD
+                  {formatPrice(property.price)} MAD
+
                 </span>
               </div>
             )}
@@ -258,7 +264,7 @@ const InvestmentCard: React.FC<InvestmentCardProps> = ({
                 <span className="text-sm text-gray-500">Prix d'entrée</span>
                 <span className="font-medium flex items-center">
                   <Wallet className="h-4 w-4 mr-1 text-gray-600" />
-                  {investmentDetails?.minEntryPrice || property.price} MAD
+                  {formatPrice(investmentDetails?.minEntryPrice || property.price)} MAD
                 </span>
               </div>
             )}
