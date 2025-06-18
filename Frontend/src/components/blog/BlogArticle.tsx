@@ -209,7 +209,9 @@ useEffect(() => {
         title="WhatsApp"
         onClick={async (e) => {
           e.preventDefault();
-          await axios.post(`https://back-qhore.ondigitalocean.app/api/blogs/${article.id}/share`);
+          await axios.post(`https://back-qhore.ondigitalocean.app/api/blogs/${article.id}/share`, {
+            network: 'whatsapp',
+          });
           window.open(`https://wa.me/?text=${encodeURIComponent(window.location.href)}`, '_blank');
         }}
       >
@@ -222,7 +224,9 @@ useEffect(() => {
         title="Instagram"
         onClick={async (e) => {
           e.preventDefault();
-          await axios.post(`https://back-qhore.ondigitalocean.app/api/blogs/${article.id}/share`);
+          await axios.post(`https://back-qhore.ondigitalocean.app/api/blogs/${article.id}/share`, {
+            network: 'instagram',
+          });
           window.open(`https://www.instagram.com/`, '_blank');
         }}
       >
@@ -235,7 +239,9 @@ useEffect(() => {
         title="Facebook"
         onClick={async (e) => {
           e.preventDefault();
-          await axios.post(`https://back-qhore.ondigitalocean.app/api/blogs/${article.id}/share`);
+          await axios.post(`https://back-qhore.ondigitalocean.app/api/blogs/${article.id}/share`, {
+            network: 'facebook',
+          });
           window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}`, '_blank');
         }}
       >
@@ -248,7 +254,9 @@ useEffect(() => {
         title="LinkedIn"
         onClick={async (e) => {
           e.preventDefault();
-          await axios.post(`https://back-qhore.ondigitalocean.app/api/blogs/${article.id}/share`);
+          await axios.post(`https://back-qhore.ondigitalocean.app/api/blogs/${article.id}/share`, {
+            network: 'linkedin',
+          });
           window.open(`https://www.linkedin.com/shareArticle?mini=true&url=${encodeURIComponent(window.location.href)}`, '_blank');
         }}
       >
@@ -261,7 +269,9 @@ useEffect(() => {
         title="Twitter"
         onClick={async (e) => {
           e.preventDefault();
-          await axios.post(`https://back-qhore.ondigitalocean.app/api/blogs/${article.id}/share`);
+          await axios.post(`https://back-qhore.ondigitalocean.app/api/blogs/${article.id}/share`, {
+            network: 'twitter',
+          });
           window.open(`https://twitter.com/intent/tweet?url=${encodeURIComponent(window.location.href)}`, '_blank');
         }}
       >
@@ -274,7 +284,9 @@ useEffect(() => {
         title="TikTok"
         onClick={async (e) => {
           e.preventDefault();
-          await axios.post(`https://back-qhore.ondigitalocean.app/api/blogs/${article.id}/share`);
+          await axios.post(`https://back-qhore.ondigitalocean.app/api/blogs/${article.id}/share`, {
+            network: 'tiktok',
+          });
           window.open(`https://www.tiktok.com/`, '_blank');
         }}
       >
@@ -287,7 +299,9 @@ useEffect(() => {
       onClick={async () => {
         try {
           await navigator.clipboard.writeText(window.location.href);
-          await axios.post(`https://back-qhore.ondigitalocean.app/api/blogs/${article.id}/share`);
+          await axios.post(`https://back-qhore.ondigitalocean.app/api/blogs/${article.id}/share`, {
+            network: 'link',
+          });
           alert("Lien copié dans le presse-papiers !");
         } catch (err) {
           alert("Échec de la copie du lien");
