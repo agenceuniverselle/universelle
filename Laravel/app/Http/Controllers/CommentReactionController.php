@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\CommentReaction;
+
 use App\Models\Notification; 
 
 class CommentReactionController extends Controller
@@ -29,11 +30,12 @@ class CommentReactionController extends Controller
         'comment_id' => $commentId,
         'reaction' => $validated['reaction'],
     ]);
-// ✅ Crée une notification
-        Notification::create([
-            'type' => 'reaction',
-            'content' => "👍 Une nouvelle réaction « {$validated['reaction']} » a été ajoutée au commentaire #{$commentId}.",
-        ]);
+    // ✅ Création de la notification
+    Notification::create([
+        'type' => 'reaction',
+        'content' => "💬 Nouveau commentaire de {$comment->first_name} {$comment->last_name} ({$comment->email}) sur un article de blog",
+    ]);
+
     return response()->json(['message' => 'Réaction ajoutée']);
 }
 }
