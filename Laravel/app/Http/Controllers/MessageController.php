@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Message;
-
+use App\Models\Notification;
 class MessageController extends Controller
 {
     public function store(Request $request)
@@ -24,7 +24,11 @@ class MessageController extends Controller
         ]);
 
         $message = Message::create($validated);
-
+// ✅ Créer une notification
+        Notification::create([
+            'type' => 'message',
+            'content' => "📩 Nouveau message de {$message->name} ({$message->email}) pour le bien #{$message->bien_id}.",
+        ]);
         return response()->json($message, 201);
     }
      // Liste tous les messages paginés (ou non)
