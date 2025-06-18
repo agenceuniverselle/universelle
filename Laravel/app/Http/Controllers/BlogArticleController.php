@@ -7,6 +7,7 @@ use App\Models\BlogArticle;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Auth;
 use App\Events\ActivityLogged;
+use App\Models\Notification;
 
 class BlogArticleController extends Controller
 {
@@ -225,18 +226,17 @@ public function update(Request $request, $id)
 }
 public function notifyShare($id)
 {
-    $article = \App\Models\BlogArticle::find($id);
+    $article = BlogArticle::find($id); // ✅ correction ici
 
     if (!$article) {
         return response()->json(['error' => 'Article introuvable'], 404);
     }
 
-    \App\Models\Notification::create([
+    Notification::create([
         'type' => 'share',
         'content' => "🔗 L’article « {$article->title} » a été partagé.",
     ]);
 
     return response()->json(['message' => 'Notification de partage créée']);
 }
-
 }
