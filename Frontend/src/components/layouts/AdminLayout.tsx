@@ -67,28 +67,31 @@ const AdminLayout = ({ children, title }: AdminLayoutProps) => {
       navigate("/admin/prospects");
       break;
     case "reaction":
-      navigate("/admin/prospects"); // ou autre
+      navigate("/admin/prospects"); 
       break;
     case "investor":
-      navigate("/admin/prospects"); // ou autre
+      navigate("/admin/prospects");
       break;
        case "message":
-      navigate("/admin/prospects"); // ou autre
+      navigate("/admin/prospects"); 
       break;
        case "newsletter":
-      navigate("/admin/prospects"); // ou autre
+      navigate("/admin/prospects"); 
       break;
        case "offer":
-      navigate("/admin/prospects"); // ou autre
+      navigate("/admin/prospects"); 
       break;
        case "expert_contact":
-      navigate("/admin/investissements"); // ou autre
+      navigate("/admin/investissements"); 
       break;
        case "message":
-      navigate("/admin/prospects"); // ou autre
+      navigate("/admin/prospects"); 
       break;
         case "conseiller":
-      navigate("/admin/investissements"); // ou autre
+      navigate("/admin/investissements"); 
+      break;
+      case "rating":
+      navigate("/admin/content"); 
       break;
     default:
       // fallback
