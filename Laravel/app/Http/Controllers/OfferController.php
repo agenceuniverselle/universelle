@@ -26,7 +26,7 @@ class OfferController extends Controller
 // ✅ Créer une notification
         Notification::create([
             'type' => 'offer',
-            'content' => "💰 Nouvelle offre de {$offer->first_name} {$offer->last_name} pour le bien #{$offer->bien_id} ({$offer->offer}€).",
+            'content' => "💰 Nouvelle offre de {$offer->first_name} {$offer->last_name} pour le bien #{$offer->bien_id} ({$offer->offer}MAD).",
         ]);
     return response()->json([
         'message' => 'Offre enregistrée avec succès',
