@@ -225,7 +225,7 @@ public function update(Request $request, $id)
 }
 public function notifyShare($id)
 {
-    $article = \App\Models\BlogPost::find($id);
+    $article = \App\Models\BlogArticle::find($id);
 
     if (!$article) {
         return response()->json(['error' => 'Article introuvable'], 404);
