@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\ConseillerContact;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
-
+use App\Models\Notification; 
 class ConseillerContactController extends Controller
 {
     public function store(Request $request)
@@ -38,7 +38,11 @@ class ConseillerContactController extends Controller
                 'status' => 'new',
                 'consent'     => $request->consent,
             ]);
-
+// ✅ Création de la notification
+            Notification::create([
+                'type' => 'conseiller',
+                'content' => "📞 Nouveau contact conseiller de {$contact->name} ({$contact->email})",
+            ]);
             return response()->json([
                 'success' => true,
                 'message' => 'Votre demande a été envoyée avec succès. Un conseiller vous contactera bientôt.',
