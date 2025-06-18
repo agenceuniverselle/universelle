@@ -34,6 +34,11 @@ import { useToast } from '@/hooks/use-toast';
 import { toast as toastSonner } from 'sonner';
 import ConseillerForm from './ConseillerForm';
 import InvestmentForm from './InvestmentForm';
+const formatPrice = (value: number | string | undefined | null) => {
+  if (!value) return "N/A";
+  const number = typeof value === 'string' ? parseFloat(value) : value;
+  return new Intl.NumberFormat('fr-FR').format(number);
+};
 
 interface InvestmentDetailDialogProps {
   property: Property;
@@ -267,7 +272,7 @@ const handleDownload = async (
                   <span className="text-gray-700">Prix d'entrée minimum</span>
                 </div>
                 <span className="font-medium">
-                  {investmentDetails?.minEntryPrice || property.price} MAD
+  {formatPrice(investmentDetails?.minEntryPrice || property.price)} MAD
                 </span>
               </div>
 
