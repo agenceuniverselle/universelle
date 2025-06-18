@@ -59,11 +59,14 @@ class InvestorRequestController extends Controller
             'commentaire' => $validated['commentaire'] ?? null,
             'consent' => $validated['consent'],
         ]);
-  // ✅ Notification prospect
-        Notification::create([
-            'type' => 'investor',
-            'content' => "📩 Nouveau prospect investisseur : {$prospect->prenom} {$prospect->nom}.",
-        ]);
+try {
+    Notification::create([
+        'type' => 'investor',
+        'content' => "📩 Nouveau prospect investisseur : {$prospect->prenom} {$prospect->nom}.",
+    ]);
+} catch (\Exception $e) {
+    \Log::error("Erreur notification : " . $e->getMessage());
+}
         return response()->json([
             'message' => 'Prospect ajouté avec succès.',
             'data' => $prospect,
