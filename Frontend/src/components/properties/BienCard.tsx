@@ -12,6 +12,11 @@ import {
   DollarSign,
   Eye 
 } from 'lucide-react';
+const formatPrice = (value: number | string | undefined | null) => {
+  if (!value) return "N/A";
+  const number = typeof value === 'string' ? parseFloat(value) : value;
+  return new Intl.NumberFormat('fr-FR').format(number);
+};
 
 interface BienCardProps {
   bien: Bien;
@@ -74,7 +79,7 @@ console.log("Image URL:", firstImageUrl);
       <CardContent className="p-4">
         <div className="flex justify-between items-center mb-4">
           <div className="font-bold text-lg flex items-center">
-          {bien.price} MAD
+          {formatPrice(bien.price)} MAD
           </div>
           <Badge variant="outline" className="font-normal">
             {bien.type}
