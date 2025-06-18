@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Offer;
-
+use App\Models\Notification;
 class OfferController extends Controller
 {
     public function store(Request $request)
@@ -23,7 +23,11 @@ class OfferController extends Controller
     ]);
 
     $offer = Offer::create($validated);
-
+// ✅ Créer une notification
+        Notification::create([
+            'type' => 'offer',
+            'content' => "💰 Nouvelle offre de {$offer->first_name} {$offer->last_name} pour le bien #{$offer->bien_id} ({$offer->offer}€).",
+        ]);
     return response()->json([
         'message' => 'Offre enregistrée avec succès',
         'data' => $offer
