@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Contact;
 use Illuminate\Http\Request;
-
+use App\Models\Notification; 
 class ContactController extends Controller
 {
     public function store(Request $request)
@@ -20,7 +20,11 @@ class ContactController extends Controller
         ]);
 
         $contact = Contact::create($validated);
-
+// ✅ Création de la notification
+        Notification::create([
+            'type' => 'contact',
+            'content' => "📬 Nouveau message de contact de {$contact->name} ({$contact->email})",
+        ]);
         return response()->json([
             'message' => 'Contact enregistré avec succès',
             'data' => $contact
