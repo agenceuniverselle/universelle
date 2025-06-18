@@ -52,7 +52,8 @@ const AdminLayout = ({ children, title }: AdminLayoutProps) => {
   const { isAuthenticated, user, logout, permissions } = useAuth();
   const { toast } = useToast();
   const { notifications, unreadCount, markAsRead } = useNotifications();
-  const [isNotifOpen, setIsNotifOpen] = useState(false); // 👈 ouvrir/fermer le menu
+  const [isNotifOpen, setIsNotifOpen] = useState(false); 
+  const [showAll, setShowAll] = useState(false);
   const notifRef = useRef<HTMLDivElement>(null);
   useClickOutside(notifRef, () => setIsNotifOpen(false));
   const handleNotificationClick = async (notif: Notification) => {
@@ -306,39 +307,54 @@ const getNavItems = () => {
     )}
   </Button>
 
-  {isNotifOpen && (
-    <div className="absolute right-0 mt-2 w-72 bg-white dark:bg-gray-800 border dark:border-gray-700 shadow-lg rounded-md z-50">
-      <div className="px-4 py-2 border-b dark:border-gray-700 font-semibold text-sm text-gray-800 dark:text-gray-200">
-        Notifications
-      </div>
-      <ul className="max-h-60 overflow-y-auto text-sm divide-y dark:divide-gray-700">
-        {notifications.length === 0 ? (
-          <li className="px-4 py-2 text-gray-500 dark:text-gray-400 text-center">Aucune notification</li>
-        ) : (
-          notifications.slice(0, 5).map((notif) => (
-            <li
-              key={notif.id}
-              className={cn(
-                "px-4 py-2 cursor-pointer transition-colors",
-                !notif.is_read
-                  ? "bg-red-50 dark:bg-red-900 hover:bg-red-100 dark:hover:bg-red-800"
-                  : "hover:bg-gray-100 dark:hover:bg-gray-700"
-              )}
-              onClick={() => handleNotificationClick(notif)}
-            >
-              <p className="font-medium text-gray-700 dark:text-gray-100">{notif.content}</p>
-              <p className="text-xs text-gray-400">
-                {new Date(notif.created_at).toLocaleString()}
-              </p>
-            </li>
-          ))
-        )}
-      </ul>
-      <div className="px-4 py-2 text-xs text-right text-blue-500 hover:underline cursor-pointer">
-        Voir toutes les notifications
-      </div>
+{isNotifOpen && (
+  <div className="absolute right-0 mt-2 w-72 bg-white dark:bg-gray-800 border dark:border-gray-700 shadow-lg rounded-md z-50">
+    <div className="px-4 py-2 border-b dark:border-gray-700 font-semibold text-sm text-gray-800 dark:text-gray-200">
+      Notifications
     </div>
-  )}
+
+    {/* ✅ Dynamique max-height ici */}
+    <ul
+      className={cn(
+        "overflow-y-auto text-sm divide-y dark:divide-gray-700 transition-all duration-300",
+        showAll ? "max-h-[400px]" : "max-h-60"
+      )}
+    >
+      {notifications.length === 0 ? (
+        <li className="px-4 py-2 text-gray-500 dark:text-gray-400 text-center">Aucune notification</li>
+      ) : (
+        (showAll ? notifications : notifications.slice(0, 5)).map((notif) => (
+          <li
+            key={notif.id}
+            className={cn(
+              "px-4 py-2 cursor-pointer transition-colors",
+              !notif.is_read
+                ? "bg-red-50 dark:bg-red-900 hover:bg-red-100 dark:hover:bg-red-800"
+                : "hover:bg-gray-100 dark:hover:bg-gray-700"
+            )}
+            onClick={() => handleNotificationClick(notif)}
+          >
+            <p className="font-medium text-gray-700 dark:text-gray-100">{notif.content}</p>
+            <p className="text-xs text-gray-400">
+              {new Date(notif.created_at).toLocaleString()}
+            </p>
+          </li>
+        ))
+      )}
+    </ul>
+
+    {/* ✅ Toggle "Voir plus / Réduire" */}
+    {notifications.length > 5 && (
+      <div
+        className="px-4 py-2 text-xs text-right text-blue-500 hover:underline cursor-pointer"
+        onClick={() => setShowAll(!showAll)}
+      >
+        {showAll ? "Réduire" : "Voir toutes les notifications"}
+      </div>
+    )}
+  </div>
+)}
+
 </div>
    <Button
         onClick={handleLogout}
