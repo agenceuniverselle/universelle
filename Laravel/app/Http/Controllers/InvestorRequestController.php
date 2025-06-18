@@ -6,7 +6,7 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\InvestorRequest;
-
+use App\Models\Notification;
 class InvestorRequestController extends Controller
 {
     //Afficher 
@@ -59,7 +59,11 @@ class InvestorRequestController extends Controller
             'commentaire' => $validated['commentaire'] ?? null,
             'consent' => $validated['consent'],
         ]);
-
+  // ✅ Notification prospect
+        Notification::create([
+            'type' => 'investor',
+            'content' => "📩 Nouveau prospect investisseur : {$prospect->prenom} {$prospect->nom}.",
+        ]);
         return response()->json([
             'message' => 'Prospect ajouté avec succès.',
             'data' => $prospect,
