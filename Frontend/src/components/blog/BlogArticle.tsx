@@ -31,11 +31,16 @@ const BlogArticle = ({ article, onBack, onSelectArticle }: BlogArticleProps) => 
 const copyLink = async () => {
   try {
     await navigator.clipboard.writeText(window.location.href);
+
+    // ✅ Appel backend pour créer la notification
+    await axios.post(`https://back-qhore.ondigitalocean.app/api/blogs/${article.id}/share`);
+
     alert("Lien copié dans le presse-papiers !");
   } catch (err) {
     alert("Échec de la copie du lien");
   }
 };
+
 
   useEffect(() => {
     setRating(article.rating || 0);
