@@ -58,24 +58,24 @@ const WhyChooseUs = () => {
         <div className="mt-20">
           <h3 className="text-center text-black-400 text-sm uppercase tracking-wider mb-8">Nos partenaires de confiance</h3>
           <div className="flex flex-wrap justify-center items-center gap-8">
-            <div className="w-40 h-20 flex items-center justify-center">
+            <div className="w-40 h-30 flex items-center justify-center">
             <img 
                 src="/lovable-uploads/Logo_Small_SVG.svg" 
                 alt="Logo Agence Universelle" 
                 className="max-h-full max-w-full"
               />
             </div>
-            <div className="w-40 h-40 flex items-center justify-center"> <img 
+            <div className="w-40 h-30 flex items-center justify-center"> <img 
                 src="/EXTRAV.png" 
                 alt="Logo EXTRAV" 
                 className="max-h-full max-w-full"
               /></div>
-            <div className="w-60 h-20 flex items-center justify-center"><img 
+            <div className="w-60 h-30 flex items-center justify-center"><img 
                 src="/SINMAT.png" 
                 alt="SINMAT EXTRAV" 
                 className="max-h-full max-w-full"
               /></div>
-             <div className="w-40 h-25 flex items-center justify-center"><img 
+             <div className="w-40 h-30 flex items-center justify-center"><img 
                 src="/sintraS.png" 
                 alt="sintraS EXTRAV" 
                 className="max-h-full max-w-full"
