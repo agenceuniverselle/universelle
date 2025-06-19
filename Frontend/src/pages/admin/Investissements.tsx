@@ -95,13 +95,51 @@ const AdminInvestissements = () => {
   const [expertRequests, setExpertRequests] = useState<ExpertRequest[]>([]);
   const [filteredExpertRequests, setFilteredExpertRequests] = useState<ExpertRequest[]>([]);
   const [expertRequestToDelete, setExpertRequestToDelete] = useState<string | null>(null);
-  const [shouldReloadOffers, setShouldReloadOffers] = useState(false);
 
   // État pour stocker le contact sélectionné
   const [selectedContact, setSelectedContact] = useState(null);
    const [editOpen, setEditOpen] = useState(false);
   const [selectedExpert, setSelectedExpert] = useState<ExpertRequest | null>(null);
-  
+  const fetchExclusiveOffersSilent = async () => {
+  try {
+    const res = await axios.get("https://back-qhore.ondigitalocean.app/api/exclusive-offers");
+    const newData = res.data || [];
+
+    setExclusiveOffers(current => {
+      const same = JSON.stringify(current) === JSON.stringify(newData);
+      return same ? current : newData;
+    });
+  } catch (error) {
+    console.warn("Erreur silencieuse des offres exclusives :", error);
+  }
+};
+const fetchAdvisorRequestsSilent = async () => {
+  try {
+    const res = await axios.get("https://back-qhore.ondigitalocean.app/api/advisor-requests");
+    const newData = res.data || [];
+
+    setAdvisorRequests(current => {
+      const same = JSON.stringify(current) === JSON.stringify(newData);
+      return same ? current : newData;
+    });
+  } catch (error) {
+    console.warn("Erreur silencieuse des demandes conseiller :", error);
+  }
+};
+const fetchExpertRequestsSilent = async () => {
+  try {
+    const res = await axios.get("https://back-qhore.ondigitalocean.app/api/expert-contacts");
+    const newData = res.data || [];
+
+    setExpertRequests(current => {
+      const same = JSON.stringify(current) === JSON.stringify(newData);
+      return same ? current : newData;
+    });
+  } catch (error) {
+    console.warn("Erreur silencieuse des demandes expert :", error);
+  }
+};
+
   const fetchExpertRequests = async () => {
   try {
     // No 'headers' or 'Authorization' token needed for this specific GET request
@@ -318,11 +356,25 @@ const AdminInvestissements = () => {
       setOfferToDelete(null);
     }
   };
+useEffect(() => {
+  const interval = setInterval(() => {
+    if (document.visibilityState !== "visible") return;
 
+    if (activeView === "offres") {
+      fetchExclusiveOffersSilent();
+    } else if (activeView === "demandes") {
+      fetchAdvisorRequestsSilent();
+    } else if (activeView === "experts") {
+      fetchExpertRequestsSilent();
+    }
+  }, 1000); // chaque seconde
+
+  return () => clearInterval(interval);
+}, [activeView]);
   useEffect(() => {
   if (activeView === "offres") {
     fetchExclusiveOffers();
-     setShouldReloadOffers(false); 
+   
   } else if (activeView === "demandes") {
     fetchAdvisorRequests();
   } else if (activeView === "experts") { 
@@ -1315,10 +1367,7 @@ const filteredProperties = properties.filter((property) => {
       <ExclusiveOfferDialog
         open={exclusiveDialogOpen}
         onOpenChange={setExclusiveDialogOpen}
-       onOfferAdded={() => {
-    setShouldReloadOffers(true); // 🔁 recharge automatique
-    toast({ title: "Ajoutée", description: "Offre exclusive ajoutée." });
-  }}
+       onOfferAdded={() => {}}
       />
       <AlertDialog open={deleteConfirmOpen} onOpenChange={setDeleteConfirmOpen}>
         <AlertDialogContent className="
