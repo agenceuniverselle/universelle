@@ -1244,10 +1244,11 @@ const filteredProperties = properties.filter((property) => {
       <AddInvestmentDialog
         open={addDialogOpen}
         onOpenChange={setAddDialogOpen}
-       onPropertyAdded={() => {
-          fetchProperties();
-          toast({ title: "Ajouté", description: "Bien ajouté avec succès" });
-        }}
+       onPropertyAdded={(newProperty) => {
+  setProperties((prev) => [newProperty, ...prev]); // ✅ ajoute en haut de la table
+  toast({ title: "Ajouté", description: "Bien ajouté avec succès" });
+  setAddDialogOpen(false);
+}}
       />
 
       <ExclusiveOfferDialog
