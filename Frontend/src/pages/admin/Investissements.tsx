@@ -337,9 +337,17 @@ const AdminInvestissements = () => {
     }
   };
 
-  useEffect(() => {
+useEffect(() => {
+  // Chargement initial
   fetchProperties();
-}, [shouldReloadProperties]);
+
+  // Chargement automatique toutes les 30 sec (en background)
+  const intervalId = setInterval(() => {
+    fetchPropertiesSilent(); // version sans affichage visuel
+  }, 30000);
+
+  return () => clearInterval(intervalId); // nettoyage propre
+}, []);
 
   const fetchProperties = async () => {
     try {
@@ -350,6 +358,22 @@ const AdminInvestissements = () => {
       console.error("Erreur de chargement des biens :", error);
     }
   };
+  const fetchPropertiesSilent = async () => {
+  try {
+    const response = await axios.get("https://back-qhore.ondigitalocean.app/api/properties");
+    const newData = response.data.data || [];
+
+    // ✅ Évite de re-render inutile si les données sont identiques
+    setProperties((current) => {
+      const currentIds = current.map(p => p.id).sort().join(",");
+      const newIds = newData.map(p => p.id).sort().join(",");
+      return currentIds !== newIds ? newData : current;
+    });
+  } catch (error) {
+    console.warn("Erreur silencieuse lors du rechargement des biens :", error);
+  }
+};
+
   const handleViewDetails = (propertyId: string) => {
     navigate(`/admin/investissements/${propertyId}`);
 
