@@ -46,7 +46,7 @@ const AdminBiens = () => {
   const [recentSearches, setRecentSearches] = useState<string[]>([]);
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const [advancedFiltersOpen, setAdvancedFiltersOpen] = useState(false);
-  const { addBien } = useBiens();
+  
   const [filters, setFilters] = useState({
     type: '',
     minPrice: '',
@@ -254,10 +254,32 @@ const AdminBiens = () => {
       setAddPropertyOpen(true);
     }, 300);
   };
+const fetchBiensSilent = async () => {
+  try {
+    const response = await axios.get("https://back-qhore.ondigitalocean.app/api/biens");
+    const newData = response.data || [];
+
+    setBiens((current) => {
+      const same = JSON.stringify(current) === JSON.stringify(newData);
+      return same ? current : newData;
+    });
+  } catch (error) {
+    console.warn("Erreur silencieuse de chargement des biens :", error);
+  }
+};
+
+useEffect(() => {
+  const interval = setInterval(() => {
+    if (document.visibilityState === "visible") {
+      fetchBiensSilent();
+    }
+  }, 1000); 
+
+  return () => clearInterval(interval);
+}, []);
 
   const handlePropertyAdded = (bienId: string) => {
     setAddPropertyOpen(false);
-    addBien(newBien);
     toast({
       title: "Bien ajouté avec succès",
       description: "Vous pouvez maintenant le voir dans la liste des biens",
