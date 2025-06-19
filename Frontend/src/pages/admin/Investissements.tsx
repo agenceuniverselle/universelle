@@ -73,7 +73,7 @@ interface ExpertRequest {
   consent?: boolean;
   created_at: string;
 }
-const AdminInvestissements = () => {
+AdminInvestissements = () => {
   const navigate = useNavigate();
   const [properties, setProperties] = useState<InvestmentProperty[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
@@ -84,106 +84,103 @@ const AdminInvestissements = () => {
   const [activeView, setActiveView] = useState<
     "biens" | "offres" | "demandes" | "experts"
   >("biens");
-
   const [selectedOfferId, setSelectedOfferId] = useState<number | null>(null);
+  const { permissions } = useAuth();
   const [advisorRequests, setAdvisorRequests] = useState<AdvisorRequest[]>([]);
-  const [expertRequests, setExpertRequests] = useState<ExpertRequest[]>([]);
-  const [exclusiveOffers, setExclusiveOffers] = useState<ExclusiveOffer[]>([]);
-  const [advisorRequestToDelete, setAdvisorRequestToDelete] = useState<string | null>(null);
-  const [expertRequestToDelete, setExpertRequestToDelete] = useState<string | null>(null);
-  const [bienToDelete, setBienToDelete] = useState<string | number | null>(null);
-
-  const [statusFilter, setStatusFilter] = useState("all");
-  const [filteredAdvisorRequests, setFilteredAdvisorRequests] = useState<AdvisorRequest[]>([]);
-  const [filteredExpertRequests, setFilteredExpertRequests] = useState<ExpertRequest[]>([]);
-
-  const [selectedContact, setSelectedContact] = useState<AdvisorRequest | null>(null);
+  const [advisorRequestToDelete, setAdvisorRequestToDelete] = useState<
+    string | null
+  >(null);
+  const [advisorRequestToEdit, setAdvisorRequestToEdit] =useState<AdvisorRequest | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [expertRequests, setExpertRequests] = useState<ExpertRequest[]>([]);
+  const [filteredExpertRequests, setFilteredExpertRequests] = useState<ExpertRequest[]>([]);
+  const [expertRequestToDelete, setExpertRequestToDelete] = useState<string | null>(null);
 
+  // État pour stocker le contact sélectionné
+  const [selectedContact, setSelectedContact] = useState(null);
+   const [editOpen, setEditOpen] = useState(false);
   const [selectedExpert, setSelectedExpert] = useState<ExpertRequest | null>(null);
-  const [editOpen, setEditOpen] = useState(false);
-
+  
+  const fetchExpertRequests = async () => {
+  try {
+    // No 'headers' or 'Authorization' token needed for this specific GET request
+    // because your Laravel route for index is not protected by middleware.
+    const res = await axios.get("https://back-qhore.ondigitalocean.app/api/expert-contacts");
+    setExpertRequests(res.data || []); // Assuming the API returns an array directly
+  } catch (error) {
+    console.error("Erreur de chargement des demandes d'expert :", error);
+    toast({
+      title: "Erreur",
+      description: "Impossible de charger les demandes d'expert",
+      variant: "destructive",
+    });
+  }
+};
+  // Fonction pour ouvrir le modal d'édition
+  const handleEdit = (contact) => {
+    setSelectedContact(contact);
+    setIsEditModalOpen(true);
+  };
+  // Ajout des filtres et tris
+  const [filterType, setFilterType] = useState("all");
+  const [filterStatus, setFilterStatus] = useState("all");
   const [activeTab, setActiveTab] = useState("all");
   const [sortBy, setSortBy] = useState("date");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
-
-  const { permissions } = useAuth();
-
-  // Permissions
+  const [exclusiveOffers, setExclusiveOffers] = useState<ExclusiveOffer[]>([]);
   const canView = permissions.includes("view_investments");
   const canEdit = permissions.includes("edit_investments");
   const canDelete = permissions.includes("delete_investments");
   const canCreate = permissions.includes("create_investments");
+  const hasAnyPermission = canView || canEdit || canDelete || canCreate;
+  const [bienToDelete, setBienToDelete] = useState<string | number>(null);
 
   const canViewOffers = permissions.includes("view_exclusive_offers");
   const canCreateOffers = permissions.includes("create_exclusive_offers");
   const canEditOffers = permissions.includes("edit_exclusive_offers");
   const canDeleteOffers = permissions.includes("delete_exclusive_offers");
+  const hasAnyPermissionOffers =
+    canViewOffers || canCreateOffers || canEditOffers || canDeleteOffers;
+  const [offerToDelete, setOfferToDelete] = useState<string | null>(null);
+  // Add status filter for advisor requests
+  const [statusFilter, setStatusFilter] = useState("all");
 
-  const hasAnyPermission = canView || canEdit || canDelete || canCreate;
-  const hasAnyPermissionOffers = canViewOffers || canCreateOffers || canEditOffers || canDeleteOffers;
-
-  // 🔁 Fetch les biens à l'init
+  const [filteredAdvisorRequests, setFilteredAdvisorRequests] = useState<
+    AdvisorRequest[]
+  >([]);
   useEffect(() => {
-    fetchProperties();
-  }, []);
-
-  // 🔁 Fetch selon l’onglet actif
-  useEffect(() => {
-    if (activeView === "offres") {
-      fetchExclusiveOffers();
-    } else if (activeView === "demandes") {
-      fetchAdvisorRequests();
-    } else if (activeView === "experts") {
-      fetchExpertRequests();
-    }
-  }, [activeView]);
-
-  // 🔁 Recherche Expert
-  useEffect(() => {
-    const search = searchTerm.toLowerCase();
     setFilteredExpertRequests(
-      expertRequests.filter((r) =>
-        [r.name, r.email, r.phone, r.message, r.expert, r.service_type]
-          .some((field) => field?.toLowerCase().includes(search))
-      )
+      expertRequests.filter((request) => {
+        const search = searchTerm.toLowerCase();
+        return (
+          request.name.toLowerCase().includes(search) ||
+          request.email.toLowerCase().includes(search) ||
+          request.phone.toLowerCase().includes(search) || // Include phone in search
+          (request.message && request.message.toLowerCase().includes(search)) ||
+          (request.expert && request.expert.toLowerCase().includes(search)) || // Include expert name in search
+          (request.service_type &&
+            request.service_type.toLowerCase().includes(search)) // Include service type in search
+        );
+      })
     );
   }, [expertRequests, searchTerm]);
-
-  // 🔁 Filtrage demandes conseiller
+  // Filter advisor requests by status
   useEffect(() => {
     if (statusFilter === "all") {
       setFilteredAdvisorRequests(advisorRequests);
     } else {
-      setFilteredAdvisorRequests(advisorRequests.filter(r => r.status === statusFilter));
+      setFilteredAdvisorRequests(
+        advisorRequests.filter((request) => request.status === statusFilter)
+      );
     }
   }, [advisorRequests, statusFilter]);
-
-  // 🔄 API CALLS
-  const fetchProperties = async () => {
-    try {
-      const res = await axios.get("https://back-qhore.ondigitalocean.app/api/properties");
-      setProperties(res.data.data || []);
-    } catch (err) {
-      console.error("Erreur de chargement des biens :", err);
-    }
-  };
-
-  const fetchExclusiveOffers = async () => {
-    try {
-      const res = await axios.get("https://back-qhore.ondigitalocean.app/api/exclusive-offers");
-      setExclusiveOffers(res.data || []);
-    } catch (err) {
-      console.error("Erreur de chargement des offres exclusives :", err);
-    }
-  };
 
   const fetchAdvisorRequests = async () => {
     try {
       const res = await axios.get("https://back-qhore.ondigitalocean.app/api/advisor-requests");
       setAdvisorRequests(res.data || []);
-    } catch (err) {
-      console.error("Erreur de chargement des demandes de conseiller :", err);
+    } catch (error) {
+      console.error("Erreur de chargement des demandes de conseiller :", error);
       toast({
         title: "Erreur",
         description: "Impossible de charger les demandes de conseiller",
@@ -192,56 +189,211 @@ const AdminInvestissements = () => {
     }
   };
 
-  const fetchExpertRequests = async () => {
-    try {
-      const res = await axios.get("https://back-qhore.ondigitalocean.app/api/expert-contacts");
-      setExpertRequests(res.data || []);
-    } catch (err) {
-      console.error("Erreur de chargement des demandes d'expert :", err);
-      toast({
-        title: "Erreur",
-        description: "Impossible de charger les demandes d'expert",
-        variant: "destructive",
-      });
-    }
-  };
-
-  // 🔧 Suppression avec token
-  const getToken = (): string | null => localStorage.getItem("access_token");
-
-  const handleDeleteItem = async (type: "property" | "advisor" | "expert" | "offer", id: string) => {
+  const handleDeleteExpertRequest = async (id: string | null) => {
     if (!id) return;
-    const token = getToken();
-    if (!token) {
-      toast({
-        title: "Erreur d'authentification",
-        description: "Votre session a expiré. Veuillez vous reconnecter.",
-        variant: "destructive",
-      });
-      navigate("/login");
-      return;
-    }
 
     try {
       setIsDeleting(true);
-      const urlMap = {
-        property: `properties/${id}`,
-        advisor: `advisor-requests/${id}`,
-        expert: `expert-contacts/${id}`,
-        offer: `exclusive-offers/${id}`
-      };
-      await axios.delete(`https://back-qhore.ondigitalocean.app/api/${urlMap[type]}`, {
-        headers: { Authorization: `Bearer ${token}` }
+      const token = localStorage.getItem("access_token");
+      if (!token) {
+        toast({
+          title: "Erreur d'authentification",
+          description: "Votre session a expiré. Veuillez vous reconnecter.",
+          variant: "destructive",
+        });
+        navigate("/login");
+        return;
+      }
+
+      await axios.delete(https://back-qhore.ondigitalocean.app
+/api/expert-contacts/${id}, {
+       
       });
 
-      toast({ title: "Supprimée", description: `L'élément a été supprimé.` });
+      toast({
+        title: "Supprimée",
+        description: "Demande d'expert supprimée avec succès.",
+      });
+      fetchExpertRequests(); // Refresh the list
+    } catch (error) {
+      toast({
+        title: "Erreur",
+        description: "Erreur lors de la suppression de la demande d'expert",
+        variant: "destructive",
+      });
+    } finally {
+      setIsDeleting(false);
+      setDeleteConfirmOpen(false);
+      setExpertRequestToDelete(null);
+    }
+  };
+  const handleDeleteAdvisorRequest = async (id: string | null) => {
+    if (!id) return;
 
-      // Refresh selon type
-      if (type === "property") fetchProperties();
-      if (type === "advisor") fetchAdvisorRequests();
-      if (type === "expert") fetchExpertRequests();
-      if (type === "offer") fetchExclusiveOffers();
-    } catch (err) {
+    try {
+      setIsDeleting(true);
+      const token = localStorage.getItem("access_token");
+      if (!token) {
+        toast({
+          title: "Erreur d'authentification",
+          description: "Votre session a expiré. Veuillez vous reconnecter.",
+          variant: "destructive",
+        });
+        navigate("/login");
+        return;
+      }
+
+      await axios.delete(https://back-qhore.ondigitalocean.app
+/api/advisor-requests/${id}, {
+        headers: {
+          Authorization: Bearer ${token},
+        },
+      });
+
+      toast({
+        title: "Supprimée",
+        description: "Demande de conseiller supprimée avec succès.",
+      });
+      fetchAdvisorRequests();
+    } catch (error) {
+      toast({
+        title: "Erreur",
+        description: "Erreur lors de la suppression de la demande",
+        variant: "destructive",
+      });
+    } finally {
+      setIsDeleting(false);
+      setDeleteConfirmOpen(false);
+      setAdvisorRequestToDelete(null);
+    }
+  };
+
+  const handleSuccess = () => {
+    fetchAdvisorRequests();
+    setAddDialogOpen(false);
+  };
+
+  const handleDeleteExclusiveOffer = async (id: string | null) => {
+    if (!id) return;
+
+    try {
+      setIsDeleting(true);
+
+      // ✅ Récupération du token depuis le localStorage
+      const token = localStorage.getItem("access_token");
+      if (!token) {
+        toast({
+          title: "Erreur d'authentification",
+          description: "Votre session a expiré. Veuillez vous reconnecter.",
+          variant: "destructive",
+        });
+        navigate("/login");
+        return;
+      }
+
+      // ✅ Requête de suppression avec le token
+      await axios.delete(https://back-qhore.ondigitalocean.app
+/api/exclusive-offers/${id}, {
+        headers: {
+          Authorization: Bearer ${token}, // ✅ Token ajouté dans les headers
+        },
+      });
+
+      toast({
+        title: "Supprimée",
+        description: "Offre exclusive supprimée avec succès.",
+      });
+      fetchExclusiveOffers();
+    } catch (error) {
+      toast({
+        title: "Erreur",
+        description: "Erreur lors de la suppression de l’offre",
+        variant: "destructive",
+      });
+    } finally {
+      setIsDeleting(false);
+      setDeleteConfirmOpen(false);
+      setOfferToDelete(null);
+    }
+  };
+
+  useEffect(() => {
+  if (activeView === "offres") {
+    fetchExclusiveOffers();
+  } else if (activeView === "demandes") {
+    fetchAdvisorRequests();
+  } else if (activeView === "experts") { 
+    fetchExpertRequests();
+  }
+}, [activeView]); 
+
+  const fetchExclusiveOffers = async () => {
+    try {
+      const res = await axios.get("https://back-qhore.ondigitalocean.app/api/exclusive-offers");
+      setExclusiveOffers(res.data || []); // ✅ supprime .data
+    } catch (error) {
+      console.error("Erreur de chargement des offres exclusives :", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchProperties();
+  }, []);
+
+  const fetchProperties = async () => {
+    try {
+      const response = await axios.get("https://back-qhore.ondigitalocean.app/api/properties");
+      setProperties(response.data.data || []);
+    } catch (error) {
+      console.error("Erreur de chargement des biens :", error);
+    }
+  };
+  const handleViewDetails = (propertyId: string) => {
+    navigate(/admin/investissements/${propertyId});
+  };
+  const handleEditProperty = (propertyId: string) => {
+    toast({
+      title: "Mode édition",
+      description: "Redirection vers le formulaire d'édition...",
+      variant: "default",
+    });
+
+    setTimeout(() => {
+      navigate(/admin/investissements/edit/${propertyId});
+    }, 300);
+  };
+
+  const handleDeleteProperty = async (id: string | null) => {
+    if (!id) return;
+
+    try {
+      setIsDeleting(true);
+
+      // ✅ Récupération du token
+      const token = localStorage.getItem("access_token");
+      if (!token) {
+        toast({
+          title: "Erreur d'authentification",
+          description: "Votre session a expiré. Veuillez vous reconnecter.",
+          variant: "destructive",
+        });
+        navigate("/login");
+        return;
+      }
+
+      // ✅ Requête de suppression avec le token
+      await axios.delete(https://back-qhore.ondigitalocean.app
+/api/properties/${id}, {
+        headers: {
+          Authorization: Bearer ${token}, // ✅ Ajout du token dans les headers
+        },
+      });
+
+      toast({ title: "Supprimé", description: "Bien supprimé avec succès." });
+      setDeleteConfirmOpen(false);
+      setBienToDelete(null);
+      fetchProperties(); // Recharge la liste
+    } catch (error) {
       toast({
         title: "Erreur",
         description: "Erreur lors de la suppression",
@@ -249,30 +401,36 @@ const AdminInvestissements = () => {
       });
     } finally {
       setIsDeleting(false);
-      setDeleteConfirmOpen(false);
-      setBienToDelete(null);
-      setAdvisorRequestToDelete(null);
-      setExpertRequestToDelete(null);
-      setSelectedOfferId(null);
     }
   };
 
-  // ✅ Données triées
+  // FILTRAGE & TRI
   const investmentProperties = properties.filter((p) => !!p.investmentDetails);
-  const filteredProperties = investmentProperties.filter((p) => {
-    const s = searchTerm.toLowerCase();
-    return (
-      p.title?.toLowerCase().includes(s) ||
-      p.location?.toLowerCase().includes(s) ||
-      p.type?.toLowerCase().includes(s) ||
-      p.investmentDetails?.investmentType?.toLowerCase().includes(s) ||
-      p.status?.toLowerCase().includes(s) ||
-      p.investmentDetails?.projectStatus?.toLowerCase().includes(s)
-    ) && (
+
+  const filteredProperties = investmentProperties.filter((property) => {
+    const search = searchTerm.toLowerCase();
+
+    const matchesSearch =
+      property.title?.toLowerCase().includes(search) ||
+      property.location?.toLowerCase().includes(search) ||
+      property.type?.toLowerCase().includes(search) ||
+      property.investmentDetails?.investmentType
+        ?.toLowerCase()
+        .includes(search) ||
+      property.status?.toLowerCase().includes(search) ||
+      property.investmentDetails?.projectStatus?.toLowerCase().includes(search);
+
+    const matchesTab =
       activeTab === "all" ||
-      (activeTab === "drafts" && p.isDraft) ||
-      (activeTab === "published" && !p.isDraft)
-    );
+      (activeTab === "drafts" && property.isDraft) ||
+      (activeTab === "published" && !property.isDraft);
+
+    return matchesSearch && matchesTab;
+  });
+
+  const filteredExclusiveOffers = exclusiveOffers.filter((offer) => {
+    const search = searchTerm.toLowerCase();
+    return offer.property?.title?.toLowerCase().includes(search);
   });
 
   const sortedProperties = [...filteredProperties].sort((a, b) => {
@@ -284,25 +442,26 @@ const AdminInvestissements = () => {
 
     if (sortBy === "price") {
       return sortOrder === "asc"
-        ? (a.price ?? 0) - (b.price ?? 0)
+        ? (a.price ?? 0) - (b.price ?? 0) // ✅ Utilisation des valeurs par défaut 0 si undefined
         : (b.price ?? 0) - (a.price ?? 0);
     }
 
     if (sortBy === "return") {
       return sortOrder === "asc"
-        ? (a.investmentDetails?.returnRate ?? 0) - (b.investmentDetails?.returnRate ?? 0)
-        : (b.investmentDetails?.returnRate ?? 0) - (a.investmentDetails?.returnRate ?? 0);
+        ? (a.investmentDetails?.returnRate ?? 0) -
+            (b.investmentDetails?.returnRate ?? 0)
+        : (b.investmentDetails?.returnRate ?? 0) -
+            (a.investmentDetails?.returnRate ?? 0);
     }
 
     return 0;
   });
-
   const handleDelete = async (id: string) => {
     if (!window.confirm("Confirmer la suppression ?")) return;
 
     try {
-      await axios.delete(`https://back-qhore.ondigitalocean.app
-/api/properties/${id}`);
+      await axios.delete(https://back-qhore.ondigitalocean.app
+/api/properties/${id});
       toast({ title: "Supprimé", description: "Bien supprimé avec succès." });
       fetchProperties();
     } catch (error) {
@@ -312,8 +471,7 @@ const AdminInvestissements = () => {
         variant: "destructive",
       });
     }
-  };
-
+  }; 
   return (
     <AdminLayout title="Biens d’investissement">
       <div className="mb-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
