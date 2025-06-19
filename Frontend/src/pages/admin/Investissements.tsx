@@ -292,12 +292,12 @@ const AdminInvestissements = () => {
       }
 
       // ✅ Requête de suppression avec le token
-      await axios.delete(https://back-qhore.ondigitalocean.app
-/api/exclusive-offers/${id}, {
-        headers: {
-          Authorization: Bearer ${token}, // ✅ Token ajouté dans les headers
-        },
-      });
+     await axios.delete(`https://back-qhore.ondigitalocean.app/api/exclusive-offers/${id}`, {
+  headers: {
+    Authorization: `Bearer ${token}`,
+  },
+});
+
 
       toast({
         title: "Supprimée",
