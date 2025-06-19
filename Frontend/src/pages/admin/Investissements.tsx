@@ -246,7 +246,7 @@ const AdminInvestissements = () => {
       await axios.delete(`https://back-qhore.ondigitalocean.app
 /api/advisor-requests/${id}`, {
         headers: {
-          Authorization: Bearer ${token},
+          Authorization: `Bearer ${token}`,
         },
       });
 
