@@ -409,7 +409,7 @@ const AdminInvestissements = () => {
   // FILTRAGE & TRI
   const investmentProperties = properties.filter((p) => !!p.investmentDetails);
 
-  const filteredProperties = investmentProperties.filter((property) => {
+const filteredProperties = properties.filter((property) => {
     const search = searchTerm.toLowerCase();
 
     const matchesSearch =
