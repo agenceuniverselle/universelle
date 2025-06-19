@@ -75,7 +75,7 @@ const WhyChooseUs = () => {
                 alt="SINMAT EXTRAV" 
                 className="max-h-full max-w-full"
               /></div>
-             <div className="w-40 h-30 flex items-center justify-center"><img 
+             <div className="w-60 h-30 flex items-center justify-center"><img 
                 src="/sintraS.png" 
                 alt="sintraS EXTRAV" 
                 className="max-h-full max-w-full"
