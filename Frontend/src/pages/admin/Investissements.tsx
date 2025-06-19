@@ -349,7 +349,8 @@ const AdminInvestissements = () => {
     }
   };
   const handleViewDetails = (propertyId: string) => {
-    navigate(/admin/investissements/${propertyId});
+    navigate(`/admin/investissements/${propertyId}`);
+
   };
   const handleEditProperty = (propertyId: string) => {
     toast({
