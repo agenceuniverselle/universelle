@@ -70,6 +70,46 @@ const AdminContent = () => {
   const canCreateTestimonials = permissions.includes("create_testimonials");
   const canEditTestimonials = permissions.includes("edit_testimonials");
   const canDeleteTestimonials = permissions.includes("delete_testimonials");
+const fetchBlogsSilent = async () => {
+  try {
+    const res = await axios.get('https://back-qhore.ondigitalocean.app/api/blogs');
+    const newData = res.data || [];
+
+    setBlogArticles((current) => {
+      const same = JSON.stringify(current) === JSON.stringify(newData);
+      return same ? current : newData;
+    });
+  } catch (err) {
+    console.warn("Erreur silencieuse des blogs", err);
+  }
+};
+
+const fetchTestimonialsSilent = async () => {
+  try {
+    const res = await axios.get('https://back-qhore.ondigitalocean.app/api/testimonials');
+    const newData = Array.isArray(res.data) ? res.data : [];
+
+    setTestimonials((current) => {
+      const same = JSON.stringify(current) === JSON.stringify(newData);
+      return same ? current : newData;
+    });
+  } catch (err) {
+    console.warn("Erreur silencieuse des témoignages", err);
+  }
+};
+useEffect(() => {
+  const interval = setInterval(() => {
+    if (document.visibilityState !== "visible") return;
+
+    if (activeView === 'blog') {
+      fetchBlogsSilent();
+    } else if (activeView === 'temoignages') {
+      fetchTestimonialsSilent();
+    }
+  }, 1000); // toutes les 1 seconde
+
+  return () => clearInterval(interval);
+}, [activeView]);
 
   useEffect(() => {
     if (activeView === 'blog') {
