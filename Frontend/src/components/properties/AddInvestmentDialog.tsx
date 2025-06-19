@@ -244,7 +244,7 @@ const AddInvestmentDialog: React.FC<AddInvestmentDialogProps> = ({
           description: "Le bien d'investissement a été ajouté en mode brouillon.",
           variant: "default",
         });
-       onPropertyAdded(result.data?.id);
+       onPropertyAdded(result.propertyId);
       }
   
     } catch (error) {
