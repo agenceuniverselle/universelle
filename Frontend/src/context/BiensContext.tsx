@@ -27,6 +27,7 @@ interface BiensContextType {
   biens: Bien[];
   loading: boolean;
   error: string | null;
+  setBiens: React.Dispatch<React.SetStateAction<Bien[]>>;
   addBien: (bien: Bien) => void;
   removeBien: (id: string) => void;
   updateBien: (id: string, bien: Partial<Bien>) => void;
@@ -85,7 +86,7 @@ export const BiensProvider = ({ children }: { children: ReactNode }) => {
   };
 
   return (
-    <BiensContext.Provider value={{ biens, loading, error, addBien, removeBien, updateBien, getBienById, publishBien }}>
+    <BiensContext.Provider value={{ biens, loading, error, setBiens, addBien, removeBien, updateBien, getBienById, publishBien }}>
       {children}
     </BiensContext.Provider>
   );
