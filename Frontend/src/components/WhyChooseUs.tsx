@@ -65,12 +65,12 @@ const WhyChooseUs = () => {
                 className="max-h-full max-w-full"
               />
             </div>
-            <div className="w-40 h-20 flex items-center justify-center"> <img 
+            <div className="w-40 h-40 flex items-center justify-center"> <img 
                 src="/EXTRAV.png" 
                 alt="Logo EXTRAV" 
                 className="max-h-full max-w-full"
               /></div>
-            <div className="w-60 h-35 flex items-center justify-center"><img 
+            <div className="w-60 h-20 flex items-center justify-center"><img 
                 src="/SINMAT.png" 
                 alt="SINMAT EXTRAV" 
                 className="max-h-full max-w-full"
