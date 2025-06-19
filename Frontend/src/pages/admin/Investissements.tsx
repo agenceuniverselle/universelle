@@ -205,8 +205,8 @@ const AdminInvestissements = () => {
         return;
       }
 
-      await axios.delete(https://back-qhore.ondigitalocean.app
-/api/expert-contacts/${id}, {
+      await axios.delete(`https://back-qhore.ondigitalocean.app/api/expert-contacts/${id}`, {
+
        
       });
 
