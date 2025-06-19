@@ -134,6 +134,7 @@ const AdminInvestissements = () => {
   const canCreate = permissions.includes("create_investments");
   const hasAnyPermission = canView || canEdit || canDelete || canCreate;
   const [bienToDelete, setBienToDelete] = useState<string | number>(null);
+  const [shouldReloadProperties, setShouldReloadProperties] = useState(false);
 
   const canViewOffers = permissions.includes("view_exclusive_offers");
   const canCreateOffers = permissions.includes("create_exclusive_offers");
@@ -337,8 +338,8 @@ const AdminInvestissements = () => {
   };
 
   useEffect(() => {
-    fetchProperties();
-  }, []);
+  fetchProperties();
+}, [shouldReloadProperties]);
 
   const fetchProperties = async () => {
     try {
@@ -1244,10 +1245,11 @@ const filteredProperties = properties.filter((property) => {
       <AddInvestmentDialog
         open={addDialogOpen}
         onOpenChange={setAddDialogOpen}
-       onPropertyAdded={(newProperty) => {
-  setProperties((prev) => [newProperty, ...prev]); // ✅ ajoute en haut de la table
-  toast({ title: "Ajouté", description: "Bien ajouté avec succès" });
-  setAddDialogOpen(false);
+        onPropertyAdded={() => {
+    setShouldReloadProperties(prev => !prev); // 🔁 déclenche rechargement
+    toast({ title: "Ajouté", description: "Bien ajouté avec succès" });
+    setAddDialogOpen(false);
+  }}
 }}
       />
 
