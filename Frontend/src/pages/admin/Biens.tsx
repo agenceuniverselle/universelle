@@ -36,8 +36,8 @@ const AdminBiens = () => {
   const navigate = useNavigate();
   const { permissions } = useAuth(); // ✅ Récupérer les permissions de l'utilisateur connecté
 
-  const { biens: properties, loading, error, removeBien: removeProperty, publishBien: publishProperty } = useBiens();
-  const { biens: properties, setBiens, ... } = useBiens();
+  const { biens: properties, loading, error, removeBien: removeProperty, publishBien: publishProperty,setBiens } = useBiens();
+
 
   const [searchTerm, setSearchTerm] = useState('');
   const [searchResults, setSearchResults] = useState<Property[]>([]);
