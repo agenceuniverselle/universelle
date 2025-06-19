@@ -46,6 +46,7 @@ const AdminBiens = () => {
   const [recentSearches, setRecentSearches] = useState<string[]>([]);
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const [advancedFiltersOpen, setAdvancedFiltersOpen] = useState(false);
+  const { addBien } = useBiens();
   const [filters, setFilters] = useState({
     type: '',
     minPrice: '',
@@ -256,6 +257,7 @@ const AdminBiens = () => {
 
   const handlePropertyAdded = (bienId: string) => {
     setAddPropertyOpen(false);
+    addBien(newBien);
     toast({
       title: "Bien ajouté avec succès",
       description: "Vous pouvez maintenant le voir dans la liste des biens",
