@@ -360,7 +360,8 @@ const AdminInvestissements = () => {
     });
 
     setTimeout(() => {
-      navigate(/admin/investissements/edit/${propertyId});
+      navigate(`/admin/investissements/edit/${propertyId}`);
+
     }, 300);
   };
 
