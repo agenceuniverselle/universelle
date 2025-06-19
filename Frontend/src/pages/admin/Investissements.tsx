@@ -337,13 +337,9 @@ const AdminInvestissements = () => {
     }
   };
 
-useEffect(() => {
-  if (shouldReloadProperties) {
-    fetchProperties();
-    setShouldReloadProperties(false);
-  }
+  useEffect(() => {
+  fetchProperties();
 }, [shouldReloadProperties]);
-
 
   const fetchProperties = async () => {
     try {
@@ -1247,17 +1243,48 @@ const filteredProperties = properties.filter((property) => {
         }}
       />
 
-   <AddInvestmentDialog
-  open={addDialogOpen}
-  onOpenChange={setAddDialogOpen}
-  onPropertyAdded={() => {
-    setTimeout(() => {
-      setShouldReloadProperties(true); // 🔁 fetch discret
-    }, 1000); // ⏳ Petit délai pour que le backend ait fini
-    toast({ title: "Ajouté", description: "Bien ajouté avec succès" });
-    setAddDialogOpen(false);
-  }}
-/>
+      <AddInvestmentDialog
+        open={addDialogOpen}
+        onOpenChange={setAddDialogOpen}
+      onPropertyAdded={(newProperty) => {
+  setProperties(prev => [...prev, {
+    ...newProperty,
+    investmentDetails: {
+      title: newProperty.title,
+      type: newProperty.type,
+      price: newProperty.price,
+      status: newProperty.status,
+      location: newProperty.location,
+      area: newProperty.area,
+      bedrooms: newProperty.bedrooms,
+      bathrooms: newProperty.bathrooms,
+      description: newProperty.description,
+      investmentType: newProperty.investmentType,
+      projectStatus: newProperty.projectStatus,
+      returnRate: newProperty.returnRate,
+      minEntryPrice: newProperty.minEntryPrice,
+      recommendedDuration: newProperty.recommendedDuration,
+      financingEligibility: newProperty.financingEligibility,
+      isFeatured: newProperty.isFeatured,
+      partners: Array.isArray(newProperty.partners)
+        ? newProperty.partners
+        : JSON.parse(newProperty.partners ?? '[]'),
+    },
+    images: Array.isArray(newProperty.images)
+      ? newProperty.images
+      : JSON.parse(newProperty.images ?? '[]'),
+    documents: Array.isArray(newProperty.documents)
+      ? newProperty.documents
+      : JSON.parse(newProperty.documents ?? '[]'),
+    createdAt: new Date(newProperty.created_at).toLocaleDateString('fr-FR')
+  }]);
+
+  toast({ title: "Ajouté", description: "Bien ajouté avec succès" });
+  setAddDialogOpen(false);
+}}
+
+
+      />
 
       <ExclusiveOfferDialog
         open={exclusiveDialogOpen}
