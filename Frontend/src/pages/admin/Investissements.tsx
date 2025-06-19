@@ -49,6 +49,8 @@ import { ExclusiveOffer } from "@/types/exclusiveOffer.types";
 import { InvestmentProperty } from "@/types/Property.types";
 import ConseillerForm from "@/components/properties/ConseillerForm";
 import ExpertEditForm from "@/components/ExpertEditForm";
+import { useLocation } from "react-router-dom";
+
 interface AdvisorRequest {
   id: string;
   property_id: string | null;
@@ -95,7 +97,7 @@ const AdminInvestissements = () => {
   const [expertRequests, setExpertRequests] = useState<ExpertRequest[]>([]);
   const [filteredExpertRequests, setFilteredExpertRequests] = useState<ExpertRequest[]>([]);
   const [expertRequestToDelete, setExpertRequestToDelete] = useState<string | null>(null);
-
+  const location = useLocation();
   // État pour stocker le contact sélectionné
   const [selectedContact, setSelectedContact] = useState(null);
    const [editOpen, setEditOpen] = useState(false);
@@ -337,14 +339,19 @@ const AdminInvestissements = () => {
     }
   };
 
-  useEffect(() => {
-  fetchProperties();
-}, [shouldReloadProperties]);
+useEffect(() => {
+  const shouldReload = shouldReloadProperties || location.state?.reloadAfterAdd;
+
+  if (shouldReload) {
+    fetchProperties();
+    setShouldReloadProperties(false);
+  }
+}, [shouldReloadProperties, location.state]);
+
 
   const fetchProperties = async () => {
     try {
       const response = await axios.get("https://back-qhore.ondigitalocean.app/api/properties");
-      console.log("🚨 Propriétés reçues :", response.data); // 👈 Ajoute ça temporairement
       setProperties(response.data.data || []);
     } catch (error) {
       console.error("Erreur de chargement des biens :", error);
