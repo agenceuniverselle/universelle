@@ -275,7 +275,7 @@ useEffect(() => {
           window.open(`https://twitter.com/intent/tweet?url=${encodeURIComponent(window.location.href)}`, '_blank');
         }}
       >
-        <Twitter size={24} className="text-blue-400" />
+      <img src="/Twitter.png" alt="WhatsApp" className="w-6 h-6" />
       </a>
 
       {/* TikTok */}
