@@ -95,6 +95,7 @@ const AdminInvestissements = () => {
   const [expertRequests, setExpertRequests] = useState<ExpertRequest[]>([]);
   const [filteredExpertRequests, setFilteredExpertRequests] = useState<ExpertRequest[]>([]);
   const [expertRequestToDelete, setExpertRequestToDelete] = useState<string | null>(null);
+  const [shouldReloadOffers, setShouldReloadOffers] = useState(false);
 
   // État pour stocker le contact sélectionné
   const [selectedContact, setSelectedContact] = useState(null);
@@ -321,6 +322,7 @@ const AdminInvestissements = () => {
   useEffect(() => {
   if (activeView === "offres") {
     fetchExclusiveOffers();
+     setShouldReloadOffers(false); 
   } else if (activeView === "demandes") {
     fetchAdvisorRequests();
   } else if (activeView === "experts") { 
@@ -1313,7 +1315,10 @@ const filteredProperties = properties.filter((property) => {
       <ExclusiveOfferDialog
         open={exclusiveDialogOpen}
         onOpenChange={setExclusiveDialogOpen}
-        onOfferAdded={() => {}}
+       onOfferAdded={() => {
+    setShouldReloadOffers(true); // 🔁 recharge automatique
+    toast({ title: "Ajoutée", description: "Offre exclusive ajoutée." });
+  }}
       />
       <AlertDialog open={deleteConfirmOpen} onOpenChange={setDeleteConfirmOpen}>
         <AlertDialogContent className="
