@@ -344,7 +344,7 @@ useEffect(() => {
   // Chargement automatique toutes les 30 sec (en background)
   const intervalId = setInterval(() => {
     fetchPropertiesSilent(); // version sans affichage visuel
-  }, 30000);
+  }, 1000);
 
   return () => clearInterval(intervalId); // nettoyage propre
 }, []);
