@@ -384,12 +384,12 @@ const AdminInvestissements = () => {
       }
 
       // ✅ Requête de suppression avec le token
-      await axios.delete(https://back-qhore.ondigitalocean.app
-/api/properties/${id}, {
-        headers: {
-          Authorization: Bearer ${token}, // ✅ Ajout du token dans les headers
-        },
-      });
+     await axios.delete(`https://back-qhore.ondigitalocean.app/api/properties/${id}`, {
+  headers: {
+    Authorization: `Bearer ${token}`, // <- entre backticks aussi ici
+  },
+});
+
 
       toast({ title: "Supprimé", description: "Bien supprimé avec succès." });
       setDeleteConfirmOpen(false);
@@ -462,8 +462,8 @@ const AdminInvestissements = () => {
     if (!window.confirm("Confirmer la suppression ?")) return;
 
     try {
-      await axios.delete(https://back-qhore.ondigitalocean.app
-/api/properties/${id});
+      await axios.delete(`https://back-qhore.ondigitalocean.app/api/properties/${id}`);
+
       toast({ title: "Supprimé", description: "Bien supprimé avec succès." });
       fetchProperties();
     } catch (error) {
