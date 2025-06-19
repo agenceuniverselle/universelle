@@ -236,7 +236,9 @@ const AddInvestmentDialog: React.FC<AddInvestmentDialogProps> = ({
           description: "Redirection vers la page d'édition...",
           variant: "default",
         });
-        navigate(`/admin/investissements`);
+       navigate("/admin/investissements", {
+  state: { reloadAfterAdd: true }
+});
       } else {
         setIsSubmitting(false);
         toast({
