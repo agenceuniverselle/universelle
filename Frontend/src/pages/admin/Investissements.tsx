@@ -73,7 +73,7 @@ interface ExpertRequest {
   consent?: boolean;
   created_at: string;
 }
-AdminInvestissements = () => {
+const AdminInvestissements = () => {
   const navigate = useNavigate();
   const [properties, setProperties] = useState<InvestmentProperty[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
