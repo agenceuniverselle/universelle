@@ -116,7 +116,10 @@ $documentPaths[] = Storage::disk('spaces')->url($path);
             ));
  // Retourner une réponse JSON avec un message de succès
 
-       return response()->json(['message' => 'Bien ajouté avec succès'], 201);
+      return response()->json([
+    'message' => 'Bien ajouté avec succès',
+    'property' => $property
+], 201);
    } catch (\Exception $e) {
        // Gestion des erreurs côté serveur
        return response()->json([
