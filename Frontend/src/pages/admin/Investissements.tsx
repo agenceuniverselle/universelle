@@ -1250,7 +1250,7 @@ const filteredProperties = properties.filter((property) => {
     toast({ title: "Ajouté", description: "Bien ajouté avec succès" });
     setAddDialogOpen(false);
   }}
-}}
+
       />
 
       <ExclusiveOfferDialog
