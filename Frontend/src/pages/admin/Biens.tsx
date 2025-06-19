@@ -258,7 +258,8 @@ const AdminBiens = () => {
 const fetchBiensSilent = async () => {
   try {
     const response = await axios.get("https://back-qhore.ondigitalocean.app/api/biens");
-    const newData = response.data || [];
+    const newData = response.data.data || []; // ✅ ici, extraire .data
+    console.log("✅ Données silencieuses reçues :", newData);
 
     setBiens((current) => {
       const same = JSON.stringify(current) === JSON.stringify(newData);
@@ -268,6 +269,7 @@ const fetchBiensSilent = async () => {
     console.warn("Erreur silencieuse de chargement des biens :", error);
   }
 };
+
 
 useEffect(() => {
   const interval = setInterval(() => {
